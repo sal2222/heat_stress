@@ -26,142 +26,152 @@ library(janitor)
 ```
 
 ## Load Military Installations, Ranges, and Training Areas (MIRTA) Dataset
-Accessed from: https://catalog.data.gov/dataset/military-installations-ranges-and-training-areas. Metadata updated date: January 18, 2017
+
+Accessed from: https://catalog.data.gov/dataset/military-installations-ranges-and-training-areas. Metadata updated date: January 18, 2017.
+
+Join Fort Benning Georgia and Alabama shapefiles.
+
+Fort Lewis (JBLM) geometry includes remote sites.
+
 ```{r load_shapefile}
-#Ref: http://strimas.com/r/tidy-sf/
+
 bases <- here::here("data/installations_ranges", "MIRTA_Boundaries.shp") %>%
-  st_read() %>% 
+  sf::st_read() %>% 
   janitor::clean_names()
 
-as_tibble(bases)
-```
-
-
-## Modify specific installations
-```{r join_split_shapefiles}
-
-## Join Fort Benning Georgia and Alabama shapefiles (st_union)
+## Edit Fort Benning geometries
 benning_join <-
   bases %>%
     filter(stringr::str_detect(site_name, "Fort Benning")) %>% 
     dplyr::select(geometry) %>% st_union() 
 
+bases <- bases %>% 
+  filter(site_name != "Fort Benning") %>%
+  mutate(geometry = replace(geometry, site_name == "Fort Benning GA", benning_join ))
 
+rm(benning_join)
+
+## Edit Fort Lewis (JBLM) geometries to remove remote polygons
+## Include sites near Yakima, WA and Camp Rilea, OR
+
+# "Before" plot
+bases %>% 
+    filter(site_name == "Fort Lewis") %>% 
+    ggplot() +
+       geom_sf() 
+
+# Set bounding box
+jblm_filt_bbox <- 
+  sf::st_bbox(c(xmin = -123, 
+                ymin = 46.8, 
+                xmax = -122, 
+                ymax = 47.2), 
+                crs = st_crs(4326)) %>% 
+ sf::st_as_sfc(.)
+
+
+# separate MULTIPOLYGON to POLYGON(s)
+
+jblm_polygon <-
+   bases %>% 
+    filter(site_name == "Fort Lewis") %>% 
+    sf::st_cast(., "POLYGON")
+
+# identify polygons within bbox
+jblm_new_geom <-
+  sf::st_within(jblm_polygon$geometry, jblm_filt_bbox) 
+
+# add column for within box status
+jblm_polygon <-
+  jblm_polygon %>% 
+    mutate(within_bbox = lapply(jblm_new_geom, `[`, 1)) %>% 
+    filter(within_bbox == 1) %>% 
+    dplyr::select(-within_bbox) %>%
+    sf::st_union()
+
+
+# replace Fort Lewis geometry in main dataframe
+
+bases <- bases %>% 
+  mutate(geometry = replace(geometry, site_name == "Fort Lewis", jblm_polygon))
+
+rm(jblm_filt_bbox, jblm_new_geom, jblm_polygon)
+
+# "After" plot
+bases %>% 
+    filter(site_name == "Fort Lewis") %>% 
+    ggplot() +
+       geom_sf() 
+           
 ```
 
+
 ## Select installations
+
+Select bases for analyses. Citeria: in list of top CONUS bases for heat illnesses from MSMR report (April 2018). Additional Army installations based on HSI counts and rates (from DMED) and for diversity of climate regions.
+
+Add centroid column.
 ```{r select_sf_dataframe, warning = FALSE}
-## Create dataframe of active duty Army installations, including FSH (JBSA) and single Fort Benning row 
 
-army_bases <-
+# Look-up base name in MITRA list  
+#  search_names <- bases$site_name %>% as.character()
+
+#  stringr::str_subset(search_names, "Lewis")
+
+select_bases <-
   bases %>%
-    filter(oper_stat == "Active") %>% 
-    mutate(component = replace(component, site_name == "Fort Sam Houston", "Army Active")) %>%
-    filter(component == "Army Active") %>%
-    filter(site_name != "Fort Benning") %>%
-    mutate(geometry = replace(geometry, site_name == "Fort Benning GA", benning_geom ))
-   
-
-## Filter installations of interest
-
-army_select <-
-  army_bases %>% 
     dplyr::filter(.$site_name %in% c("Fort Benning GA", "Fort Bragg","Fort Campbell",
                               "Fort Jackson", "Fort Polk", "Fort Hood",
                               "Fort Stewart", "Fort Leonard Wood", "Fort Riley",
-                              "NTC and Fort Irwin")) %>% 
+                              "NTC and Fort Irwin", "Fort Bliss", "Fort Lewis",
+                              "Fort Sill", "Fort Carson", "Fort Gordon",
+                              "Fort Drum", "MCB Camp Lejeune", "MCRD Beaufort Parris Island",
+                              "MCB Camp Pendleton", "MCRD San Diego", "MCB Quantico",
+                              "Twentynine Palms Main Base", "Lackland AFB", "Eglin AFB", "Fort Sam Houston")) %>% 
     mutate(centroid = st_centroid(geometry)) %>% 
-    dplyr::select(-c("component", "joint_base", "country", "oper_stat"))
+    dplyr::select(-c("joint_base", "country", "oper_stat"))
 
+select_bases
 
-st_crs(army_select)
-as_tibble(army_select)
 ```
 
-## Plot selected shapefiles
 
-```{r plot_selected_bases}
+
+```{r plot_selected_bases, eval = FALSE}
 
 ## Plot selected installations
-bases_plot <- purrr::map(army_select$site_name,
+purrr::map(select_bases$site_name,
            function(x) {
              ggplot() +
-               geom_sf(data = filter(army_select, site_name == x)) +
+               geom_sf(data = filter(select_bases, site_name == x)) +
+               geom_sf(data = st_centroid(filter(select_bases, site_name == x))) +
                 ggtitle(x) +
                 theme_bw() +
-                theme(axis.text.x = element_text(size = rel(0.6)),
-                      axis.text.y = element_text(size = rel(0.6))) 
+                theme(axis.text.x = element_text(size = rel(1)),
+                      axis.text.y = element_text(size = rel(1))) 
            })
 
-cowplot::plot_grid(plotlist = bases_plot)
-```
-
-
-```{r individual_base, include = FALSE, eval = FALSE}
-bragg <-
-  bases %>% 
-    filter(.$site_name == "Fort Bragg")
-
-
-# Save shapefile
-# st_write(bragg, "bragg.shp")
-
-st_centroid(bragg) %>% 
-  as.tibble()
-
-bragg_centroid <- st_centroid(bragg)
-
-ggplot(bragg) +
-  ggtitle("Fort Bragg") +
-  geom_sf() +
-  theme_bw()
+#cowplot::plot_grid(plotlist = bases_plot)
 ```
 
 
 ## Load NLDAS grids
+
 NLDAS grid shapefile from: https://ldas.gsfc.nasa.gov/sites/default/files/ldas/nldas/NLDAS_Grid_Reference.zip
 
 ```{r load_nldas_grid}
 
-nldas_grid <- st_read("nldas_grids/NLDAS_Grid_Reference.shp") %>% 
+nldas_grid <- 
+  here::here("data/nldas_grids", "NLDAS_Grid_Reference.shp") %>%
+  sf::st_read() %>% 
   janitor::clean_names()
 
-st_crs(nldas_grid)
-as_tibble(nldas_grid)
+nldas_grid
 
 ```
 
 
-## NLDAS and Installation Grid Overlap and Weighted Averages
-
-```{r nldas_intersection_indiv, include = FALSE, eval = FALSE}
-class(bragg)
-bragg_nldas <-
-  st_intersection(bragg, nldas_grid) %>% 
-  mutate(area = sf::st_area(.),
-         weight = area / sum(area))
-
-bragg_intersects <-
-  nldas_grid %>% filter(lengths(st_intersects(., bragg)) > 0)
-
-as.data.frame(bragg_intersects) %>% 
-  select(-geometry)
-
-bragg_nldas
-
-sum(bragg_nldas$area)
-sum(bragg_nldas$weight)
-st_area(bragg_nldas) 
-
-
-ggplot(bragg_nldas) + 
-  ggtitle("Fort Bragg NLDAS grids") +
-  geom_sf() +
-  geom_label(data = bragg_nldas, aes(x = centerx, y = centery, label = nldas_id), size = 3, fontface = "bold") +
-  geom_text(data = bragg_nldas, aes(x = centerx, y = centery, label =  formatC(weight, format = "f", digits = 3)) , size = 3, position = position_nudge(y = -0.02)) +
-  theme_bw()
-
-```
+## NLDAS and Installation Grid Overlap 
 
 
 ```{r nldas_intersection_selected, warning = FALSE, message = FALSE}
@@ -169,13 +179,16 @@ ggplot(bragg_nldas) +
 # Identify all NLDAS grids intersected by installation shapefiles
 
 bases_nldas = NULL
-for (i in 1:nrow(army_select)) {
-  base = army_select[i,] 
-  base_nldas = st_intersection(base, nldas_grid) 
-  bases_nldas = rbind(bases_nldas, base_nldas)
-}
-rm(base, base_nldas)
+
+  for (i in 1:nrow(select_bases)) {
+    i_base = select_bases[i,] 
+    base_nldas = st_intersection(i_base, nldas_grid) 
+    bases_nldas = rbind(bases_nldas, base_nldas)
+  }
+
 bases_nldas
+
+rm(i_base, base_nldas)
 
 
 # Calculate area of installation in each NLDAS grid and weight for spatial weighted average
@@ -190,142 +203,44 @@ nldas_weights <- bases_nldas %>%
 
 # NLDAS grids that intersect with bases (to map full grid squares)
 intersects = NULL
-for (i in 1:nrow(army_select)) {
-  base = army_select[i,] 
-  base_intersect = nldas_grid %>% filter(lengths(st_intersects(., base)) > 0)
-  intersects = rbind(intersects, base_intersect)
-}
-rm(base, base_intersect)
+
+  for (i in 1:nrow(select_bases)) {
+    i_base = select_bases[i,] 
+    base_intersect = nldas_grid %>% filter(lengths(st_intersects(., i_base)) > 0)
+    intersects = rbind(intersects, base_intersect)
+  }
+
+rm(i_base, base_intersect)
 
 # Join `site_name` to selected NLDAS grid geometries
 
 intersects <- intersects %>% left_join(dplyr::select(as_tibble(nldas_weights), c(nldas_id, site_name)), by = "nldas_id")
-  
+
+intersects  
 ```
 
 
-## Bounding box for installation
-```{r bounding_box_indiv, eval=FALSE, warning = FALSE}
-st_bbox(bragg) %>% 
-  .[c("ymin", "xmin", "ymax", "xmax")]
+## Plots with intersecting NLDAS grids
+```{r grid_plots, warning = FALSE}
 
-bb_bragg <- st_as_sfc(st_bbox(bragg))
-class(bb_bragg)
-
-
-```
-
-
-```{r bounding_box}
-
-bbox = NULL
-for (i in 1:nrow(army_select)) {
-  base = army_select[i,] 
-  base_bbox = st_bbox(base)
-  bbox = rbind(bbox, base_bbox)
-}
-rm(base, base_bbox)
-bbox
-
-bbox_join <-
-  as_tibble(army_select[,1]) %>% 
-    bind_cols(as_tibble(bbox))
-
-bbox_join %>% 
-  dplyr::select(-geometry) %>% 
-  print()
-
-army_select <- bbox_join %>% 
-  dplyr::select(-geometry) %>%
-  right_join(army_select, by = "site_name")
+purrr::map(select_bases$site_name,
+           function(x) {
+             ggplot() +
+               geom_sf(data = filter(select_bases, site_name == x)) +
+               geom_sf(data = filter(intersects, site_name == x), fill = NA, color = "blue") +
+               geom_sf(data = st_centroid(filter(select_bases, site_name == x)), shape = 3, size = 3, stroke = 1.5) +
+               geom_label(data = filter(intersects, site_name == x), aes(x = centerx, y = centery, label = nldas_id), size = 2) +
+                ggtitle(x) +
+                theme_bw() +
+                theme(axis.text.x = element_text(size = rel(1)),
+                      axis.text.y = element_text(size = rel(1)),
+                      axis.title.x = element_blank(),
+                      axis.title.y = element_blank()) 
+           })
 
 
 
 ```
 
 
-## Plots of intersecting NLDAS grids
-```{r grid_plots_indiv, eval = FALSE}
-ggplot() + 
-  geom_sf(data = bragg_nldas) +
-  geom_sf(data = bb_bragg , color = "blue", fill = "NA") +
-  geom_sf(data = bragg_centroid, color = "red") +
-  ggtitle("Fort Bragg Bounding Box") +
-  geom_label(data = bragg_nldas, aes(x = centerx, y = centery, label = nldas_id), size = 3, fontface = "bold") +
-  geom_text(data = bragg_nldas, aes(x = centerx, y = centery, label =  formatC(weight, format = "f", digits = 3)) , size = 3, position = position_nudge(y = -0.02)) +
-  theme_bw()
 
-
-ggplot() +
-  geom_sf(data = bragg_intersects) +
-  geom_sf(data = bb_bragg , color = "blue", fill = "NA") +
-  geom_sf(data = bragg_centroid, color = "red") +
-  geom_sf(data = bragg, fill = "NA") +
-  ggtitle("Fort Bragg Intersecting Grids") +
-  geom_label(data = bragg_nldas, aes(x = centerx, y = centery, label = nldas_id), size = 3, fontface = "bold") +
-  geom_text(data = bragg_nldas, aes(x = centerx, y = centery, label =  formatC(weight, format = "f", digits = 3)) , size = 3, position = position_nudge(y = -0.03)) +
-  theme_bw()
-
-```
-
-```{r grid_plots}
-
-# Faceted maps
-tm_shape(intersects) +
-  tm_borders() +
-  tm_text("nldas_id", size = 0.5) +
-  tm_shape(nldas_weights) +
-  tm_borders() +
-  tm_graticules(col = "gray90", alpha = 0.5, labels.size = 0.5) +
-  tm_facets(by = "site_name") +
-  tm_layout(panel.label.size = 0.8, panel.label.height = 0.8)
-
-
-# tm_shape(intersects %>%  filter(site_name == "Fort Polk")) +
-#  tm_borders() +
-#  tm_text("nldas_id", size = 0.5) +
-#  tm_shape(nldas_weights %>% filter(site_name == "Fort Polk")) +
-#  tm_borders() +
-#  tm_graticules(col = "gray90", alpha = 0.5, labels.size = 0.5) +
-#    tm_layout(title = "Fort Polk")
-
- 
-# Individual site maps (tmap) 
-
-site_list <- unique(as.character(army_select$site_name))
-
-for (i in seq_along(site_list)) { 
-site_plot_tmap <-
-  tm_shape(intersects %>%  filter(site_name == site_list[i])) +
-  tm_borders() +
-  tm_text("nldas_id", size = 0.7) +
-  tm_shape(nldas_weights %>% filter(site_name == site_list[i])) +
-  tm_borders() +
-  tm_fill(col = "darkolivegreen4", alpha = 0.2) +
-  tm_graticules(col = "gray90", alpha = 0.3, labels.size = 0.8) +
-    tm_layout(title = site_list[i])
-print(site_plot_tmap)
-}
-
-
-
-# Individual site maps (ggplot) 
-
-for (i in seq_along(site_list)) { 
-site_plot_gg <-
-
-ggplot() +
-  geom_sf(data = intersects %>% filter(site_name == site_list[i])) +
-  geom_rect(data = army_select %>% filter(site_name == site_list[i]), 
-            aes(xmin = xmin , xmax = xmax, ymin = ymin, ymax = ymax), color = "blue", fill = "transparent") +
-  ggtitle(site_list[i]) +
-  geom_sf(data = nldas_weights %>% filter(site_name == site_list[i]), fill = "NA") +
-  geom_label(data = nldas_weights %>% filter(site_name == site_list[i]), aes(x = centerx, y = centery, label = nldas_id), size = 3, fontface = "bold") +
-  geom_text(data = nldas_weights %>% filter(site_name == site_list[i]), aes(x = centerx, y = centery, label =  formatC(weight, format = "f", digits = 3)) , size = 3, position = position_nudge(y = -0.03)) +
-  theme_bw() +
-  theme(axis.title = element_text())
-
-print(site_plot_gg)
-}
-
-```
