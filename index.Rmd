@@ -2,6 +2,15 @@
 title: "Index page"
 ---
 
-### Heat Stress Research
+# Heat Stress Research
 
-Stuff goes here...
+Welcome to my heat stress research website!
+
+
+## Locations
+
+Click [here](shapefiles.html) to examine location shapefiles and NLDAS-2 grid overlays.
+
+
+
+
