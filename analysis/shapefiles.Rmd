@@ -25,6 +25,7 @@ library(purrr)
 library(purrrlyr)
 library(tmap)
 library(janitor)
+library(plotly)
 
 ```
 
@@ -39,7 +40,7 @@ Fort Lewis (JBLM) geometry includes remote sites.
 ```{r load_shapefile}
 
 bases <- here::here("data/installations_ranges", "MIRTA_Boundaries.shp") %>%
-  sf::st_read() %>% 
+  sf::st_read(stringsAsFactors = FALSE) %>% 
   janitor::clean_names()
 
 ## Edit Fort Benning geometries
@@ -132,10 +133,10 @@ select_bases <-
                               "MCB Camp Pendleton", "MCRD San Diego", "MCB Quantico",
                               "Twentynine Palms Main Base", "Lackland AFB", "Eglin AFB", "Fort Sam Houston")) %>% 
     mutate(centroid = st_centroid(geometry)) %>% 
-    dplyr::select(-c("joint_base", "country", "oper_stat"))
+    dplyr::select(-c("joint_base", "country", "oper_stat")) 
+
 
 select_bases
-
 ```
 
 
@@ -166,7 +167,7 @@ NLDAS grid shapefile from: https://ldas.gsfc.nasa.gov/sites/default/files/ldas/n
 
 nldas_grid <- 
   here::here("data/nldas_grids", "NLDAS_Grid_Reference.shp") %>%
-  sf::st_read() %>% 
+  sf::st_read(stringsAsFactors = FALSE) %>% 
   janitor::clean_names()
 
 nldas_grid
@@ -226,22 +227,26 @@ intersects
 ## Plots with intersecting NLDAS grids
 ```{r grid_plots, warning = FALSE}
 
-purrr::map(select_bases$site_name,
-           function(x) {
-             ggplot() +
-               geom_sf(data = filter(select_bases, site_name == x)) +
-               geom_sf(data = filter(intersects, site_name == x), fill = NA, color = "blue") +
-               geom_sf(data = st_centroid(filter(select_bases, site_name == x)), shape = 3, size = 3, stroke = 1.5) +
-               geom_label(data = filter(intersects, site_name == x), aes(x = centerx, y = centery, label = nldas_id), size = 2) +
-                ggtitle(x) +
-                theme_bw() +
-                theme(axis.text.x = element_text(size = rel(1)),
-                      axis.text.y = element_text(size = rel(1)),
-                      axis.title.x = element_blank(),
-                      axis.title.y = element_blank()) 
-           })
+set_names(select_bases$site_name)
 
 
+base_grid_plots <-
+  purrr::map(select_bases$site_name,
+             function(x) {
+               ggplot() +
+                 geom_sf(data = filter(select_bases, site_name == x)) +
+                 geom_sf(data = filter(intersects, site_name == x), fill = NA, color = "blue") +
+                 geom_sf(data = st_centroid(filter(select_bases, site_name == x)), shape = 3, size = 3, stroke = 1.5) +
+                 geom_label(data = filter(intersects, site_name == x), aes(x = centerx, y = centery, label = nldas_id), size = 2) +
+                  ggtitle(x) +
+                  theme_bw() +
+                  theme(axis.text.x = element_text(size = rel(1)),
+                        axis.text.y = element_text(size = rel(1)),
+                        axis.title.x = element_blank(),
+                        axis.title.y = element_blank()) 
+             })
+
+ggplotly(base_grid_plots)
 
 ```
 
