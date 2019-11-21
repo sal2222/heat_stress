@@ -1,0 +1,7 @@
+---
+title: "Index page"
+---
+
+### Heat Stress Research
+
+Stuff goes here...

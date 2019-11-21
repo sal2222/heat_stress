@@ -1,0 +1,13 @@
+---
+title: "About"
+---
+
+### About this site
+
+This is a research site for heat exposure and heat stress illness outcomes. 
+
+The source code can be found at: https://github.com/sal2222/heat_stress
+
+
+
+R packages:
