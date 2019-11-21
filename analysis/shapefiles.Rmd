@@ -62,7 +62,8 @@ rm(benning_join)
 bases %>% 
     filter(site_name == "Fort Lewis") %>% 
     ggplot() +
-       geom_sf() 
+       geom_sf() +
+       ggtitle("Fort Lewis (JBLM) - Before") 
 
 # Set bounding box
 jblm_filt_bbox <- 
@@ -105,8 +106,8 @@ rm(jblm_filt_bbox, jblm_new_geom, jblm_polygon)
 bases %>% 
     filter(site_name == "Fort Lewis") %>% 
     ggplot() +
-       geom_sf() 
-           
+       geom_sf() + 
+       ggtitle("Fort Lewis (JBLM) - After")    
 ```
 
 
@@ -227,13 +228,11 @@ intersects
 ## Plots with intersecting NLDAS grids
 ```{r grid_plots, warning = FALSE}
 
-set_names(select_bases$site_name)
+select_bases$site_name <- purrr::set_names(select_bases$site_name)
 
 
-base_grid_plots <-
-  purrr::map(select_bases$site_name,
-             function(x) {
-               ggplot() +
+base_grid_plot_function <- function(x) {
+      ggplot() +
                  geom_sf(data = filter(select_bases, site_name == x)) +
                  geom_sf(data = filter(intersects, site_name == x), fill = NA, color = "blue") +
                  geom_sf(data = st_centroid(filter(select_bases, site_name == x)), shape = 3, size = 3, stroke = 1.5) +
@@ -244,10 +243,16 @@ base_grid_plots <-
                         axis.text.y = element_text(size = rel(1)),
                         axis.title.x = element_blank(),
                         axis.title.y = element_blank()) 
-             })
+}
 
-ggplotly(base_grid_plots)
 
+# base_grid_plot_function(select_bases$site_name[1])
+
+
+base_grid_plots <-
+  map(select_bases$site_name, ~base_grid_plot_function(.x))
+
+base_grid_plots
 ```
 
 
