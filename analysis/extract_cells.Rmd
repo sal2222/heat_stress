@@ -1,0 +1,184 @@
+---
+title: "extract_cells"
+author: "SL"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(sf)
+library(tidyverse)
+library(viridis)
+library(rvest)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rgeos)
+library(lwgeom)
+library(ncdf4)
+library(devtools)
+library(raster)
+library(ncdump)
+library(lubridate)
+library(flipTime)
+library(fuzzyjoin)
+library(RNetCDF)
+library(tidync)
+library(furrr)
+library(tabularaster)
+
+```
+
+
+## Extract variables from cells
+
+This code extracts variables from NLDAS-2 netCDF files by converting .nc4 to raster and selecting by raster cell position. It includes a function to extract a single file and applies purrr:map2_dfc to map over each file and each defined variable.
+
+
+## NLDAS-2 Data
+
+```{r extract_variable_names, eval = FALSE}
+
+# List NLDAS-2 .nc4 files from 1990 - present
+# Extract date and hour from file name
+
+file_list <-  
+  list.files(path = "D:/nldas", pattern = "^.*\\.(nc4|NC4|Nc4|Nc4)$",
+                        full.names = FALSE) %>% 
+  as_tibble() %>% 
+  mutate(date = value %>% 
+           stringr::str_extract("[1-2][0-9]{7}") %>% lubridate::ymd(),
+         hour = value %>% 
+           stringr::str_extract("[0-2][0-9][0]{2}") %>% as_factor(),
+         path = paste0("D:/nldas/", value)) %>% 
+  dplyr::select(value, path, date, hour) %>% 
+  filter(date >= "1990-01-01")
+
+saveRDS(file_list, "data/file_list.Rds")
+
+# Vector of NLDAS-2 file names
+
+file_names <-
+  file_list$value %>%
+  as_tibble() %>% 
+  as_vector()
+
+
+# Select NLDAS variables
+nldas_variables <- c("TMP", "SPFH", "PRES", "UGRD", "VGRD", "DSWRF")
+
+```
+
+## Open ncdf4 files and read as Raster
+
+```{r id_raster_cells, warning = FALSE, eval = FALSE}
+
+# Load list of locations (object saved in shapefiles.Rmd)
+
+# select_bases <- readRDS("data/select_bases.rds")
+
+# Matrix of centroid X, Y coordinates
+
+coordinates_matrix <- st_coordinates(select_bases$centroid)
+
+
+# Open one .nc4 file as a raster and extract raster cellnumber (different from NLDAS grid ID)
+# .nc4 files stored on external drive, not in project data folder due to size
+
+nldas_path <- "D:/nldas/"
+
+# Open single raster file
+  # Review dimensions (224 x 464), resolution (0.125 degree), extent, crs (WGS84) 
+ 
+single_raster <- raster(file_list$path[1], varname = "TMP", quick = "TRUE")
+single_raster
+
+
+cells <- tabularaster::cellnumbers(single_raster, coordinates_matrix) %>% 
+    dplyr::select(cell_)
+
+cells
+
+rm(single_raster)
+
+# saveRDS(cells, file = "data/cells.rds")
+
+cells <- readRDS("D:/nldas/cells.rds")
+
+# Join raster cells with site names
+
+cell_key <- cbind(select_bases$site_name, cells)
+
+cell_key
+
+# output_path <- "D:/nldas/nldas_raster/"
+
+
+```
+
+```{r extract_function_map, eval = FALSE}
+
+# multiple variables
+
+  
+extract_single_file <- function(ncdf_single_file, nldas_var) {  
+  hourly_df <-   
+  ncdf_single_file %>% 
+      file.path(nldas_path, .) %>% 
+        raster::brick(varname = nldas_var, quick = TRUE) %>%
+        raster::extract(., cells, df = FALSE) %>% 
+        magrittr::set_colnames(nldas_var) %>%
+    as_tibble()
+}
+
+extract_single_file <- compiler::cmpfun(extract_single_file)
+
+
+
+ 
+
+
+# Execute map over files
+
+ptm <- proc.time()
+
+for (i in seq_along(file_names)) {
+map2_dfc(.x = file_names[[i]], .y = nldas_variables, .f = extract_single_file) %>% 
+write_rds(., path = paste0("C:/Users/slewa/Documents/data/heat/nldas_raster/",
+                           paste0(
+    file_names[[i]] %>%  stringr::str_extract("[1-2][0-9]{7}"),
+    "_",
+    file_names[[i]] %>% stringr::str_extract("\\.[0-2][0-9][0]{2}") %>% str_sub(start = 2L)),
+    ".rds"), 
+    compress = "none")
+}
+
+proc.time() - ptm
+
+
+
+# single instance test
+map2_dfc(.x = file_names[[1]], .y = nldas_variables, .f = extract_single_file) %>% 
+write_rds(., path = paste0("D:/nldas_raster/",
+                           paste0(
+    file_names[[1]] %>%  stringr::str_extract("[1-2][0-9]{7}"),
+    "_",
+    file_names[[1]] %>% stringr::str_extract("\\.[0-2][0-9][0]{2}") %>% str_sub(start = 2L)),
+    ".rds"), 
+    compress = "none")
+
+read_rds("D:/nldas_raster/19900101_0000.rds") %>% class()
+
+
+ncdump::NetCDF("D:/nldas/NLDAS_FORA0125_H.A20090510.2000.002.grb.SUB.nc4")
+```
+
+
+```{r raster_list, eval = FALSE}
+raster_list <- list.files(path = "D:/nldas_raster",pattern = ".rds") %>%
+  map(read_rds)
+```
+

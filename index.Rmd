@@ -4,13 +4,14 @@ title: "Index page"
 
 # Heat Stress Research
 
-Welcome to my heat stress research website!
+Welcome to my heat stress research website!  
 
 
 ## Locations
 
-Click [here](analysis/shapefiles.html) to examine location shapefiles and NLDAS-2 grid overlays.
+Examine location shapefiles and NLDAS-2 grid overlays [here](analysis/shapefiles.html)  
 
+Instructions to download NLDAS-2 files using `wget` command [here](analysis/nldas_wget.html)  
 
-
+Extract locations (cells) and variables from NLDAS-2 .nc4 files with conversion to raster brick [here](analysis/extract_cells.html)  
 
