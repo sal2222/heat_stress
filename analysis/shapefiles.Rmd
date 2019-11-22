@@ -137,6 +137,8 @@ select_bases <-
     dplyr::select(-c("joint_base", "country", "oper_stat")) 
 
 
+saveRDS(select_bases, "data/select_bases.rds")
+
 select_bases
 ```
 
