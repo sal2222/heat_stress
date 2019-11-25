@@ -1521,22 +1521,22 @@ div.tocify {
 </div>
 <div id="nldas-2-data" class="section level2">
 <h2>NLDAS-2 Data</h2>
-<pre class="r"><code># List NLDAS-2 .nc4 files from 1990 - present
-# Extract date and hour from file name
+<p>List NLDAS-2 .nc4 files from 1990 - present Extract date and hour from file name</p>
+<pre class="r"><code>#file_list &lt;-  
+#  list.files(path = &quot;D:/nldas&quot;, pattern = &quot;^.*\\.(nc4|NC4|Nc4|Nc4)$&quot;,
+#                        full.names = FALSE) %&gt;% 
+#  as_tibble() %&gt;% 
+#  mutate(date = value %&gt;% 
+#           stringr::str_extract(&quot;[1-2][0-9]{7}&quot;) %&gt;% lubridate::ymd(),
+#         hour = value %&gt;% 
+#           stringr::str_extract(&quot;[0-2][0-9][0]{2}&quot;) %&gt;% as_factor(),
+#         path = paste0(&quot;D:/nldas/&quot;, value)) %&gt;% 
+#  dplyr::select(value, path, date, hour) %&gt;% 
+#  filter(date &gt;= &quot;1990-01-01&quot;)
 
-file_list &lt;-  
-  list.files(path = &quot;D:/nldas&quot;, pattern = &quot;^.*\\.(nc4|NC4|Nc4|Nc4)$&quot;,
-                        full.names = FALSE) %&gt;% 
-  as_tibble() %&gt;% 
-  mutate(date = value %&gt;% 
-           stringr::str_extract(&quot;[1-2][0-9]{7}&quot;) %&gt;% lubridate::ymd(),
-         hour = value %&gt;% 
-           stringr::str_extract(&quot;[0-2][0-9][0]{2}&quot;) %&gt;% as_factor(),
-         path = paste0(&quot;D:/nldas/&quot;, value)) %&gt;% 
-  dplyr::select(value, path, date, hour) %&gt;% 
-  filter(date &gt;= &quot;1990-01-01&quot;)
+# saveRDS(file_list, &quot;data/file_list.rds&quot;)
 
-saveRDS(file_list, &quot;data/file_list.Rds&quot;)
+file_list &lt;- readRDS(&quot;data/file_list.rds&quot;)
 
 # Vector of NLDAS-2 file names
 
@@ -1551,9 +1551,10 @@ nldas_variables &lt;- c(&quot;TMP&quot;, &quot;SPFH&quot;, &quot;PRES&quot;, &qu
 </div>
 <div id="open-ncdf4-files-and-read-as-raster" class="section level2">
 <h2>Open ncdf4 files and read as Raster</h2>
+<p>Open a single .nc4 file and identify raster cell numbers from centroid coordinates.</p>
 <pre class="r"><code># Load list of locations (object saved in shapefiles.Rmd)
 
-# select_bases &lt;- readRDS(&quot;data/select_bases.rds&quot;)
+select_bases &lt;- readRDS(&quot;data/select_bases.rds&quot;)
 
 # Matrix of centroid X, Y coordinates
 
@@ -1563,35 +1564,59 @@ coordinates_matrix &lt;- st_coordinates(select_bases$centroid)
 # Open one .nc4 file as a raster and extract raster cellnumber (different from NLDAS grid ID)
 # .nc4 files stored on external drive, not in project data folder due to size
 
-nldas_path &lt;- &quot;D:/nldas/&quot;
+
 
 # Open single raster file
   # Review dimensions (224 x 464), resolution (0.125 degree), extent, crs (WGS84) 
  
-single_raster &lt;- raster(file_list$path[1], varname = &quot;TMP&quot;, quick = &quot;TRUE&quot;)
+# single_raster &lt;- raster(file_list$path[1], varname = &quot;TMP&quot;, quick = &quot;TRUE&quot;)
+
+# saveRDS(single_raster, file = &quot;data/single_raster.rds&quot;)
+
+single_raster &lt;- readRDS(&quot;data/single_raster.rds&quot;)
 single_raster
 
 
 cells &lt;- tabularaster::cellnumbers(single_raster, coordinates_matrix) %&gt;% 
     dplyr::select(cell_)
 
-cells
-
 rm(single_raster)
 
 # saveRDS(cells, file = &quot;data/cells.rds&quot;)
 
-cells &lt;- readRDS(&quot;D:/nldas/cells.rds&quot;)
+cells &lt;- readRDS(&quot;data/cells.rds&quot;)
 
 # Join raster cells with site names
 
-cell_key &lt;- cbind(select_bases$site_name, cells)
+cell_key &lt;- cbind(select_bases$site_name, cells, stringsAsFactors = FALSE) %&gt;% 
+  rename(site_name = `select_bases$site_name`)
 
-cell_key
+# saveRDS(cell_key, file = &quot;data/cell_key.rds&quot;)
 
-# output_path &lt;- &quot;D:/nldas/nldas_raster/&quot;</code></pre>
+cell_key &lt;- readRDS(&quot;data/cell_key.rds&quot;)
+cell_key</code></pre>
 <pre class="r"><code># multiple variables
+# 
+nldas_path &lt;- &quot;D:/nldas/&quot;
 
+# output_path &lt;- &quot;D:/nldas/nldas_raster/&quot;
+output_path &lt;- &quot;D:/nldas/nldas_raster_joint/&quot;
+
+
+# Select cells non-Army bases (+ FSH):
+
+cells &lt;-
+  cell_key %&gt;% 
+    filter(site_name %in% c(
+           &quot;MCB Quantico&quot;, &quot;MCRD San Diego&quot;, &quot;Twentynine Palms Main Base&quot;,
+           &quot;MCB Camp Lejeune&quot;, &quot;MCRD Beaufort Parris Island&quot;, &quot;MCB Camp Pendleton&quot;,
+           &quot;Eglin AFB&quot;, &quot;Lackland AFB&quot;, &quot;Fort Sam Houston&quot;)) %&gt;% 
+    dplyr::select(cell_)
+
+
+
+
+# Function to extract selected variables from selected cells of a single NLDAS .nc4 file (unique GMT hour) 
   
 extract_single_file &lt;- function(ncdf_single_file, nldas_var) {  
   hourly_df &lt;-   
@@ -1603,11 +1628,12 @@ extract_single_file &lt;- function(ncdf_single_file, nldas_var) {
     as_tibble()
 }
 
+# Compile function
 extract_single_file &lt;- compiler::cmpfun(extract_single_file)
 
 
 
- 
+
 
 
 # Execute map over files
@@ -1616,7 +1642,7 @@ ptm &lt;- proc.time()
 
 for (i in seq_along(file_names)) {
 map2_dfc(.x = file_names[[i]], .y = nldas_variables, .f = extract_single_file) %&gt;% 
-write_rds(., path = paste0(&quot;C:/Users/slewa/Documents/data/heat/nldas_raster/&quot;,
+write_rds(., path = paste0(&quot;C:/Users/slewa/Documents/data/heat/nldas_raster_joint/&quot;,
                            paste0(
     file_names[[i]] %&gt;%  stringr::str_extract(&quot;[1-2][0-9]{7}&quot;),
     &quot;_&quot;,
