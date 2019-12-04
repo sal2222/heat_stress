@@ -264,6 +264,15 @@ nldas_list_joint_files <- list.files(pattern = ".rds")
 nldas_list_joint <-
   map(nldas_list_joint_files, readRDS)
 
+# Set date/time as list element name
+names(nldas_list_joint) <- paste(
+  stringr::str_replace_all(file_list$date, "-", ""),
+  file_list$hour,
+  sep = "_"
+  )
+
+nldas_list_joint[1:2]
+
 # write_rds(nldas_list_joint, path = "data/nldas_list_joint.rds")
 
 

@@ -12,3 +12,4 @@ title: "Heat Stress Research"
 
 - Extract locations (cells) and variables from NLDAS-2 .nc4 files with conversion to raster brick [here](analysis/extract_cells.html)  
 
+- Link NLDAS estimates assembled in `extract_cells`to specific locations and summarizes the data [here](analysis/installation_nldas.html).

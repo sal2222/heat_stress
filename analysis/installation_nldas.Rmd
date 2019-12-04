@@ -1,0 +1,154 @@
+---
+title: "installation_nldas"
+author: "SL"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(sf)
+library(tidyverse)
+library(viridis)
+library(rvest)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rgeos)
+library(lwgeom)
+library(ncdf4)
+library(devtools)
+library(raster)
+library(ncdump)
+library(lubridate)
+library(flipTime)
+library(fuzzyjoin)
+library(RNetCDF)
+library(tidync)
+library(furrr)
+library(tabularaster)
+
+```
+
+
+# Installation NLDAS
+
+This code links NLDAS estimates assembled in [`extract_cells`](analysis/extract_cells.html) to specific locations and summarizes the data.  
+
+## Extract NLDAS from list for each location
+
+```{r import_rds, echo = FALSE}
+cell_key <- readRDS("data/cell_key.rds")
+nldas_list <- read_rds("data/nldas_list.rds")
+nldas_list_joint <- read_rds("data/nldas_list_joint.rds")
+```
+
+The NLDAS data are stored in two lists.  
+
+The first set (`nldas_list`) contains:  
+```{r first_set}
+
+first_set_bases <- c(
+      "Fort Benning GA", "Fort Bragg","Fort Campbell",
+      "Fort Jackson", "Fort Polk", "Fort Hood",
+      "Fort Stewart", "Fort Leonard Wood", "Fort Riley",
+      "NTC and Fort Irwin", "Fort Bliss", "Fort Lewis",
+      "Fort Sill", "Fort Huachuca", "Fort Carson", "Fort Gordon",
+      "West Point Mil Reservation", "Fort Drum") %>% 
+  stringr::str_replace_all(., " ", "_") %>%
+  stringr::str_to_lower()
+
+# West Point and Fort Huachica were initially extracted, but are not intended to be included in the "Top 25" analysis.
+
+first_set_bases
+```
+
+The second set (`nldas_list_joint`) contains:
+```{r second_set}
+
+second_set_bases <- c(
+           "MCB Quantico", "MCRD San Diego", "Twentynine Palms Main Base",
+           "MCB Camp Lejeune", "MCRD Beaufort Parris Island", "MCB Camp Pendleton",
+           "Eglin AFB", "Lackland AFB", "Fort Sam Houston") %>% 
+  stringr::str_replace_all(., " ", "_") %>%
+  stringr::str_to_lower()
+  
+
+second_set_bases 
+```
+
+Extract by location from first list and create an NLDAS object for each.
+
+
+```{r first_extract, eval = FALSE}
+
+for (i in seq_along(first_set_bases)) {
+
+nldas_list %>% 
+    lapply(function(x) x[i,]) %>% 
+    bind_rows(., .id = "date_time") %>% 
+  write_rds(., path = paste0("data/base_nldas/",  first_set_bases[i], ".rds" ))
+}  
+
+```
+
+Extract by location from second list and create an NLDAS object for each.
+
+```{r second_extract, eval = FALSE}
+ptm <- proc.time()
+
+for (i in seq_along(second_set_bases)) {
+
+nldas_list_joint %>% 
+    lapply(function(x) x[i,]) %>% 
+    bind_rows(., .id = "date_time") %>% 
+  write_rds(., path = paste0("data/base_nldas/",  second_set_bases[i], ".rds" ))
+}  
+
+proc.time() - ptm
+```
+
+Review installation NLDAS files.
+```{r check_saved_files}
+
+list.files("data/base_nldas")
+
+# Fort Benning (1st set)
+read_rds("data/base_nldas/fort_benning_ga.rds")
+#Eglin AFB (2nd set)
+read_rds("data/base_nldas/eglin_afb.rds")
+
+```
+
+
+## Create long/tidy dataset
+
+```{r combined_dataframe, warning = FALSE}
+# Create index to substiture installation name into master dataframe `.id`
+
+df_index <- 
+  list.files("data/base_nldas") %>%
+      .[-c(27, 10)] %>% 
+    as_tibble() %>% 
+    mutate(row_id = row_number(),
+           value = stringr::str_replace(value, ".rds", ""))
+
+# Master dataframe (wide format)
+
+nldas_df <-
+  list.files("data/base_nldas", full.names = TRUE) %>%
+    .[-c(27, 10)] %>%   # remove West Point and Fort Huachuca
+    map_dfr(.x = ., .f = read_rds, .id = "id") %>%
+  mutate(id = as.integer(id)) %>% 
+  left_join(df_index, by = c("id" = "row_id")) %>% 
+  rename(installation = value) %>% 
+  dplyr::select(-id)
+
+nldas_df
+```
+
+
+
