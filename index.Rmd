@@ -1,10 +1,24 @@
 ---
 title: "Heat Stress Research"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
   
-## Welcome to my heat stress research website!  
+# Welcome to our heat stress research website!  
 
+Stephen Lewandowski
+Advisor: Jeffrey Shaman
+
+Columbia University Mailman School of Public Health
+Environmental Health Sciences
+Climate and Health Program
+
+
+
+## Data Preparation
 
 - Examine location shapefiles and NLDAS-2 grid overlays [[here]](shapefiles.html)  
 
@@ -12,4 +26,6 @@ title: "Heat Stress Research"
 
 - Extract locations (cells) and variables from NLDAS-2 .nc4 files with conversion to raster brick [[here]](extract_cells.html)  
 
-- Link NLDAS estimates assembled in `extract_cells`to specific locations and summarizes the data [[here]](installation_nldas.html).
+- Link NLDAS estimates assembled in `extract_cells`to specific locations and summarizes the data [[here]](installation_nldas.html)
+
+## Climate Data

@@ -1,6 +1,6 @@
 name: "Heat Stress Research"
 output_dir: "."
 output:
-  html_document:
-    toc: true
-    toc_float: true
+  html_document
+    
+    

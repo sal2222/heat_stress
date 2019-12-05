@@ -7,13 +7,17 @@ left:
     - text: "About"
       icon: fa-info
       href: about.html
-    - text: "Code"
+    - text: "Data Preparation"
       icon: fa-gear  
       menu: 
-        - text: "Shapefiles"
+        - text: "Installation Shapefiles"
           href: shapefiles.html
-        - text: "Download NLDAS-2"
+        - text: "Download NLDAS-2 Data"
           href: nldas_wget.html
+        - text: "Extract from NLDAS netCDF Files"
+          href: extract_cells.html
+        - text: "Tidy NLDAS Data for Analysis"
+          href: installation_nldas.html  
 right:
     - icon: fa-envelope fa-lg
       href: mailto:sal2222@cumc.columbia.edu
