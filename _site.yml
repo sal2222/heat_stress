@@ -1,10 +1,21 @@
 name: "Heat Stress Research"
 output_dir: "."
 navbar:
-  title: "Home"
+  title: "Heat Stress"
   left:
+    - text: "Home"
+      icon: fa-home
+      href: index.html
     - text: "About"
+      icon: fa-info
       href: about.html
+    - text: "Code"
+      icon: fa-gear  
+      menu: 
+        - text: "Shapefiles"
+          href: shapefiles.html
+        - text: "Download NLDAS-2"
+          href: nldas_wget.html
   right:
     - icon: fa-envelope fa-lg
       href: mailto:sal2222@cumc.columbia.edu
