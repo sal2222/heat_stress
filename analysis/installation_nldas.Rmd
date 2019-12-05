@@ -1,10 +1,5 @@
 ---
 title: "installation_nldas"
-author: "SL"
-output:
-  html_document:
-    toc: true
-    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
