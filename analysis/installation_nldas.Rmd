@@ -121,8 +121,9 @@ read_rds("data/base_nldas/eglin_afb.rds")
 
 ## Create long/tidy dataset
 
-```{r combined_dataframe, warning = FALSE}
-# Create index to substiture installation name into master dataframe `.id`
+```{r combined_dataframe, warning = FALSE, eval = FALSE}
+# Create index to substitute installation name into 
+# master  dataframe id
 
 df_index <- 
   list.files("data/base_nldas") %>%
@@ -147,6 +148,7 @@ nldas_df
 # write_rds(nldas_df, path = "data/base_nldas/nldas_df.rds")
 
 ```
+
 
 
 
