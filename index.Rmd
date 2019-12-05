@@ -6,15 +6,14 @@ output:
     toc_float: true
 ---
 
-  
-# Welcome to our heat stress research website!  
+Welcome to our heat stress research website!  
 
-Stephen Lewandowski  
-Advisor: Jeffrey Shaman
+**Stephen Lewandowski**  
+**Advisor: Jeffrey Shaman**  
 
-Columbia University Mailman School of Public Health
-Environmental Health Sciences
-Climate and Health Program
+Columbia University Mailman School of Public Health  
+Environmental Health Sciences  
+[Climate and Health Program](https://www.mailman.columbia.edu/research/climate-and-health-program)
 
 
 
