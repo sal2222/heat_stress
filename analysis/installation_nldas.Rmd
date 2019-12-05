@@ -148,6 +148,9 @@ nldas_df <-
   dplyr::select(-id)
 
 nldas_df
+
+# write_rds(nldas_df, path = "data/base_nldas/nldas_df.rds")
+
 ```
 
 
