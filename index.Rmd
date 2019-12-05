@@ -9,7 +9,7 @@ output:
   
 # Welcome to our heat stress research website!  
 
-Stephen Lewandowski
+Stephen Lewandowski  
 Advisor: Jeffrey Shaman
 
 Columbia University Mailman School of Public Health

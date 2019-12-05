@@ -1,6 +1,7 @@
 name: "Heat Stress Research"
 output_dir: "."
 output:
-  html_document
+  html_document:
+    theme: sandstone
     
     
