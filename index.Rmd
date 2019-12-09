@@ -19,6 +19,8 @@ Environmental Health Sciences
 
 ## Data Preparation
 
+### NLDAS-2 Weather Data
+
 - Examine location shapefiles and NLDAS-2 grid overlays [[here]](shapefiles.html)  
 
 - Instructions to download NLDAS-2 files using `wget` command [[here]](nldas_wget.html)  
@@ -27,4 +29,7 @@ Environmental Health Sciences
 
 - Link NLDAS estimates assembled in `extract_cells`to specific locations and summarizes the data [[here]](installation_nldas.html)
 
+- Add unit conversions, calculate new variables, and add Heat Index and WBGT indices [[here]](nldas_indices.html)   
+
 ## Climate Data
+

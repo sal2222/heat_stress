@@ -29,6 +29,12 @@ library(RNetCDF)
 library(tidync)
 library(furrr)
 library(tabularaster)
+library(purrrlyr)
+library(janitor)
+library(zoo)
+library(ggrepel)
+library(broom)
+
 
 ```
 
@@ -97,7 +103,6 @@ nldas_list %>%
 Extract by location from second list and create an NLDAS object for each.
 
 ```{r second_extract, eval = FALSE}
-ptm <- proc.time()
 
 for (i in seq_along(second_set_bases)) {
 
@@ -107,7 +112,6 @@ nldas_list_joint %>%
   write_rds(., path = paste0("data/base_nldas/",  second_set_bases[i], ".rds" ))
 }  
 
-proc.time() - ptm
 ```
 
 Review installation NLDAS files.
@@ -123,7 +127,7 @@ read_rds("data/base_nldas/eglin_afb.rds")
 ```
 
 
-## Create long/tidy dataset
+## Assemble master data frame with core variables
 
 ```{r combined_dataframe, warning = FALSE, eval = FALSE}
 # Create index to substitute installation name into 
@@ -131,7 +135,7 @@ read_rds("data/base_nldas/eglin_afb.rds")
 
 df_index <- 
   list.files("data/base_nldas") %>%
-      .[-c(27, 10)] %>% 
+      .[-c(10, 27)] %>% 
     as_tibble() %>% 
     mutate(row_id = row_number(),
            value = stringr::str_replace(value, ".rds", ""))
@@ -140,7 +144,7 @@ df_index <-
 
 nldas_df <-
   list.files("data/base_nldas", full.names = TRUE) %>%
-    .[-c(27, 10)] %>%   # remove West Point and Fort Huachuca
+    .[-c(10, 27)] %>%   # remove West Point and Fort Huachuca
     map_dfr(.x = ., .f = read_rds, .id = "id") %>%
   mutate(id = as.integer(id)) %>% 
   left_join(df_index, by = c("id" = "row_id")) %>% 
@@ -149,10 +153,15 @@ nldas_df <-
 
 nldas_df
 
-# write_rds(nldas_df, path = "data/base_nldas/nldas_df.rds")
+# write_rds(nldas_df, path = "data/nldas_df.rds")
 
 ```
 
+```{r load_nldas_df}
 
+nldas_df <- read_rds("data/nldas_df.rds")
+nldas_df
+
+```
 
 
