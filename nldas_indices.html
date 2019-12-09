@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>installation_nldas</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Heat Stress</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="shapefiles.html">Installation Shapefiles</a>
+    </li>
+    <li>
+      <a href="nldas_wget.html">Download NLDAS-2 Data</a>
+    </li>
+    <li>
+      <a href="extract_cells.html">Extract from NLDAS netCDF Files</a>
+    </li>
+    <li>
+      <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
+    </li>
+    <li>
+      <a href="nldas_incices.html">NLDAS Conversions and Indices</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:sal2222@cumc.columbia.edu">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/sal2222/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">installation_nldas</h1>
+
+</div>
+
+
+<p>Expand dataframe with indices and unit conversions</p>
+<div id="identify-timezones-for-local-time-conversion" class="section level2">
+<h2>Identify timezones for local time conversion</h2>
+<pre class="r"><code># GMT adjust
+
+time_zones &lt;-
+  read_rds(&quot;data/select_bases.rds&quot;) %&gt;% 
+  dplyr::select(site_name, centroid) %&gt;% 
+  mutate(time_zone = lutz::tz_lookup(centroid, crs = 4326, method = &quot;accurate&quot;)) %&gt;% 
+  as_tibble() %&gt;% 
+  dplyr::select(site_name, time_zone) %&gt;% 
+  mutate(site_name = stringr::str_replace_all(site_name, &quot; &quot;, &quot;_&quot;),
+         site_name =  stringr::str_to_lower(site_name))
+
+time_zones  </code></pre>
+<pre><code>## # A tibble: 25 x 2
+##    site_name                  time_zone          
+##    &lt;chr&gt;                      &lt;chr&gt;              
+##  1 fort_benning_ga            America/New_York   
+##  2 fort_campbell              America/Chicago    
+##  3 mcb_quantico               America/New_York   
+##  4 mcrd_san_diego             America/Los_Angeles
+##  5 fort_riley                 America/Chicago    
+##  6 ntc_and_fort_irwin         America/Los_Angeles
+##  7 fort_gordon                America/New_York   
+##  8 twentynine_palms_main_base America/Los_Angeles
+##  9 fort_sill                  America/Chicago    
+## 10 fort_carson                America/Denver     
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code>lutz::tz_plot(&quot;America/New_York&quot;)</code></pre>
+<p><img src="nldas_indices_files/figure-html/id_timezones-1.png" width="672" /></p>
+<pre class="r"><code>lutz::tz_plot(&quot;America/Chicago&quot;)</code></pre>
+<p><img src="nldas_indices_files/figure-html/id_timezones-2.png" width="672" /></p>
+<pre class="r"><code>lutz::tz_plot(&quot;America/Denver&quot;)</code></pre>
+<p><img src="nldas_indices_files/figure-html/id_timezones-3.png" width="672" /></p>
+<pre class="r"><code>lutz::tz_plot(&quot;America/Los_Angeles&quot;)</code></pre>
+<p><img src="nldas_indices_files/figure-html/id_timezones-4.png" width="672" /></p>
+</div>
+<div id="add-local-time-column-to-nldas-dataframe" class="section level2">
+<h2>Add local time column to NLDAS dataframe</h2>
+<p>This will serve as an input to WBGT estimate calculations.</p>
+<pre class="r"><code>nldas_df &lt;- read_rds(&quot;data/nldas_df.rds&quot;)
+
+# timezones cannot be vectorized in lubridate, therefore `case_when` used
+# https://community.rstudio.com/t/working-with-timezones-in-lubridate/4260
+
+
+
+# https://stackoverflow.com/questions/55352166/how-to-use-lubridate-as-datetime-function-in-combination-with-dplyr-mutate-and-c
+# (Without the additional `as_datetime(as.character))`, each value receives the result of the first item in case_when- Eglin converts to EST instead of CST)
+
+
+nldas_time_zone &lt;-
+  nldas_df %&gt;% 
+    mutate(utc_dttm = lubridate::ymd_hm(date_time)) %&gt;% 
+    dplyr::select(utc_dttm, installation, everything(), -date_time) %&gt;% 
+    left_join(time_zones, by = c(&quot;installation&quot; = &quot;site_name&quot;)) %&gt;%  
+    dplyr::mutate(local_dttm = dplyr::case_when(
+      .$time_zone == &quot;America/New_York&quot; ~ as.character(with_tz(.$utc_dttm, tz = &quot;America/New_York&quot;)),
+      .$time_zone == &quot;America/Chicago&quot; ~ as.character(with_tz(.$utc_dttm, tz = &quot;America/Chicago&quot;)), 
+      .$time_zone == &quot;America/Denver&quot; ~ as.character(with_tz(.$utc_dttm, tz = &quot;America/Denver&quot;)), 
+      .$time_zone == &quot;America/Los_Angeles&quot; ~ as.character(with_tz(.$utc_dttm, tz = &quot;America/Los_Angeles&quot;))),
+      local_dttm = lubridate::ymd_hms(local_dttm)) %&gt;% 
+  dplyr::select(utc_dttm, local_dttm, everything(), -time_zone)</code></pre>
+</div>
+<div id="meteorology-conversions-and-heat-index" class="section level2">
+<h2>Meteorology conversions and heat index</h2>
+<p>From original NLDAS variables, add windspeed, temp in F and C, relative humidity, dew point (C), heat index (F)</p>
+<pre class="r"><code>nldas_full &lt;-
+  nldas_time_zone %&gt;% 
+    mutate(windspeed = sqrt(UGRD^2 + VGRD^2),
+           tmp_f = weathermetrics::convert_temperature(TMP, old_metric = &quot;kelvin&quot;, new_metric = &quot;fahrenheit&quot;),
+           tmp_c = weathermetrics::convert_temperature(TMP, old_metric = &quot;kelvin&quot;, new_metric = &quot;celsius&quot;),
+           rh = humidity::SH2RH(SPFH, TMP, p = PRES, isK = TRUE),
+           dp_c = humidity.to.dewpoint(rh = rh, t = tmp_c, temperature.metric = &quot;celsius&quot;),
+           heat_index = weathermetrics::heat.index(t = tmp_f,
+                           rh = rh,
+                           temperature.metric = &quot;fahrenheit&quot;,
+                           output.metric = &quot;fahrenheit&quot;,
+                           round = 2)) </code></pre>
+</div>
+<div id="wet-bulb-globe-temperature-wbgt-estimate" class="section level2">
+<h2>Wet Bulb Globe Temperature (WBGT) Estimate</h2>
+<p>We will apply a wrapper of the C code developed by Liljegren <em>et al</em> to estimate WBGT from datasets of standard meterological measurements . This product was produced by UChicago Argonne, LLC under contract with the Department of Energy <a href="https://github.com/mdljts/wbgt">(GitHub link)</a>. The source code is available at: <a href="https://github.com/mdljts/wbgt/blob/master/src/wbgt.c">(link)</a>.</p>
+<p>In addition to the weather variables and time, we will need <code>lat</code> and <code>lon</code> columns for the WBGT function.</p>
+<pre class="r"><code># Add lat/lon to nldas dataframe
+
+  # Create lat lon table of centroids
+  
+base_coordinates &lt;- 
+  read_rds(&quot;data/select_bases.rds&quot;) %&gt;%
+  as_tibble() %&gt;% 
+  dplyr::select(site_name, centroid) %&gt;%  
+  mutate(longitude = unlist(map(centroid,1)),
+         latitude = unlist(map(centroid,2)),
+         site_name = stringr::str_replace_all(site_name, &quot; &quot;, &quot;_&quot;),
+         site_name =  stringr::str_to_lower(site_name)) %&gt;% 
+  dplyr::select(-centroid)
+
+base_coordinates </code></pre>
+<pre><code>## # A tibble: 25 x 3
+##    site_name                  longitude latitude
+##    &lt;chr&gt;                          &lt;dbl&gt;    &lt;dbl&gt;
+##  1 fort_benning_ga                -84.8     32.4
+##  2 fort_campbell                  -87.6     36.6
+##  3 mcb_quantico                   -77.5     38.6
+##  4 mcrd_san_diego                -117.      32.7
+##  5 fort_riley                     -96.8     39.2
+##  6 ntc_and_fort_irwin            -117.      35.4
+##  7 fort_gordon                    -82.2     33.4
+##  8 twentynine_palms_main_base    -116.      34.5
+##  9 fort_sill                      -98.5     34.7
+## 10 fort_carson                   -105.      38.5
+## # ... with 15 more rows</code></pre>
+<p>WBGT with <code>mdljts</code> wrapper. Create a dataframe with the required columns for the <code>wbgt_df</code> function.</p>
+<pre class="r"><code># Create dataframe with columns needed for wbgt::wbgt_df (mdljts wrapper)
+
+                     
+# Join lat and lon
+nldas_full &lt;-
+  nldas_full %&gt;% 
+  left_join(base_coordinates, by = c(&quot;installation&quot; = &quot;site_name&quot;)) %&gt;% 
+  dplyr::select(utc_dttm, local_dttm, installation, longitude, latitude, everything())
+
+nldas_full  
+
+# Create datframe for `wbgt_df` function
+
+wbgt_mdljts_df &lt;-
+  nldas_full %&gt;% 
+    mutate(
+      year = lubridate::year(local_dttm), 
+      month = lubridate::month(local_dttm), 
+      day = lubridate::day(local_dttm), 
+      hour = lubridate::hour(local_dttm), 
+      minute = lubridate::minute(local_dttm), 
+      gmt = lubridate::hour(utc_dttm), 
+      avg = 60, 
+      lat = latitude, 
+      lon = longitude, 
+      solar = DSWRF, 
+      pres = PRES / 100, 
+      Tair = tmp_c, 
+      relhum = rh, 
+      speed = windspeed, 
+      zspeed = 10, 
+      dT = 0, 
+      urban = 0) %&gt;% 
+  dplyr::select(year:urban)
+
+wbgt_mdljts_df
+
+
+# Execute WBGT wrapper on entire dataframe 
+wbgt_mdljts &lt;-     
+ wbgt::wbgt_df(wbgt_mdljts_df) %&gt;% 
+   dplyr::select(wbgt)
+
+
+# Bind WBGT column to NLDAS dataframe and add Fahrenheit conversion
+
+nldas_full &lt;-
+  nldas_full %&gt;% 
+  bind_cols(wbgt_mdljts) %&gt;% 
+  mutate(wbgt_f = weathermetrics::convert_temperature(wbgt, old_metric = &quot;celsius&quot;, new_metric = &quot;fahrenheit&quot;))
+
+
+# write_rds(nldas_full, path = &quot;data/nldas_full.rds&quot;)</code></pre>
+</div>
+<div id="wide-nldas-dataframe" class="section level2">
+<h2>“Wide” NLDAS dataframe</h2>
+<pre class="r"><code># View &quot;wide&quot; NLDAS dataframe
+# 
+nldas_wide &lt;-
+  read_rds(&quot;data/nldas_full.rds&quot;)
+
+nldas_wide</code></pre>
+<pre><code>## # A tibble: 6,472,525 x 19
+##    utc_dttm            local_dttm          installation longitude latitude   TMP
+##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;            &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
+##  1 1990-01-01 00:00:00 1989-12-31 18:00:00 eglin_afb        -86.5     30.6  291.
+##  2 1990-01-01 01:00:00 1989-12-31 19:00:00 eglin_afb        -86.5     30.6  290.
+##  3 1990-01-01 02:00:00 1989-12-31 20:00:00 eglin_afb        -86.5     30.6  289.
+##  4 1990-01-01 03:00:00 1989-12-31 21:00:00 eglin_afb        -86.5     30.6  288.
+##  5 1990-01-01 04:00:00 1989-12-31 22:00:00 eglin_afb        -86.5     30.6  287.
+##  6 1990-01-01 05:00:00 1989-12-31 23:00:00 eglin_afb        -86.5     30.6  287.
+##  7 1990-01-01 06:00:00 1990-01-01 00:00:00 eglin_afb        -86.5     30.6  286.
+##  8 1990-01-01 07:00:00 1990-01-01 01:00:00 eglin_afb        -86.5     30.6  285.
+##  9 1990-01-01 08:00:00 1990-01-01 02:00:00 eglin_afb        -86.5     30.6  284.
+## 10 1990-01-01 09:00:00 1990-01-01 03:00:00 eglin_afb        -86.5     30.6  283.
+## # ... with 6,472,515 more rows, and 13 more variables: SPFH &lt;dbl&gt;, PRES &lt;dbl&gt;,
+## #   UGRD &lt;dbl&gt;, VGRD &lt;dbl&gt;, DSWRF &lt;dbl&gt;, windspeed &lt;dbl&gt;, tmp_f &lt;dbl&gt;,
+## #   tmp_c &lt;dbl&gt;, rh &lt;dbl&gt;, dp_c &lt;dbl&gt;, heat_index &lt;dbl&gt;, wbgt &lt;dbl&gt;,
+## #   wbgt_f &lt;dbl&gt;</code></pre>
+<pre class="r"><code># Mean temperature (K) from Jan 1990 - July 2019 (year-round)
+nldas_wide %&gt;% 
+  group_by(installation) %&gt;% 
+  summarise(mean_tmp = mean(TMP)) %&gt;% 
+  arrange(desc(mean_tmp))</code></pre>
+<pre><code>## # A tibble: 25 x 2
+##    installation                mean_tmp
+##    &lt;chr&gt;                          &lt;dbl&gt;
+##  1 lackland_afb                    295.
+##  2 fort_sam_houston                295.
+##  3 fort_gordon                     294.
+##  4 eglin_afb                       294.
+##  5 mcrd_beaufort_parris_island     294.
+##  6 fort_drum                       293.
+##  7 twentynine_palms_main_base      293.
+##  8 fort_lewis                      293.
+##  9 fort_polk                       292.
+## 10 fort_benning_ga                 292.
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code># Mean WBGT (F) from Jan 1990 - July 2019 (year-round)
+nldas_wide %&gt;% 
+  group_by(installation) %&gt;% 
+  summarise(mean_wbgt_f = mean(wbgt_f)) %&gt;% 
+  arrange(desc(mean_wbgt_f))</code></pre>
+<pre><code>## # A tibble: 25 x 2
+##    installation                mean_wbgt_f
+##    &lt;chr&gt;                             &lt;dbl&gt;
+##  1 eglin_afb                          67.2
+##  2 mcrd_beaufort_parris_island        67.1
+##  3 fort_sam_houston                   66.7
+##  4 lackland_afb                       66.6
+##  5 fort_drum                          65.6
+##  6 fort_lewis                         64.7
+##  7 fort_gordon                        64.3
+##  8 fort_benning_ga                    63.5
+##  9 mcb_camp_lejeune                   63.0
+## 10 fort_hood                          62.3
+## # ... with 15 more rows</code></pre>
+</div>
+<div id="long-nldas-dataframe" class="section level2">
+<h2>“Long” NLDAS dataframe</h2>
+<pre class="r"><code># Gather by local time and location
+# (90+ million rows for 25 locations, 1990-2018 hourly)
+
+
+nldas_long &lt;-
+  nldas_wide %&gt;%
+    dplyr::select(-utc_dttm, -longitude, -latitude) %&gt;% 
+    tidyr::gather(key = &quot;variable&quot;, value = &quot;value&quot;, TMP:wbgt_f) 
+  
+
+#write_rds(nldas_long, path = &quot;data/nldas_long.rds&quot;)</code></pre>
+<pre class="r"><code>nldas_long &lt;-
+  read_rds(&quot;data/nldas_long.rds&quot;)
+
+nldas_long</code></pre>
+<pre><code>## # A tibble: 90,615,350 x 4
+##    local_dttm          installation variable value
+##    &lt;dttm&gt;              &lt;chr&gt;        &lt;chr&gt;    &lt;dbl&gt;
+##  1 1989-12-31 18:00:00 eglin_afb    TMP       291.
+##  2 1989-12-31 19:00:00 eglin_afb    TMP       290.
+##  3 1989-12-31 20:00:00 eglin_afb    TMP       289.
+##  4 1989-12-31 21:00:00 eglin_afb    TMP       288.
+##  5 1989-12-31 22:00:00 eglin_afb    TMP       287.
+##  6 1989-12-31 23:00:00 eglin_afb    TMP       287.
+##  7 1990-01-01 00:00:00 eglin_afb    TMP       286.
+##  8 1990-01-01 01:00:00 eglin_afb    TMP       285.
+##  9 1990-01-01 02:00:00 eglin_afb    TMP       284.
+## 10 1990-01-01 03:00:00 eglin_afb    TMP       283.
+## # ... with 90,615,340 more rows</code></pre>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

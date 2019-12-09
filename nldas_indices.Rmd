@@ -1,0 +1,247 @@
+---
+title: "installation_nldas"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(sf)
+library(tidyverse)
+library(lutz)
+library(lubridate)
+library(weathermetrics)
+library(humidity)
+library(wbgt)
+library(HeatStress)
+
+
+```
+
+
+Expand dataframe with indices and unit conversions
+
+
+## Identify timezones for local time conversion
+
+```{r id_timezones}
+# GMT adjust
+
+time_zones <-
+  read_rds("data/select_bases.rds") %>% 
+  dplyr::select(site_name, centroid) %>% 
+  mutate(time_zone = lutz::tz_lookup(centroid, crs = 4326, method = "accurate")) %>% 
+  as_tibble() %>% 
+  dplyr::select(site_name, time_zone) %>% 
+  mutate(site_name = stringr::str_replace_all(site_name, " ", "_"),
+         site_name =  stringr::str_to_lower(site_name))
+
+time_zones  
+
+lutz::tz_plot("America/New_York")
+lutz::tz_plot("America/Chicago")
+lutz::tz_plot("America/Denver")
+lutz::tz_plot("America/Los_Angeles")
+
+
+```
+
+## Add local time column to NLDAS dataframe
+
+This will serve as an input to WBGT estimate calculations.
+
+```{r local_time, eval = FALSE}
+
+nldas_df <- read_rds("data/nldas_df.rds")
+
+# timezones cannot be vectorized in lubridate, therefore `case_when` used
+# https://community.rstudio.com/t/working-with-timezones-in-lubridate/4260
+
+
+
+# https://stackoverflow.com/questions/55352166/how-to-use-lubridate-as-datetime-function-in-combination-with-dplyr-mutate-and-c
+# (Without the additional `as_datetime(as.character))`, each value receives the result of the first item in case_when- Eglin converts to EST instead of CST)
+
+
+nldas_time_zone <-
+  nldas_df %>% 
+    mutate(utc_dttm = lubridate::ymd_hm(date_time)) %>% 
+    dplyr::select(utc_dttm, installation, everything(), -date_time) %>% 
+    left_join(time_zones, by = c("installation" = "site_name")) %>%  
+    dplyr::mutate(local_dttm = dplyr::case_when(
+      .$time_zone == "America/New_York" ~ as.character(with_tz(.$utc_dttm, tz = "America/New_York")),
+      .$time_zone == "America/Chicago" ~ as.character(with_tz(.$utc_dttm, tz = "America/Chicago")), 
+      .$time_zone == "America/Denver" ~ as.character(with_tz(.$utc_dttm, tz = "America/Denver")), 
+      .$time_zone == "America/Los_Angeles" ~ as.character(with_tz(.$utc_dttm, tz = "America/Los_Angeles"))),
+      local_dttm = lubridate::ymd_hms(local_dttm)) %>% 
+  dplyr::select(utc_dttm, local_dttm, everything(), -time_zone)
+    
+
+```
+
+
+## Meteorology conversions and heat index
+From original NLDAS variables, add windspeed, temp in F and C, relative humidity, dew point (C), heat index (F) 
+
+```{r nldas_conversions, eval = FALSE}
+
+nldas_full <-
+  nldas_time_zone %>% 
+    mutate(windspeed = sqrt(UGRD^2 + VGRD^2),
+           tmp_f = weathermetrics::convert_temperature(TMP, old_metric = "kelvin", new_metric = "fahrenheit"),
+           tmp_c = weathermetrics::convert_temperature(TMP, old_metric = "kelvin", new_metric = "celsius"),
+           rh = humidity::SH2RH(SPFH, TMP, p = PRES, isK = TRUE),
+           dp_c = humidity.to.dewpoint(rh = rh, t = tmp_c, temperature.metric = "celsius"),
+           heat_index = weathermetrics::heat.index(t = tmp_f,
+                           rh = rh,
+                           temperature.metric = "fahrenheit",
+                           output.metric = "fahrenheit",
+                           round = 2)) 
+
+
+
+
+```
+
+
+## Wet Bulb Globe Temperature (WBGT) Estimate
+
+We will apply a wrapper of the C code developed by Liljegren *et al* to estimate WBGT from datasets of standard meterological measurements . This product was produced by UChicago Argonne, LLC under contract with the Department of Energy [(GitHub link)](https://github.com/mdljts/wbgt). The source code is available at: [(link)](https://github.com/mdljts/wbgt/blob/master/src/wbgt.c).  
+  
+  
+  
+In addition to the weather variables and time, we will need `lat` and `lon` columns for the WBGT function. 
+
+```{r lat_lon}
+
+# Add lat/lon to nldas dataframe
+
+  # Create lat lon table of centroids
+  
+base_coordinates <- 
+  read_rds("data/select_bases.rds") %>%
+  as_tibble() %>% 
+  dplyr::select(site_name, centroid) %>%  
+  mutate(longitude = unlist(map(centroid,1)),
+         latitude = unlist(map(centroid,2)),
+         site_name = stringr::str_replace_all(site_name, " ", "_"),
+         site_name =  stringr::str_to_lower(site_name)) %>% 
+  dplyr::select(-centroid)
+
+base_coordinates 
+
+```
+
+WBGT with `mdljts` wrapper. Create a dataframe with the required columns for the `wbgt_df` function. 
+
+```{r wbgt_mdljts, eval = FALSE}
+# Create dataframe with columns needed for wbgt::wbgt_df (mdljts wrapper)
+
+                     
+# Join lat and lon
+nldas_full <-
+  nldas_full %>% 
+  left_join(base_coordinates, by = c("installation" = "site_name")) %>% 
+  dplyr::select(utc_dttm, local_dttm, installation, longitude, latitude, everything())
+
+nldas_full  
+
+# Create datframe for `wbgt_df` function
+
+wbgt_mdljts_df <-
+  nldas_full %>% 
+    mutate(
+      year = lubridate::year(local_dttm), 
+      month = lubridate::month(local_dttm), 
+      day = lubridate::day(local_dttm), 
+      hour = lubridate::hour(local_dttm), 
+      minute = lubridate::minute(local_dttm), 
+      gmt = lubridate::hour(utc_dttm), 
+      avg = 60, 
+      lat = latitude, 
+      lon = longitude, 
+      solar = DSWRF, 
+      pres = PRES / 100, 
+      Tair = tmp_c, 
+      relhum = rh, 
+      speed = windspeed, 
+      zspeed = 10, 
+      dT = 0, 
+      urban = 0) %>% 
+  dplyr::select(year:urban)
+
+wbgt_mdljts_df
+
+
+# Execute WBGT wrapper on entire dataframe 
+wbgt_mdljts <-     
+ wbgt::wbgt_df(wbgt_mdljts_df) %>% 
+   dplyr::select(wbgt)
+
+
+# Bind WBGT column to NLDAS dataframe and add Fahrenheit conversion
+
+nldas_full <-
+  nldas_full %>% 
+  bind_cols(wbgt_mdljts) %>% 
+  mutate(wbgt_f = weathermetrics::convert_temperature(wbgt, old_metric = "celsius", new_metric = "fahrenheit"))
+
+
+# write_rds(nldas_full, path = "data/nldas_full.rds")
+
+```
+
+## "Wide" NLDAS dataframe
+
+```{r open_nldas_full}
+
+# View "wide" NLDAS dataframe
+# 
+nldas_wide <-
+  read_rds("data/nldas_full.rds")
+
+nldas_wide
+
+# Mean temperature (K) from Jan 1990 - July 2019 (year-round)
+nldas_wide %>% 
+  group_by(installation) %>% 
+  summarise(mean_tmp = mean(TMP)) %>% 
+  arrange(desc(mean_tmp))
+
+# Mean WBGT (F) from Jan 1990 - July 2019 (year-round)
+nldas_wide %>% 
+  group_by(installation) %>% 
+  summarise(mean_wbgt_f = mean(wbgt_f)) %>% 
+  arrange(desc(mean_wbgt_f))
+```
+
+## "Long" NLDAS dataframe
+
+```{r convert_long_df, eval = FALSE}
+
+# Gather by local time and location
+# (90+ million rows for 25 locations, 1990-2018 hourly)
+
+
+nldas_long <-
+  nldas_wide %>%
+    dplyr::select(-utc_dttm, -longitude, -latitude) %>% 
+    tidyr::gather(key = "variable", value = "value", TMP:wbgt_f) 
+  
+
+#write_rds(nldas_long, path = "data/nldas_long.rds")
+
+```
+
+```{r view_nldas_long}
+
+nldas_long <-
+  read_rds("data/nldas_long.rds")
+
+nldas_long
+```
+

@@ -467,17 +467,13 @@ nldas_list %&gt;%
   write_rds(., path = paste0(&quot;data/base_nldas/&quot;,  first_set_bases[i], &quot;.rds&quot; ))
 }  </code></pre>
 <p>Extract by location from second list and create an NLDAS object for each.</p>
-<pre class="r"><code>ptm &lt;- proc.time()
-
-for (i in seq_along(second_set_bases)) {
+<pre class="r"><code>for (i in seq_along(second_set_bases)) {
 
 nldas_list_joint %&gt;% 
     lapply(function(x) x[i,]) %&gt;% 
     bind_rows(., .id = &quot;date_time&quot;) %&gt;% 
   write_rds(., path = paste0(&quot;data/base_nldas/&quot;,  second_set_bases[i], &quot;.rds&quot; ))
-}  
-
-proc.time() - ptm</code></pre>
+}  </code></pre>
 <p>Review installation NLDAS files.</p>
 <pre class="r"><code>list.files(&quot;data/base_nldas&quot;)</code></pre>
 <pre><code>##  [1] &quot;eglin_afb.rds&quot;                   &quot;fort_benning_ga.rds&quot;            
@@ -492,8 +488,8 @@ proc.time() - ptm</code></pre>
 ## [19] &quot;lackland_afb.rds&quot;                &quot;mcb_camp_lejeune.rds&quot;           
 ## [21] &quot;mcb_camp_pendleton.rds&quot;          &quot;mcb_quantico.rds&quot;               
 ## [23] &quot;mcrd_beaufort_parris_island.rds&quot; &quot;mcrd_san_diego.rds&quot;             
-## [25] &quot;nldas_df.rds&quot;                    &quot;ntc_and_fort_irwin.rds&quot;         
-## [27] &quot;twentynine_palms_main_base.rds&quot;  &quot;west_point_mil_reservation.rds&quot;</code></pre>
+## [25] &quot;ntc_and_fort_irwin.rds&quot;          &quot;twentynine_palms_main_base.rds&quot; 
+## [27] &quot;west_point_mil_reservation.rds&quot;</code></pre>
 <pre class="r"><code># Fort Benning (1st set)
 read_rds(&quot;data/base_nldas/fort_benning_ga.rds&quot;)</code></pre>
 <pre><code>## # A tibble: 258,901 x 7
@@ -527,14 +523,14 @@ read_rds(&quot;data/base_nldas/eglin_afb.rds&quot;)</code></pre>
 ## 10 19900101_0900  283. 0.00629 101593.  5.24 -5.64     0
 ## # ... with 258,891 more rows</code></pre>
 </div>
-<div id="create-longtidy-dataset" class="section level2">
-<h2>Create long/tidy dataset</h2>
+<div id="assemble-master-data-frame-with-core-variables" class="section level2">
+<h2>Assemble master data frame with core variables</h2>
 <pre class="r"><code># Create index to substitute installation name into 
 # master  dataframe id
 
 df_index &lt;- 
   list.files(&quot;data/base_nldas&quot;) %&gt;%
-      .[-c(27, 10)] %&gt;% 
+      .[-c(10, 27)] %&gt;% 
     as_tibble() %&gt;% 
     mutate(row_id = row_number(),
            value = stringr::str_replace(value, &quot;.rds&quot;, &quot;&quot;))
@@ -543,7 +539,7 @@ df_index &lt;-
 
 nldas_df &lt;-
   list.files(&quot;data/base_nldas&quot;, full.names = TRUE) %&gt;%
-    .[-c(27, 10)] %&gt;%   # remove West Point and Fort Huachuca
+    .[-c(10, 27)] %&gt;%   # remove West Point and Fort Huachuca
     map_dfr(.x = ., .f = read_rds, .id = &quot;id&quot;) %&gt;%
   mutate(id = as.integer(id)) %&gt;% 
   left_join(df_index, by = c(&quot;id&quot; = &quot;row_id&quot;)) %&gt;% 
@@ -552,7 +548,23 @@ nldas_df &lt;-
 
 nldas_df
 
-# write_rds(nldas_df, path = &quot;data/base_nldas/nldas_df.rds&quot;)</code></pre>
+# write_rds(nldas_df, path = &quot;data/nldas_df.rds&quot;)</code></pre>
+<pre class="r"><code>nldas_df &lt;- read_rds(&quot;data/nldas_df.rds&quot;)
+nldas_df</code></pre>
+<pre><code>## # A tibble: 6,472,525 x 8
+##    date_time       TMP    SPFH    PRES  UGRD  VGRD DSWRF installation
+##    &lt;chr&gt;         &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;       
+##  1 19900101_0000  291. 0.0121  100808.  3.81 -1.38     0 eglin_afb   
+##  2 19900101_0100  290. 0.0113  100883.  4.02 -2.18     0 eglin_afb   
+##  3 19900101_0200  289. 0.0106  100957.  4.23 -2.97     0 eglin_afb   
+##  4 19900101_0300  288. 0.00982 101033.  4.44 -3.77     0 eglin_afb   
+##  5 19900101_0400  287. 0.00929 101163.  4.86 -4.20     0 eglin_afb   
+##  6 19900101_0500  287. 0.00875 101294.  5.29 -4.63     0 eglin_afb   
+##  7 19900101_0600  286. 0.00822 101424.  5.71 -5.05     0 eglin_afb   
+##  8 19900101_0700  285. 0.00757 101481.  5.55 -5.25     0 eglin_afb   
+##  9 19900101_0800  284. 0.00693 101537.  5.40 -5.45     0 eglin_afb   
+## 10 19900101_0900  283. 0.00629 101593.  5.24 -5.64     0 eglin_afb   
+## # ... with 6,472,515 more rows</code></pre>
 </div>
 </div>
 
