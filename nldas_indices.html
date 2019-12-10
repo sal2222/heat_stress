@@ -662,25 +662,71 @@ nldas_long &lt;-
     tidyr::gather(key = &quot;variable&quot;, value = &quot;value&quot;, TMP:wbgt_f) 
   
 
-#write_rds(nldas_long, path = &quot;data/nldas_long.rds&quot;)</code></pre>
+
+# write_rds(nldas_long, path = &quot;data/nldas_long.rds&quot;)
+
+# This long object is 4.2 GB, compared to 1.0 GB for the wide object. We will proceed to nest this dataframe by installation and variable.</code></pre>
 <pre class="r"><code>nldas_long &lt;-
   read_rds(&quot;data/nldas_long.rds&quot;)
 
 nldas_long</code></pre>
-<pre><code>## # A tibble: 90,615,350 x 4
-##    local_dttm          installation variable value
-##    &lt;dttm&gt;              &lt;chr&gt;        &lt;chr&gt;    &lt;dbl&gt;
-##  1 1989-12-31 18:00:00 eglin_afb    TMP       291.
-##  2 1989-12-31 19:00:00 eglin_afb    TMP       290.
-##  3 1989-12-31 20:00:00 eglin_afb    TMP       289.
-##  4 1989-12-31 21:00:00 eglin_afb    TMP       288.
-##  5 1989-12-31 22:00:00 eglin_afb    TMP       287.
-##  6 1989-12-31 23:00:00 eglin_afb    TMP       287.
-##  7 1990-01-01 00:00:00 eglin_afb    TMP       286.
-##  8 1990-01-01 01:00:00 eglin_afb    TMP       285.
-##  9 1990-01-01 02:00:00 eglin_afb    TMP       284.
-## 10 1990-01-01 03:00:00 eglin_afb    TMP       283.
-## # ... with 90,615,340 more rows</code></pre>
+</div>
+<div id="nested-nldas-dataframe" class="section level2">
+<h2>Nested NLDAS dataframe</h2>
+<p>Create List-column for installation/variable pairs</p>
+<pre class="r"><code># Increase memory limit
+memory.limit()
+memory.limit(size = 56000)
+
+nldas_nest &lt;-
+  nldas_long %&gt;% 
+  dplyr::select(installation, variable, local_dttm, value) %&gt;% 
+  nest(., data = local_dttm:value)
+
+write_rds(nldas_nest, path = &quot;data/nldas_nest.rds&quot;)</code></pre>
+<pre class="r"><code>nldas_nest &lt;-
+  read_rds(&quot;data/nldas_nest.rds&quot;)
+
+nldas_nest</code></pre>
+<pre><code>## # A tibble: 350 x 3
+##    installation    variable           data
+##    &lt;chr&gt;           &lt;chr&gt;    &lt;list&lt;df[,2]&gt;&gt;
+##  1 eglin_afb       TMP       [258,901 x 2]
+##  2 fort_benning_ga TMP       [258,901 x 2]
+##  3 fort_bliss      TMP       [258,901 x 2]
+##  4 fort_bragg      TMP       [258,901 x 2]
+##  5 fort_campbell   TMP       [258,901 x 2]
+##  6 fort_carson     TMP       [258,901 x 2]
+##  7 fort_drum       TMP       [258,901 x 2]
+##  8 fort_gordon     TMP       [258,901 x 2]
+##  9 fort_hood       TMP       [258,901 x 2]
+## 10 fort_jackson    TMP       [258,901 x 2]
+## # ... with 340 more rows</code></pre>
+<pre class="r"><code>nldas_nest %&gt;% 
+  filter(installation == &quot;eglin_afb&quot; &amp; variable == &quot;TMP&quot;) %&gt;% 
+  pull(data)</code></pre>
+<pre><code>## &lt;list_of&lt;
+##   tbl_df&lt;
+##     local_dttm: datetime&lt;UTC&gt;
+##     value     : double
+##   &gt;
+## &gt;[1]&gt;
+## [[1]]
+## # A tibble: 258,901 x 2
+##    local_dttm          value
+##    &lt;dttm&gt;              &lt;dbl&gt;
+##  1 1989-12-31 18:00:00  291.
+##  2 1989-12-31 19:00:00  290.
+##  3 1989-12-31 20:00:00  289.
+##  4 1989-12-31 21:00:00  288.
+##  5 1989-12-31 22:00:00  287.
+##  6 1989-12-31 23:00:00  287.
+##  7 1990-01-01 00:00:00  286.
+##  8 1990-01-01 01:00:00  285.
+##  9 1990-01-01 02:00:00  284.
+## 10 1990-01-01 03:00:00  283.
+## # ... with 258,891 more rows</code></pre>
+<pre class="r"><code># The nested list is 1.4 GB, compared to 4.2 GB for the long dataframe</code></pre>
 </div>
 
 

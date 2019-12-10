@@ -1,0 +1,186 @@
+---
+title: "nldas_timeseries"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(dygraphs)
+library(xts)
+library(timetk)
+library(zoo)
+library(forecast)
+library(fable)
+library(sweep)
+library(viridis)
+```
+
+
+```{r}
+nldas_nest <- read_rds("data/nldas_nest.rds")
+nldas_nest
+```
+
+
+
+## Create `zoo` timeseries
+```{r make_ts, eval = FALSE, warning = FALSE, message = FALSE}
+
+
+# Function to convert hourly `dttm` to a time series (zoo) object
+
+make_ts = function(df) {
+  zoo::zoo(x = df[["value"]],
+           order.by = df[["local_dttm"]],
+           frequency = 24)
+}
+
+
+make_ts(nldas_nest$data[[1]]) %>% dygraph() 
+
+# Map zoo ts function over each location
+TMP_ts <-
+  nldas_nest %>% 
+    filter(variable == "TMP") %>%
+    mutate(data_ts = 
+      purrr::map(data, make_ts))
+
+
+```
+
+## Create `xts` timeseries
+```{r xts_ts, warning = FALSE, message = FALSE}
+
+# Create `xts` time series
+
+
+tmp_f_ts <-
+  nldas_nest %>% 
+    filter(variable == "tmp_f") %>%
+    mutate(data_ts = 
+      purrr::map(data, timetk::tk_xts))
+
+
+tmp_f_ts
+
+tmp_f_ts$data_ts[[1]] %>% head()
+
+
+```
+
+
+## Example dynamic graph of temperature time series
+```{r}
+
+# Sample time series dynamic graph
+
+tmp_f_ts$data_ts[[1]] %>% 
+  dygraph(main = tmp_f_ts$installation[1]) %>% 
+  dySeries("value", label = "Temperature (°F)") %>%
+  dyLegend(show = "always", hideOnMouseOut = FALSE)
+  
+```
+
+## Model time series
+
+
+### Exponential Smoothing ETS (Error, Trend, Seasonal) model function
+```{r model_ts}
+
+
+# Ref: https://cran.rstudio.com/web/packages/sweep/vignettes/SW01_Forecasting_Time_Series_Groups.html
+
+# Map the Exponential Smoothing ETS (Error, Trend, Seasonal) model function, ets, from the forecast package
+
+tmp_f_fit <-
+  tmp_f_ts %>%
+  slice(1:4) %>% 
+   mutate(data_ts = 
+      purrr::map(data_ts, timetk::tk_ts)) %>% 
+   mutate(fit_ets = map(data_ts, forecast::ets))
+
+# View ETS model accuracies
+tmp_f_fit %>%
+    mutate(glance = map(fit_ets, sweep::sw_glance)) %>%
+    unnest(glance)
+
+# Augmented fitted and residual values
+
+augment_fit_ets <- tmp_f_fit %>%
+    mutate(augment = map(fit_ets, sweep::sw_augment, timetk_idx = TRUE, rename_index = "time")) %>%
+    unnest(augment)
+
+augment_fit_ets 
+
+# Plot the residuals (slow)
+
+#  augment_fit_ets %>%
+#      filter(installation == "eglin_afb") %>% 
+#      ggplot(aes(x = time, y = .resid)) +
+#      geom_hline(yintercept = 0, color = "grey40") +
+#      geom_line() +
+#      geom_smooth(method = "loess") +
+#      labs(title = "Temperature (°F)",
+#           subtitle = "ETS Model Residuals") + 
+#      theme_bw() 
+
+# Create decompositions
+
+tmp_f_fit %>%
+    mutate(decomp = map(fit_ets, sweep::sw_tidy_decomp, timetk_idx = TRUE, rename_index = "time")) %>%
+    unnest(decomp)
+
+# Forecasting the model
+
+tmp_f_fit_fcast <- tmp_f_fit %>%
+    mutate(fcast_ets = map(fit_ets, forecast, h = 720),
+           sweep = map(fcast_ets, sweep::sw_sweep, fitted = FALSE, timetk_idx = TRUE)) %>%
+    unnest(sweep)
+    
+tmp_f_fit_fcast
+
+
+# Plot forecast
+
+tmp_f_fit_fcast %>%
+    filter(installation == "eglin_afb",
+           index > as.Date("2019-01-01")) %>% 
+    ggplot(aes(x = index, y = value, color = key)) +
+    geom_ribbon(aes(ymin = lo.95, ymax = hi.95), 
+                fill = "#D5DBFF", color = NA, size = 0) +
+    geom_ribbon(aes(ymin = lo.80, ymax = hi.80, fill = key), 
+                fill = "#596DD5", color = NA, size = 0, alpha = 0.8) +
+    geom_line() +
+    labs(title = "Temperature (°F)",
+         subtitle = "ETS Model Forecasts",
+         x = "", y = "Temperature (°F)") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+### Multiple seasonal decomposition
+
+```{r}
+
+# Multiple seasonal decomposition
+
+
+tmp_f_fit_mstl <-
+  tmp_f_fit %>% 
+    mutate(fit_mstl =
+             map(data_ts, forecast::mstl)) 
+
+tmp_f_fit_mstl$fit_mstl[[1]] %>% 
+  autoplot()
+
+
+```
+

@@ -233,15 +233,48 @@ nldas_long <-
     tidyr::gather(key = "variable", value = "value", TMP:wbgt_f) 
   
 
-#write_rds(nldas_long, path = "data/nldas_long.rds")
 
+# write_rds(nldas_long, path = "data/nldas_long.rds")
+
+# This long object is 4.2 GB, compared to 1.0 GB for the wide object. We will proceed to nest this dataframe by installation and variable.
 ```
 
-```{r view_nldas_long}
+```{r view_nldas_long, eval = FALSE}
 
 nldas_long <-
   read_rds("data/nldas_long.rds")
 
 nldas_long
+```
+
+## Nested NLDAS dataframe 
+Create List-column for installation/variable pairs 
+
+```{r nldas_nest, eval = FALSE}
+# Increase memory limit
+memory.limit()
+memory.limit(size = 56000)
+
+nldas_nest <-
+  nldas_long %>% 
+  dplyr::select(installation, variable, local_dttm, value) %>% 
+  nest(., data = local_dttm:value)
+
+write_rds(nldas_nest, path = "data/nldas_nest.rds")
+
+```
+
+```{r view_nldas_nest}
+
+nldas_nest <-
+  read_rds("data/nldas_nest.rds")
+
+nldas_nest
+
+nldas_nest %>% 
+  filter(installation == "eglin_afb" & variable == "TMP") %>% 
+  pull(data)
+
+# The nested list is 1.4 GB, compared to 4.2 GB for the long dataframe
 ```
 

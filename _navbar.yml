@@ -19,7 +19,15 @@ left:
         - text: "Tidy NLDAS Data for Analysis"
           href: installation_nldas.html
         - text: "NLDAS Conversions and Indices"
-          href: nldas_incices.html  
+          href: nldas_incices.html
+ - text: "Meteorology"
+      icon: fa-thermometer  
+      menu: 
+        - text: "Time series formats"
+          href: nldas_timeseries.html
+        - text: "Fable time series"
+          href: fable.html          
+          
 right:
     - icon: fa-envelope fa-lg
       href: mailto:sal2222@cumc.columbia.edu
