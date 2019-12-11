@@ -1,5 +1,5 @@
 ---
-title: "dmed_read"
+title: "dmed_summary"
 output:
   html_document:
     toc: true
@@ -45,7 +45,7 @@ dmed_tidy
 
 
 
-## Example Plot: rate by type
+## Example Plots
 
 ```{r dmed_plot}
 
@@ -66,6 +66,200 @@ dmed_tidy %>%
     scale_x_continuous(breaks = 0:2100) +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "gender",
+         type == "Hospitalizations",
+         category == "Total",
+         year != "2006_2015") %>%
+  ggplot(aes(x = year, y = rate, color = hsi)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Heat Stress Illness Hospitalization Rates in CONUS",
+      x = "Year",
+      y = "Rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "gender",
+         type == "Ambulatory Data",
+         category == "Total",
+         year != "2006_2015") %>%
+  ggplot(aes(x = year, y = count, color = hsi)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Counts in CONUS",
+      x = "Year",
+      y = "Count",
+      caption = "Primary diagnosis"
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "age",
+         hsi == "all",
+         type == "Ambulatory Data",
+         year != "2006_2015") %>%
+  ggplot(aes(x = year, y = rate, color = category)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "CONUS Army Heat Stress Illness Ambulatory Rate (all types) by Age Group",
+      x = "Year",
+      y = "Rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+    scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "age",
+         hsi == "all",
+         type == "Hospitalizations",
+         year != "2006_2015") %>%
+  ggplot(aes(x = year, y = rate, color = category)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "CONUS Army Heat Stress Illness Hospitalization Rate (all types) by Age Group",
+      x = "Year",
+      y = "Rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+    scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+dmed_tidy %>%
+  filter(strata == "gender",
+         type == "Ambulatory Data",
+         category == "Total",
+         year != "2006_2015",
+         hsi == "all") %>% 
+  ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates by Installation",
+      x = "Year",
+      y = "Rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+dmed_tidy %>%
+  filter(strata == "gender",
+         type == "Ambulatory Data",
+         category != "Total",
+         year != "2006_2015",
+         hsi == "all",
+         location == "us") %>% 
+  ggplot(aes(x = year, y = rate, color = category)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "CONUS Heat Stress Illness Ambulatory Rates",
+      x = "Year",
+      y = "Rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "gender",
+         type == "Ambulatory Data",
+         category == "Total",
+         year != "2006_2015") %>% 
+  ggplot(aes(x = hsi, y = count)) +
+    geom_boxplot() +
+    labs(
+      title = "CONUS Heat Stress Illness Ambulatory Counts",
+      x = "Heat Stress Illness Type",
+      y = "Count",
+      caption = "Primary diagnosis"
+    ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "gender",
+         type == "Hospitalizations",
+         category == "Total",
+         year != "2006_2015",
+         hsi != "all") %>% 
+  ggplot(aes(x = hsi, y = count)) +
+    geom_boxplot() +
+    labs(
+      title = "CONUS Heat Stress Illness Hospitalization Counts",
+      x = "Heat Stress Illness Type",
+      y = "Count",
+      caption = "Primary diagnosis"
+    ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "gender",
+         type == "Reportable Events",
+         category == "Total",
+         year != "2006_2015",
+         hsi != "all") %>% 
+  ggplot(aes(x = hsi, y = count)) +
+    geom_boxplot() +
+    labs(
+      title = "CONUS Heat Stress Illness Reportable Event Counts",
+      x = "Heat Stress Illness Type",
+      y = "Count",
+      caption = "Primary diagnosis"
+    ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "gender",
+         type == "Reportable Events",
+         category == "Total",
+         year != "2006_2015",
+         hsi != "all") %>%  
+  ggplot(aes(x = year, y = count, color = hsi)) +
+    geom_line() +
+    labs(
+      title = "CONUS Heat Stress Illness Reportable Event Counts",
+      x = "Year",
+      y = "Count",
+      caption = "Primary diagnosis"
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
 
 ```
 

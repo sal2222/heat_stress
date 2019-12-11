@@ -11,7 +11,7 @@
 
 
 
-<title>dmed_read</title>
+<title>dmed_summary</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -387,7 +387,7 @@ div.tocify {
       <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
     </li>
     <li>
-      <a href="nldas_incices.html">NLDAS Conversions and Indices</a>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Outcome Data</li>
@@ -449,7 +449,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">dmed_read</h1>
+<h1 class="title toc-ignore">dmed_summary</h1>
 
 </div>
 
@@ -474,8 +474,8 @@ dmed_tidy</code></pre>
 ##  9 Reportable Eve~ Total     1997     0      8806.     0 jackson  gender hexhsa~
 ## 10 Ambulatory Data Male      1998     0      6456.     0 jackson  gender hexhsa~
 ## # ... with 11,000 more rows</code></pre>
-<div id="example-plot-rate-by-type" class="section level2">
-<h2>Example Plot: rate by type</h2>
+<div id="example-plots" class="section level2">
+<h2>Example Plots</h2>
 <pre class="r"><code>dmed_tidy %&gt;%
   filter(location == &quot;us&quot;,
          strata == &quot;gender&quot;,
@@ -494,6 +494,190 @@ dmed_tidy</code></pre>
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
 <p><img src="dmed_summary_files/figure-html/dmed_plot-1.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;gender&quot;,
+         type == &quot;Hospitalizations&quot;,
+         category == &quot;Total&quot;,
+         year != &quot;2006_2015&quot;) %&gt;%
+  ggplot(aes(x = year, y = rate, color = hsi)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Heat Stress Illness Hospitalization Rates in CONUS&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Rate (per 1,000 persons per year)&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-2.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;gender&quot;,
+         type == &quot;Ambulatory Data&quot;,
+         category == &quot;Total&quot;,
+         year != &quot;2006_2015&quot;) %&gt;%
+  ggplot(aes(x = year, y = count, color = hsi)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Counts in CONUS&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Count&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-3.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;age&quot;,
+         hsi == &quot;all&quot;,
+         type == &quot;Ambulatory Data&quot;,
+         year != &quot;2006_2015&quot;) %&gt;%
+  ggplot(aes(x = year, y = rate, color = category)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;CONUS Army Heat Stress Illness Ambulatory Rate (all types) by Age Group&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Rate (per 1,000 persons per year)&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+    scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-4.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;age&quot;,
+         hsi == &quot;all&quot;,
+         type == &quot;Hospitalizations&quot;,
+         year != &quot;2006_2015&quot;) %&gt;%
+  ggplot(aes(x = year, y = rate, color = category)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;CONUS Army Heat Stress Illness Hospitalization Rate (all types) by Age Group&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Rate (per 1,000 persons per year)&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+    scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-5.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(strata == &quot;gender&quot;,
+         type == &quot;Ambulatory Data&quot;,
+         category == &quot;Total&quot;,
+         year != &quot;2006_2015&quot;,
+         hsi == &quot;all&quot;) %&gt;% 
+  ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates by Installation&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Rate (per 1,000 persons per year)&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-6.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(strata == &quot;gender&quot;,
+         type == &quot;Ambulatory Data&quot;,
+         category != &quot;Total&quot;,
+         year != &quot;2006_2015&quot;,
+         hsi == &quot;all&quot;,
+         location == &quot;us&quot;) %&gt;% 
+  ggplot(aes(x = year, y = rate, color = category)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;CONUS Heat Stress Illness Ambulatory Rates&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Rate (per 1,000 persons per year)&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-7.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;gender&quot;,
+         type == &quot;Ambulatory Data&quot;,
+         category == &quot;Total&quot;,
+         year != &quot;2006_2015&quot;) %&gt;% 
+  ggplot(aes(x = hsi, y = count)) +
+    geom_boxplot() +
+    labs(
+      title = &quot;CONUS Heat Stress Illness Ambulatory Counts&quot;,
+      x = &quot;Heat Stress Illness Type&quot;,
+      y = &quot;Count&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-8.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;gender&quot;,
+         type == &quot;Hospitalizations&quot;,
+         category == &quot;Total&quot;,
+         year != &quot;2006_2015&quot;,
+         hsi != &quot;all&quot;) %&gt;% 
+  ggplot(aes(x = hsi, y = count)) +
+    geom_boxplot() +
+    labs(
+      title = &quot;CONUS Heat Stress Illness Hospitalization Counts&quot;,
+      x = &quot;Heat Stress Illness Type&quot;,
+      y = &quot;Count&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-9.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;gender&quot;,
+         type == &quot;Reportable Events&quot;,
+         category == &quot;Total&quot;,
+         year != &quot;2006_2015&quot;,
+         hsi != &quot;all&quot;) %&gt;% 
+  ggplot(aes(x = hsi, y = count)) +
+    geom_boxplot() +
+    labs(
+      title = &quot;CONUS Heat Stress Illness Reportable Event Counts&quot;,
+      x = &quot;Heat Stress Illness Type&quot;,
+      y = &quot;Count&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-10.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;gender&quot;,
+         type == &quot;Reportable Events&quot;,
+         category == &quot;Total&quot;,
+         year != &quot;2006_2015&quot;,
+         hsi != &quot;all&quot;) %&gt;%  
+  ggplot(aes(x = year, y = count, color = hsi)) +
+    geom_line() +
+    labs(
+      title = &quot;CONUS Heat Stress Illness Reportable Event Counts&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Count&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+      scale_x_continuous(breaks = 0:2100) +
+      theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-11.png" width="672" /></p>
 </div>
 <div id="tables" class="section level2">
 <h2>Tables</h2>
