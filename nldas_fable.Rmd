@@ -1,0 +1,52 @@
+---
+title: "nldas_fable"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(fable)
+library(tsibble)
+library(lubridate)
+```
+
+"The R package fable provides a collection of commonly used univariate and multivariate time series forecasting models including exponential smoothing via state space models and automatic ARIMA modelling. These models work within the fable framework, which provides the tools to evaluate, visualise, and combine models in a workflow consistent with the tidyverse." [http://fable.tidyverts.org/](http://fable.tidyverts.org/)
+
+
+```{r load_data}
+nldas_nest <- read_rds("data/nldas_nest.rds") %>%
+  filter(variable %in% c("tmp_f", "heat_index", "wbgt_f"))
+
+nldas_nest %>% 
+  count(variable)
+
+```
+
+## Convert dttm to `tsibble` object
+```{r tsibble, eval = FALSE}
+
+nldas_tsibble_wbgt <-
+  nldas_nest %>% 
+  filter(variable == "wbgt_f") %>% 
+    mutate(data_tsibble = 
+        purrr::map(data, tsibble::as_tsibble()))
+
+
+
+
+```
+
+Duplicate/Missing times:  Need to clean data before proceeding!
+```{r}
+# Issue: duplicate times?
+
+nldas_nest$data[[1]] %>% duplicates() 
+
+```
+

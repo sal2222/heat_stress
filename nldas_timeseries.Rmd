@@ -42,7 +42,6 @@ make_ts = function(df) {
 }
 
 
-make_ts(nldas_nest$data[[1]]) %>% dygraph() 
 
 # Map zoo ts function over each location
 TMP_ts <-

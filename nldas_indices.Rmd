@@ -18,7 +18,8 @@ library(weathermetrics)
 library(humidity)
 library(wbgt)
 library(HeatStress)
-
+library(inspectdf)
+library(janitor)
 
 ```
 
@@ -57,6 +58,9 @@ This will serve as an input to WBGT estimate calculations.
 ```{r local_time, eval = FALSE}
 
 nldas_df <- read_rds("data/nldas_df.rds")
+
+# Inspect for missing values
+nldas_df %>% inspectdf::inspect_na()
 
 # timezones cannot be vectorized in lubridate, therefore `case_when` used
 # https://community.rstudio.com/t/working-with-timezones-in-lubridate/4260
@@ -205,6 +209,37 @@ nldas_wide <-
   read_rds("data/nldas_full.rds")
 
 nldas_wide
+
+
+# Inspect for missing values
+
+nldas_wide %>% 
+  inspectdf::inspect_na()
+
+
+# Inspect date coverage
+
+## Unique dates
+nldas_wide %>% 
+  group_by(installation) %>% 
+  summarize(unique_utc = n_distinct(utc_dttm)) %>% 
+  arrange(unique_utc) 
+
+nldas_wide %>% 
+  group_by(installation) %>% 
+  summarize(unique_local = n_distinct(local_dttm)) %>% 
+  arrange(unique_local)
+
+## Duplicate dates
+nldas_wide %>% 
+  group_by(installation) %>% 
+  janitor::get_dupes(utc_dttm)
+
+nldas_wide %>% 
+  group_by(installation) %>% 
+  summarize(unique_utc = n_distinct(utc_dttm)) %>% 
+  arrange(unique_utc) 
+
 
 # Mean temperature (K) from Jan 1990 - July 2019 (year-round)
 nldas_wide %>% 

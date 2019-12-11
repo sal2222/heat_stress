@@ -19,8 +19,7 @@ Environmental Health Sciences
 
 ## Data Preparation
 
-### NLDAS-2 Weather Data
-
+### NLDAS-2 Weather Data Preparation
 - Examine location shapefiles and NLDAS-2 grid overlays [[here]](shapefiles.html)  
 
 - Instructions to download NLDAS-2 files using `wget` command [[here]](nldas_wget.html)  
@@ -29,7 +28,15 @@ Environmental Health Sciences
 
 - Link NLDAS estimates assembled in `extract_cells`to specific locations and summarizes the data [[here]](installation_nldas.html)
 
-- Add unit conversions, calculate new variables, and add Heat Index and WBGT indices [[here]](nldas_indices.html)   
+- Add unit conversions, calculate new variables, and add Heat Index and WBGT indices [[here]](nldas_indices.html)
 
-## Climate Data
+### Heat Stress Illness Data Preparation
+- Functions to read and compile Defense Medical Epidemiology Database (DMED) queries [[here]](dmed_read.html)
 
+## Climate 
+
+- Time series formats for NLDAS-2 data [[here]](nldas_timeseries.html)  
+
+## Heat Stress Outcomes
+
+- DMED Summary (annual) [[here]](dmed_summary.html)  

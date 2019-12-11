@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>dmed_read</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Heat Stress Research</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
+    <li>
+      <a href="shapefiles.html">Installation Shapefiles</a>
+    </li>
+    <li>
+      <a href="nldas_wget.html">Download NLDAS-2 Data</a>
+    </li>
+    <li>
+      <a href="extract_cells.html">Extract from NLDAS netCDF Files</a>
+    </li>
+    <li>
+      <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
+    </li>
+    <li>
+      <a href="nldas_incices.html">NLDAS Conversions and Indices</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-thermometer"></span>
+     
+    Meteorology
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
+    </li>
+    <li class="dropdown-header">Time series (Fable)</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:sal2222@cumc.columbia.edu">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/sal2222/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">dmed_read</h1>
+
+</div>
+
+
+<p>Summary of data from DMED queries.</p>
+<p>Data preparation code is available at: <a href="dmed_read.html">(link)</a></p>
+<pre class="r"><code>dmed_tidy &lt;- 
+  read_rds(&quot;D:/dmed/dmed_tidy.rds&quot;)
+
+dmed_tidy</code></pre>
+<pre><code>## # A tibble: 11,010 x 9
+##    type            category  year count population  rate location strata hsi    
+##    &lt;fct&gt;           &lt;fct&gt;    &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;  &lt;fct&gt;  
+##  1 Ambulatory Data Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  2 Ambulatory Data Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  3 Ambulatory Data Total     1997     0      8806.     0 jackson  gender hexhsa~
+##  4 Hospitalizatio~ Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  5 Hospitalizatio~ Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  6 Hospitalizatio~ Total     1997     0      8806.     0 jackson  gender hexhsa~
+##  7 Reportable Eve~ Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  8 Reportable Eve~ Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  9 Reportable Eve~ Total     1997     0      8806.     0 jackson  gender hexhsa~
+## 10 Ambulatory Data Male      1998     0      6456.     0 jackson  gender hexhsa~
+## # ... with 11,000 more rows</code></pre>
+<div id="example-plot-rate-by-type" class="section level2">
+<h2>Example Plot: rate by type</h2>
+<pre class="r"><code>dmed_tidy %&gt;%
+  filter(location == &quot;us&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;,
+         hsi == &quot;all&quot;) %&gt;%
+  ggplot(aes(x = year, y = rate, color = type)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Heat Stress Illness Rate (all types) in CONUS&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Rate (per 1,000 persons per year)&quot;,
+      caption = &quot;Primary diagnosis&quot;
+    ) +
+    scale_x_continuous(breaks = 0:2100) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_summary_files/figure-html/dmed_plot-1.png" width="672" /></p>
+</div>
+<div id="tables" class="section level2">
+<h2>Tables</h2>
+<pre class="r"><code># Army CONUS strata populations
+
+dmed_tidy %&gt;%
+  filter(type == &quot;Hospitalizations&quot;,
+         location == &quot;us&quot;,
+         year != &quot;2006_2015&quot;,
+         category != &quot;Total&quot;,
+         hsi == &quot;all&quot;) %&gt;% 
+  group_by(strata, category) %&gt;% 
+  summarize(mean_population = mean(population)) %&gt;% 
+  knitr::kable() %&gt;% 
+    kable_styling(&quot;striped&quot;, full_width = F) </code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+strata
+</th>
+<th style="text-align:left;">
+category
+</th>
+<th style="text-align:right;">
+mean_population
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+gender
+</td>
+<td style="text-align:left;">
+Male
+</td>
+<td style="text-align:right;">
+372940.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+gender
+</td>
+<td style="text-align:left;">
+Female
+</td>
+<td style="text-align:right;">
+59938.05
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:left;">
+&lt; 20
+</td>
+<td style="text-align:right;">
+31647.10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:left;">
+20-24
+</td>
+<td style="text-align:right;">
+134398.49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:left;">
+25-29
+</td>
+<td style="text-align:right;">
+98186.33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:left;">
+30-34
+</td>
+<td style="text-align:right;">
+69757.79
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:left;">
+35-39
+</td>
+<td style="text-align:right;">
+53646.55
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+age
+</td>
+<td style="text-align:left;">
+&gt;= 40
+</td>
+<td style="text-align:right;">
+45095.13
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+grade
+</td>
+<td style="text-align:left;">
+E1-E4
+</td>
+<td style="text-align:right;">
+195826.42
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+grade
+</td>
+<td style="text-align:left;">
+E5-E9
+</td>
+<td style="text-align:right;">
+162254.22
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+grade
+</td>
+<td style="text-align:left;">
+O1-O3 (W1-W3)
+</td>
+<td style="text-align:right;">
+47574.56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+grade
+</td>
+<td style="text-align:left;">
+O4-O9 (W4-W5)
+</td>
+<td style="text-align:right;">
+27155.03
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+race
+</td>
+<td style="text-align:left;">
+White
+</td>
+<td style="text-align:right;">
+281363.76
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+race
+</td>
+<td style="text-align:left;">
+Black
+</td>
+<td style="text-align:right;">
+100470.63
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+race
+</td>
+<td style="text-align:left;">
+Other
+</td>
+<td style="text-align:right;">
+51110.27
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Army CONUS event type and HSI totals (1990-2015)
+dmed_tidy %&gt;% 
+  filter(strata == &quot;gender&quot;,
+         category == &quot;Total&quot;,
+         location == &quot;us&quot;,
+         year != &quot;2006_2015&quot;) %&gt;%
+  select(-c(category, population, rate, location, strata )) %&gt;% 
+  group_by(type, hsi) %&gt;% 
+  summarise(sum = sum(count)) %&gt;% 
+  knitr::kable() %&gt;% 
+    kable_styling(&quot;striped&quot;, full_width = F)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+type
+</th>
+<th style="text-align:left;">
+hsi
+</th>
+<th style="text-align:right;">
+sum
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hexhsalt
+</td>
+<td style="text-align:right;">
+203
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hexhunspec
+</td>
+<td style="text-align:right;">
+23896
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:right;">
+56627
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hstroke
+</td>
+<td style="text-align:right;">
+11229
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hexhanhy
+</td>
+<td style="text-align:right;">
+1621
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hedema
+</td>
+<td style="text-align:right;">
+424
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hsyncope
+</td>
+<td style="text-align:right;">
+1618
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hother
+</td>
+<td style="text-align:right;">
+1392
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hunspec
+</td>
+<td style="text-align:right;">
+3311
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Ambulatory Data
+</td>
+<td style="text-align:left;">
+hcramps
+</td>
+<td style="text-align:right;">
+1700
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hexhsalt
+</td>
+<td style="text-align:right;">
+37
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hexhunspec
+</td>
+<td style="text-align:right;">
+1386
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:right;">
+4175
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hstroke
+</td>
+<td style="text-align:right;">
+1574
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hexhanhy
+</td>
+<td style="text-align:right;">
+250
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hedema
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hsyncope
+</td>
+<td style="text-align:right;">
+57
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hother
+</td>
+<td style="text-align:right;">
+325
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hunspec
+</td>
+<td style="text-align:right;">
+56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Hospitalizations
+</td>
+<td style="text-align:left;">
+hcramps
+</td>
+<td style="text-align:right;">
+16
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hexhsalt
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hexhunspec
+</td>
+<td style="text-align:right;">
+2686
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+all
+</td>
+<td style="text-align:right;">
+11660
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hstroke
+</td>
+<td style="text-align:right;">
+3141
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hexhanhy
+</td>
+<td style="text-align:right;">
+3954
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hedema
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hsyncope
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hother
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hunspec
+</td>
+<td style="text-align:right;">
+564
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Reportable Events
+</td>
+<td style="text-align:left;">
+hcramps
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Ambulatory counts by location
+dmed_tidy %&gt;%
+  filter(type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+  group_by(location) %&gt;% 
+  summarise(sum_all = sum(count)) %&gt;% 
+  arrange(desc(sum_all)) %&gt;% 
+  knitr::kable() %&gt;% 
+    kable_styling(&quot;striped&quot;, full_width = F)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+location
+</th>
+<th style="text-align:right;">
+sum_all
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+us
+</td>
+<td style="text-align:right;">
+226512
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bragg
+</td>
+<td style="text-align:right;">
+14836
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+benning
+</td>
+<td style="text-align:right;">
+11340
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+jackson
+</td>
+<td style="text-align:right;">
+5579
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+campbell
+</td>
+<td style="text-align:right;">
+4081
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+overseas
+</td>
+<td style="text-align:right;">
+1751
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hood
+</td>
+<td style="text-align:right;">
+1131
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stewart
+</td>
+<td style="text-align:right;">
+869
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+polk
+</td>
+<td style="text-align:right;">
+746
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+riley
+</td>
+<td style="text-align:right;">
+602
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+leonardwood
+</td>
+<td style="text-align:right;">
+562
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bliss
+</td>
+<td style="text-align:right;">
+349
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+irwin
+</td>
+<td style="text-align:right;">
+141
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Ambulatory mean rate by location
+dmed_tidy %&gt;%
+  filter(type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+  group_by(location) %&gt;% 
+  summarise(mean_rate_all = mean(rate)) %&gt;% 
+  arrange(desc(mean_rate_all)) %&gt;% 
+  knitr::kable() %&gt;% 
+    kable_styling(&quot;striped&quot;, full_width = F)</code></pre>
+<table class="table table-striped" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+location
+</th>
+<th style="text-align:right;">
+mean_rate_all
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+jackson
+</td>
+<td style="text-align:right;">
+26.612411
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+benning
+</td>
+<td style="text-align:right;">
+25.570584
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bragg
+</td>
+<td style="text-align:right;">
+14.902104
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+polk
+</td>
+<td style="text-align:right;">
+9.086281
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+campbell
+</td>
+<td style="text-align:right;">
+6.609217
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+us
+</td>
+<td style="text-align:right;">
+5.849386
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+leonardwood
+</td>
+<td style="text-align:right;">
+5.363434
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stewart
+</td>
+<td style="text-align:right;">
+5.034761
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+riley
+</td>
+<td style="text-align:right;">
+3.660548
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+irwin
+</td>
+<td style="text-align:right;">
+3.376948
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hood
+</td>
+<td style="text-align:right;">
+2.505038
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bliss
+</td>
+<td style="text-align:right;">
+1.644338
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+overseas
+</td>
+<td style="text-align:right;">
+1.218403
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

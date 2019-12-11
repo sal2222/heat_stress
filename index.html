@@ -345,7 +345,7 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Heat Stress</a>
+      <a class="navbar-brand" href="index.html">Heat Stress Research</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -372,6 +372,7 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
     <li>
       <a href="shapefiles.html">Installation Shapefiles</a>
     </li>
@@ -384,6 +385,44 @@ div.tocify {
     <li>
       <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
     </li>
+    <li>
+      <a href="nldas_incices.html">NLDAS Conversions and Indices</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-thermometer"></span>
+     
+    Meteorology
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
+    </li>
+    <li class="dropdown-header">Time series (Fable)</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li class="dropdown-header">Daily cases</li>
   </ul>
 </li>
       </ul>
@@ -422,8 +461,8 @@ Environmental Health Sciences<br />
 <a href="https://www.mailman.columbia.edu/research/climate-and-health-program">Climate and Health Program</a></p>
 <div id="data-preparation" class="section level2">
 <h2>Data Preparation</h2>
-<div id="nldas-2-weather-data" class="section level3">
-<h3>NLDAS-2 Weather Data</h3>
+<div id="nldas-2-weather-data-preparation" class="section level3">
+<h3>NLDAS-2 Weather Data Preparation</h3>
 <ul>
 <li><p>Examine location shapefiles and NLDAS-2 grid overlays <a href="shapefiles.html">[here]</a></p></li>
 <li><p>Instructions to download NLDAS-2 files using <code>wget</code> command <a href="nldas_wget.html">[here]</a></p></li>
@@ -432,9 +471,24 @@ Environmental Health Sciences<br />
 <li><p>Add unit conversions, calculate new variables, and add Heat Index and WBGT indices <a href="nldas_indices.html">[here]</a></p></li>
 </ul>
 </div>
+<div id="heat-stress-illness-data-preparation" class="section level3">
+<h3>Heat Stress Illness Data Preparation</h3>
+<ul>
+<li>Functions to read and compile Defense Medical Epidemiology Database (DMED) queries <a href="dmed_read.html">[here]</a></li>
+</ul>
 </div>
-<div id="climate-data" class="section level2">
-<h2>Climate Data</h2>
+</div>
+<div id="climate" class="section level2">
+<h2>Climate</h2>
+<ul>
+<li>Time series formats for NLDAS-2 data <a href="nldas_timeseries.html">[here]</a></li>
+</ul>
+</div>
+<div id="heat-stress-outcomes" class="section level2">
+<h2>Heat Stress Outcomes</h2>
+<ul>
+<li>DMED Summary (annual) <a href="dmed_summary.html">[here]</a></li>
+</ul>
 </div>
 
 

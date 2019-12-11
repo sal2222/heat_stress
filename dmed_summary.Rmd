@@ -1,0 +1,123 @@
+---
+title: "dmed_read"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(viridis)
+library(knitr)
+library(kableExtra)
+library(zoo)
+library(purrr)
+library(furrr)
+library(table1)
+library(furniture)
+library(kableExtra)
+library(visdat)
+library(naniar)
+
+```
+
+Summary of data from DMED queries.  
+
+Data preparation code is available at: [(link)](dmed_read.html)
+
+
+
+```{r view_dmed}
+
+dmed_tidy <- 
+  read_rds("D:/dmed/dmed_tidy.rds")
+
+dmed_tidy
+
+```
+
+
+
+
+## Example Plot: rate by type
+
+```{r dmed_plot}
+
+dmed_tidy %>%
+  filter(location == "us",
+         strata == "gender",
+         category == "Total",
+         hsi == "all") %>%
+  ggplot(aes(x = year, y = rate, color = type)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Heat Stress Illness Rate (all types) in CONUS",
+      x = "Year",
+      y = "Rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+    scale_x_continuous(breaks = 0:2100) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+
+## Tables
+```{r tables}
+# Army CONUS strata populations
+
+dmed_tidy %>%
+  filter(type == "Hospitalizations",
+         location == "us",
+         year != "2006_2015",
+         category != "Total",
+         hsi == "all") %>% 
+  group_by(strata, category) %>% 
+  summarize(mean_population = mean(population)) %>% 
+  knitr::kable() %>% 
+    kable_styling("striped", full_width = F) 
+
+
+# Army CONUS event type and HSI totals (1990-2015)
+dmed_tidy %>% 
+  filter(strata == "gender",
+         category == "Total",
+         location == "us",
+         year != "2006_2015") %>%
+  select(-c(category, population, rate, location, strata )) %>% 
+  group_by(type, hsi) %>% 
+  summarise(sum = sum(count)) %>% 
+  knitr::kable() %>% 
+    kable_styling("striped", full_width = F)
+
+# Ambulatory counts by location
+dmed_tidy %>%
+  filter(type == "Ambulatory Data",
+         hsi == "all",
+         category == "Total") %>% 
+  group_by(location) %>% 
+  summarise(sum_all = sum(count)) %>% 
+  arrange(desc(sum_all)) %>% 
+  knitr::kable() %>% 
+    kable_styling("striped", full_width = F)
+
+# Ambulatory mean rate by location
+dmed_tidy %>%
+  filter(type == "Ambulatory Data",
+         hsi == "all",
+         category == "Total") %>% 
+  group_by(location) %>% 
+  summarise(mean_rate_all = mean(rate)) %>% 
+  arrange(desc(mean_rate_all)) %>% 
+  knitr::kable() %>% 
+    kable_styling("striped", full_width = F)
+```
+

@@ -1,4 +1,4 @@
-title: "Heat Stress"
+title: "Heat Stress Research"
 type: default
 left:
     - text: "Home"
@@ -10,6 +10,7 @@ left:
     - text: "Data Preparation"
       icon: fa-gear  
       menu: 
+        - text: "Meteorology Data" 
         - text: "Installation Shapefiles"
           href: shapefiles.html
         - text: "Download NLDAS-2 Data"
@@ -20,14 +21,22 @@ left:
           href: installation_nldas.html
         - text: "NLDAS Conversions and Indices"
           href: nldas_incices.html
- - text: "Meteorology"
+        - text: "----------"
+        - text: "Outcome Data"
+        - text: "DMED Queries"
+          href: dmed_read.html
+    - text: "Meteorology"
       icon: fa-thermometer  
       menu: 
-        - text: "Time series formats"
+        - text: "Time series formats (zoo, xts, ts)"
           href: nldas_timeseries.html
-        - text: "Fable time series"
-          href: fable.html          
-          
+        - text: "Time series (Fable)"
+    - text: "Heat Illness"
+      icon: fa-medkit  
+      menu: 
+        - text: "Annual cases"
+          href: dmed_summary.html
+        - text: "Daily cases"
 right:
     - icon: fa-envelope fa-lg
       href: mailto:sal2222@cumc.columbia.edu

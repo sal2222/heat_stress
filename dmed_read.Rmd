@@ -1,0 +1,605 @@
+---
+title: "dmed_read"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(viridis)
+library(knitr)
+library(kableExtra)
+library(zoo)
+library(purrr)
+library(furrr)
+library(table1)
+library(furniture)
+library(kableExtra)
+library(visdat)
+library(naniar)
+
+```
+
+
+This code includes reads in and combines separate Excel worksheets downloaded from DMED queries into a single dataframe.
+
+```{r file_locations, eval = FALSE}
+dmed_file <- "D:/dmed/dmed_tables/1_9_us_all_age.xlsx"  
+#
+dmed_file_list <- list.files(path = "D:/dmed/dmed_tables", pattern = "^[0-9].*\\.(xlsx)$") %>% 
+  paste0("D:/dmed/dmed_tables/", .)
+
+dmed_file_list 
+dmed_file %>% excel_sheets() %>% set_names()
+```
+
+```{r read_function_indiv_sheets, eval = FALSE, include = FALSE}
+dmed_file
+
+# Query selection data from file name
+icd_ver <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[2]
+location <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[3]
+icd_code <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[4]
+strata <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[5]
+
+
+```
+
+## Functions to read Excel tables
+
+## ICD 9 tables, start year 2006
+```{r read_function_map_icd92006, eval = FALSE}
+
+# For ICD 9 tables, start year 2006:
+
+read_icd9_from2006 <- function(dmed_file) {
+
+# Query selection data from file name
+icd_ver <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[2]
+location <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[3]
+icd_code <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[4]
+strata <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[5]
+
+
+if (strata == "age") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:L26"), .id = "type") %>% 
+    rename(category = Counts,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "count", "2006":"2006_2015")
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A28:L35"), .id = "type") %>% 
+    rename(category = Population,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "population", "2006":"2006_2015")
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A37:L44"), .id = "type") %>% 
+    rename(category = Rate,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "rate", "2006":"2006_2015")
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "gender") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:L22"), .id = "type") %>% 
+    rename(category = Counts,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "count", "2006":"2006_2015")
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A24:L27"), .id = "type") %>% 
+    rename(category = Population,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "population", "2006":"2006_2015")
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A29:L32"), .id = "type") %>% 
+    rename(category = Rate,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "rate", "2006":"2006_2015")
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "grade") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:L24"), .id = "type") %>% 
+    rename(category = Counts,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "count", "2006":"2006_2015")
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A26:L31"), .id = "type") %>% 
+    rename(category = Population,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "population", "2006":"2006_2015")
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A33:L38"), .id = "type") %>% 
+    rename(category = Rate,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "rate", "2006":"2006_2015")
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "race") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:L23"), .id = "type") %>% 
+    rename(category = Counts,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "count", "2006":"2006_2015")
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A25:L29"), .id = "type") %>% 
+    rename(category = Population,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "population", "2006":"2006_2015")
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A31:L35"), .id = "type") %>% 
+    rename(category = Rate,
+         "2006_2015" = Total) %>% 
+    gather(., key = "year", value = "rate", "2006":"2006_2015")
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} 
+
+}
+
+
+
+
+```
+
+
+## ICD 9 tables, start year 1990
+```{r read_function_map_icd91990, eval = FALSE}
+
+# For ICD 9 tables, start year 1990:
+
+read_icd9_from1990 <- function(dmed_file) {
+
+# Query selection data from file name
+icd_ver <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[2]
+location <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[3]
+icd_code <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[4]
+strata <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[5]
+
+
+if (strata == "age") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:Q26"), .id = "type") %>% 
+    rename(category = Counts) %>% 
+    gather(., key = "year", value = "count", -type, -category)
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A28:Q35"), .id = "type") %>% 
+    rename(category = Population) %>% 
+    gather(., key = "year", value = "population", -type, -category)
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A37:Q44"), .id = "type") %>% 
+    rename(category = Rate) %>% 
+    gather(., key = "year", value = "rate", -type, -category)
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "gender") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:Q22"), .id = "type") %>% 
+    rename(category = Counts) %>% 
+    gather(., key = "year", value = "count", -type, -category)
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A24:Q27"), .id = "type") %>% 
+    rename(category = Population) %>% 
+    gather(., key = "year", value = "population", -type, -category)
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A29:Q32"), .id = "type") %>% 
+    rename(category = Rate) %>% 
+    gather(., key = "year", value = "rate", -type, -category)
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "grade") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:Q24"), .id = "type") %>% 
+    rename(category = Counts) %>% 
+    gather(., key = "year", value = "count", -type, -category)
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A26:Q31"), .id = "type") %>% 
+    rename(category = Population) %>% 
+    gather(., key = "year", value = "population", -type, -category)
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A33:Q38"), .id = "type") %>% 
+    rename(category = Rate) %>% 
+    gather(., key = "year", value = "rate", -type, -category)
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "race") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:Q23"), .id = "type") %>% 
+    rename(category = Counts) %>% 
+    gather(., key = "year", value = "count", -type, -category)
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A25:Q29"), .id = "type") %>% 
+    rename(category = Population) %>% 
+    gather(., key = "year", value = "population", -type, -category)
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A31:Q35"), .id = "type") %>% 
+    rename(category = Rate) %>% 
+    gather(., key = "year", value = "rate", -type, -category)
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} 
+
+}
+
+
+
+
+```
+
+## ICD 10 tables, start year 1990
+```{r read_icd10_function, eval = FALSE}
+
+
+# For ICD 10 tables, start year 1990:
+
+read_icd10_from2016 <- function(dmed_file) {
+
+# Query selection data from file name
+icd_ver <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[2]
+location <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[3]
+icd_code <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[4]
+strata <- dmed_file %>% str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% .[[1]] %>% .[5]
+
+
+if (strata == "age") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:D26"), .id = "type") %>% 
+    rename(category = Counts) %>% 
+    gather(., key = "year", value = "count", -type, -category)
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A28:D35"), .id = "type") %>% 
+    rename(category = Population) %>% 
+    gather(., key = "year", value = "population", -type, -category)
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A37:D44"), .id = "type") %>% 
+    rename(category = Rate) %>% 
+    gather(., key = "year", value = "rate", -type, -category)
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "gender") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:D22"), .id = "type") %>% 
+    rename(category = Counts) %>% 
+    gather(., key = "year", value = "count", -type, -category)
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A24:D27"), .id = "type") %>% 
+    rename(category = Population) %>% 
+    gather(., key = "year", value = "population", -type, -category)
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A29:D32"), .id = "type") %>% 
+    rename(category = Rate) %>% 
+    gather(., key = "year", value = "rate", -type, -category)
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "grade") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:D24"), .id = "type") %>% 
+    rename(category = Counts) %>% 
+    gather(., key = "year", value = "count", -type, -category)
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A26:D31"), .id = "type") %>% 
+    rename(category = Population) %>% 
+    gather(., key = "year", value = "population", -type, -category)
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A33:D38"), .id = "type") %>% 
+    rename(category = Rate) %>% 
+    gather(., key = "year", value = "rate", -type, -category)
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} else if (strata == "race") {
+counts <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A19:D23"), .id = "type") %>% 
+    rename(category = Counts) %>% 
+    gather(., key = "year", value = "count", -type, -category)
+population <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A25:D29"), .id = "type") %>% 
+    rename(category = Population) %>% 
+    gather(., key = "year", value = "population", -type, -category)
+
+rate <- 
+  dmed_file %>% 
+    excel_sheets() %>% 
+    set_names() %>% 
+    map_df(~ read_excel(path = dmed_file, sheet = .x, range = "A31:D35"), .id = "type") %>% 
+    rename(category = Rate) %>% 
+    gather(., key = "year", value = "rate", -type, -category)
+
+left_join(counts, population, by = c("type", "category", "year")) %>% 
+  left_join(., rate, by = c("type", "category", "year")) %>% 
+  mutate(location = location,
+         strata = !!strata,
+         hsi = !!icd_code)
+} 
+
+}
+```
+
+
+## Map read function over file list
+```{r map_multiple_files_icd92006, eval = FALSE}
+
+# ICD 9, from 2006
+
+dmed_files_icd9_from2006 <-
+  dmed_file_list %>% as_tibble() %>% rename(file_name = value) %>%  
+  cbind(file_id) %>% 
+  filter(value %in% 1:73) %>% 
+  dplyr::select(file_name) %>% 
+  as_vector()
+
+icd9_from2006_df <- furrr::future_map_dfr(dmed_file_list, read_icd9_from2006, .progress = TRUE) 
+
+
+icd9_from2006_df <-
+  icd9_from2006_df %>% 
+  na.omit() %>% 
+    mutate(type = as_factor(type),
+           category = as_factor(category),
+           location = as_factor(location),
+           year = as.integer(year),
+           strata = as_factor(strata),
+           hsi = as_factor(hsi))  
+
+
+# ICD 9, From 1990 (for hospitalization)
+
+## File list is not in order by ID (11 comes after 1 instead of 2)
+
+file_id <- dmed_file_list %>%
+  str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% lapply(., `[`, 1) %>% as.numeric() %>% as_tibble() 
+
+
+dmed_files_icd9_from1990 <-
+  dmed_file_list %>% as_tibble() %>% rename(file_name = value) %>%  
+  cbind(file_id) %>% 
+  filter(value %in% 74:102) %>% 
+  dplyr::select(file_name) %>% 
+  as_vector()
+
+
+icd9_from1990_df <- furrr::future_map_dfr(dmed_files_icd9_from1990, read_icd9_from1990, .progress = TRUE) 
+
+icd9_from1990_df <-
+  icd9_from1990_df %>% 
+  na.omit() %>% 
+  mutate(type = as_factor(type),
+         category = as_factor(category),
+         location = as_factor(location),
+         year = as.integer(year),
+         strata = as_factor(strata),
+         hsi = as_factor(hsi))
+
+
+#ICD 10
+
+dmed_files_icd10_from2016 <-
+  dmed_file_list %>% as_tibble() %>% rename(file_name = value) %>%  
+  cbind(file_id) %>% 
+  filter(value %in% 103:131) %>% 
+  dplyr::select(file_name) %>% 
+  as_vector()
+
+
+icd10_from2016_df <- furrr::future_map_dfr(dmed_files_icd10_from2016, read_icd10_from2016, .progress = TRUE) 
+
+icd10_from2016_df <-
+  icd10_from2016_df %>% 
+  na.omit() %>% 
+  mutate(type = as_factor(type),
+         category = as_factor(category),
+         location = as_factor(location),
+         year = as.integer(year),
+         strata = as_factor(strata),
+         hsi = as_factor(hsi))
+
+
+
+```
+
+## Combine ICD9 and ICD 10 dataframes
+```{r combine_dataframes, eval = FALSE}
+
+dmed_tidy <-
+  rbind(icd9_from1990_df, icd9_from2006_df, icd10_from2016_df) %>% 
+  na.omit()
+
+
+
+#saveRDS(dmed_tidy, file = "D:/dmed/dmed_tidy.rds")
+
+
+```
+
+```{r view_dmed}
+
+dmed_tidy <- 
+  read_rds("D:/dmed/dmed_tidy.rds")
+
+dmed_tidy
+
+```
+
+## Inspect missing data
+```{r missing_data}
+colSums(is.na(dmed_tidy)) 
+
+
+dmed_tidy %>% 
+  filter(is.na(year)) %>% 
+  count(location)
+
+
+dmed_tidy %>%
+  count(year)
+
+
+```
+
+
