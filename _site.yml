@@ -3,5 +3,6 @@ output_dir: "."
 output:
   html_document:
     theme: sandstone
-    
+    includes:
+      in_header: "favicon.html" 
     
