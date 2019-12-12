@@ -14,39 +14,126 @@ library(tidyverse)
 library(fable)
 library(tsibble)
 library(lubridate)
+library(feasts)
+library(fabletools)
+library(ggrepel)
+library(forecast)
+library(knitr)
 ```
 
 "The R package fable provides a collection of commonly used univariate and multivariate time series forecasting models including exponential smoothing via state space models and automatic ARIMA modelling. These models work within the fable framework, which provides the tools to evaluate, visualise, and combine models in a workflow consistent with the tidyverse." [http://fable.tidyverts.org/](http://fable.tidyverts.org/)
 
 
-```{r load_data}
-nldas_nest <- read_rds("data/nldas_nest.rds") %>%
-  filter(variable %in% c("tmp_f", "heat_index", "wbgt_f"))
+```{r load_data, include = TRUE}
 
-nldas_nest %>% 
-  count(variable)
+nldas_wide <- read_rds("data/nldas_wide.rds") 
+
 
 ```
 
 ## Convert dttm to `tsibble` object
-```{r tsibble, eval = FALSE}
+```{r tsibble, include = TRUE}
 
-nldas_tsibble_wbgt <-
-  nldas_nest %>% 
-  filter(variable == "wbgt_f") %>% 
-    mutate(data_tsibble = 
-        purrr::map(data, tsibble::as_tsibble()))
+nldas_tsibble <-
+  nldas_wide %>%
+  dplyr::select(installation, utc_dttm, tmp_f, heat_index, wbgt_f) %>% 
+  tsibble::as_tsibble(., key = installation, index = utc_dttm)
 
+nldas_tsibble 
 
+```
+
+## Visualizations
+
+```{r feasts_viz}
+# Season plot (by year)
+
+nldas_tsibble %>% 
+  filter(installation == "eglin_afb") %>% 
+  feasts::gg_season(wbgt_f, max_col = 30)
+
+# STL decomposition
+
+nldas_tsibble %>% 
+  filter(installation == "eglin_afb") %>% 
+  feasts::STL(wbgt_f)
+
+nldas_tsibble %>% 
+  filter(installation == "eglin_afb") %>% 
+  feasts::STL(wbgt_f) %>% 
+  autoplot()
 
 
 ```
 
-Duplicate/Missing times:  Need to clean data before proceeding!
-```{r}
-# Issue: duplicate times?
+## Feature extraction
 
-nldas_nest$data[[1]] %>% duplicates() 
+```{r feature_extraction}
+
+nldas_tsibble %>%
+  features(wbgt_f, feat_stl) 
+
+
+nldas_tsibble %>%
+  features(wbgt_f, feat_stl) %>%
+  ggplot(aes(x = trend_strength, y = seasonal_strength_day, label = installation)) +
+  geom_point() +
+  ggrepel::geom_text_repel()
+```
+
+## Forecast models
+
+**Transformations**
+```{r transformations}
+
+nldas_tsibble %>% 
+  filter(installation == "eglin_afb") %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = wbgt_f), binwidth = 0.5)
+
+# Log transformation
+nldas_tsibble %>% 
+  filter(installation == "eglin_afb") %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = log(wbgt_f)), binwidth = 0.025)
+
+# Box-Cox transformation
+nldas_tsibble %>% 
+  filter(installation == "eglin_afb") %>%
+  features(wbgt_f, guerrero)
+
+nldas_tsibble %>% 
+  filter(installation == "eglin_afb") %>% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = BoxCox(wbgt_f, lambda = 2)), binwidth = 5)
 
 ```
 
+**Models**
+```{r fable_models, eval = FALSE}
+nldas_fable_models <-
+  nldas_tsibble %>% 
+    filter(installation == "eglin_afb") %>% 
+    model(
+      ets = ETS(box_cox(wbgt_f, lambda = 2)),
+      arima = ARIMA(wbgt_f),
+      snaive = SNAIVE(wbgt_f))
+   
+nldas_fable_models
+#write_rds(nldas_fable_models, path = "data/nldas_fable_models.rds")
+
+```
+
+**Plot**
+```{r read_fable_mods}
+nldas_fable_models <-
+  read_rds("data/nldas_fable_models.rds")
+
+nldas_fable_models
+
+nldas_fable_models %>%
+  forecast(h = 336) %>% 
+  autoplot(dplyr::filter(.data = nldas_tsibble, lubridate::date(utc_dttm) > "2019-06-01"), level = NULL)
+
+
+```

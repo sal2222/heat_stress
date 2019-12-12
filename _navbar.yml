@@ -31,6 +31,7 @@ left:
         - text: "Time series formats (zoo, xts, ts)"
           href: nldas_timeseries.html
         - text: "Time series (Fable)"
+          href: nldas_fable.html
     - text: "Heat Illness"
       icon: fa-medkit  
       menu: 

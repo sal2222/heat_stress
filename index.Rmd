@@ -35,10 +35,14 @@ Environmental Health Sciences
 
 ## Climate 
 
-- Time series formats for NLDAS-2 data [[here]](nldas_timeseries.html)
+- Time series formats for NLDAS-2 data (zoo, xts, ts) [[here]](nldas_timeseries.html)
+
+- Fable/tsibble time series format for NLDAS-2 data [[here]](nldas_fable.html)
 
 - Climate aggregates and anomalies
 
 ## Heat Stress Outcomes
 
 - DMED Summary (annual) [[here]](dmed_summary.html)  
+
+## Models

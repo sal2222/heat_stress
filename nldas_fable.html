@@ -407,7 +407,9 @@ div.tocify {
     <li>
       <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
     </li>
-    <li class="dropdown-header">Time series (Fable)</li>
+    <li>
+      <a href="nldas_fable.html">Time series (Fable)</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -454,31 +456,146 @@ div.tocify {
 
 
 <p>“The R package fable provides a collection of commonly used univariate and multivariate time series forecasting models including exponential smoothing via state space models and automatic ARIMA modelling. These models work within the fable framework, which provides the tools to evaluate, visualise, and combine models in a workflow consistent with the tidyverse.” <a href="http://fable.tidyverts.org/">http://fable.tidyverts.org/</a></p>
-<pre class="r"><code>nldas_nest &lt;- read_rds(&quot;data/nldas_nest.rds&quot;) %&gt;%
-  filter(variable %in% c(&quot;tmp_f&quot;, &quot;heat_index&quot;, &quot;wbgt_f&quot;))
-
-nldas_nest %&gt;% 
-  count(variable)</code></pre>
-<pre><code>## # A tibble: 3 x 2
-##   variable       n
-##   &lt;chr&gt;      &lt;int&gt;
-## 1 heat_index    25
-## 2 tmp_f         25
-## 3 wbgt_f        25</code></pre>
+<pre class="r"><code>nldas_wide &lt;- read_rds(&quot;data/nldas_wide.rds&quot;) </code></pre>
 <div id="convert-dttm-to-tsibble-object" class="section level2">
 <h2>Convert dttm to <code>tsibble</code> object</h2>
-<pre class="r"><code>nldas_tsibble_wbgt &lt;-
-  nldas_nest %&gt;% 
-  filter(variable == &quot;wbgt_f&quot;) %&gt;% 
-    mutate(data_tsibble = 
-        purrr::map(data, tsibble::as_tsibble()))</code></pre>
-<p>Duplicate/Missing times: Need to clean data before proceeding!</p>
-<pre class="r"><code># Issue: duplicate times?
+<pre class="r"><code>nldas_tsibble &lt;-
+  nldas_wide %&gt;%
+  dplyr::select(installation, utc_dttm, tmp_f, heat_index, wbgt_f) %&gt;% 
+  tsibble::as_tsibble(., key = installation, index = utc_dttm)
 
-nldas_nest$data[[1]] %&gt;% duplicates() </code></pre>
-<pre><code>## Using `utc_dttm` as index variable.</code></pre>
-<pre><code>## # A tibble: 0 x 2
-## # ... with 2 variables: utc_dttm &lt;dttm&gt;, value &lt;dbl&gt;</code></pre>
+nldas_tsibble </code></pre>
+<pre><code>## # A tsibble: 6,472,525 x 5 [1h] &lt;UTC&gt;
+## # Key:       installation [25]
+##    installation utc_dttm            tmp_f heat_index wbgt_f
+##    &lt;chr&gt;        &lt;dttm&gt;              &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;
+##  1 eglin_afb    1990-01-01 00:00:00  64.1       64.6   62.9
+##  2 eglin_afb    1990-01-01 01:00:00  62.5       62.8   61.3
+##  3 eglin_afb    1990-01-01 02:00:00  60.9       61.0   59.6
+##  4 eglin_afb    1990-01-01 03:00:00  59.3       59.2   57.8
+##  5 eglin_afb    1990-01-01 04:00:00  57.8       57.5   56.4
+##  6 eglin_afb    1990-01-01 05:00:00  56.2       55.8   54.8
+##  7 eglin_afb    1990-01-01 06:00:00  54.7       54.1   53.2
+##  8 eglin_afb    1990-01-01 07:00:00  53.2       52.4   51.5
+##  9 eglin_afb    1990-01-01 08:00:00  51.8       50.7   49.8
+## 10 eglin_afb    1990-01-01 09:00:00  50.4       49     48.0
+## # ... with 6,472,515 more rows</code></pre>
+</div>
+<div id="visualizations" class="section level2">
+<h2>Visualizations</h2>
+<pre class="r"><code># Season plot (by year)
+
+nldas_tsibble %&gt;% 
+  filter(installation == &quot;eglin_afb&quot;) %&gt;% 
+  feasts::gg_season(wbgt_f, max_col = 30)</code></pre>
+<p><img src="nldas_fable_files/figure-html/feasts_viz-1.png" width="672" /></p>
+<pre class="r"><code># STL decomposition
+
+nldas_tsibble %&gt;% 
+  filter(installation == &quot;eglin_afb&quot;) %&gt;% 
+  feasts::STL(wbgt_f)</code></pre>
+<pre><code>## # A dable:           258,901 x 9 [1h] &lt;UTC&gt;
+## # Key:               installation [1]
+## # STL Decomposition: wbgt_f = trend + season_year + season_week + season_day +
+## #   remainder
+##    installation utc_dttm            wbgt_f trend season_year season_week
+##    &lt;chr&gt;        &lt;dttm&gt;               &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;
+##  1 eglin_afb    1990-01-01 00:00:00   62.9  65.0       -10.4      -0.515
+##  2 eglin_afb    1990-01-01 01:00:00   61.3  65.0       -10.5      -1.66 
+##  3 eglin_afb    1990-01-01 02:00:00   59.6  64.9       -10.6      -2.91 
+##  4 eglin_afb    1990-01-01 03:00:00   57.8  64.8       -10.8      -3.94 
+##  5 eglin_afb    1990-01-01 04:00:00   56.4  64.7       -11.1      -4.46 
+##  6 eglin_afb    1990-01-01 05:00:00   54.8  64.6       -11.6      -4.68 
+##  7 eglin_afb    1990-01-01 06:00:00   53.2  64.5       -11.9      -5.12 
+##  8 eglin_afb    1990-01-01 07:00:00   51.5  64.4       -11.8      -6.38 
+##  9 eglin_afb    1990-01-01 08:00:00   49.8  64.3       -11.4      -7.86 
+## 10 eglin_afb    1990-01-01 09:00:00   48.0  64.2       -11.3      -9.10 
+## # ... with 258,891 more rows, and 3 more variables: season_day &lt;dbl&gt;,
+## #   remainder &lt;dbl&gt;, season_adjust &lt;dbl&gt;</code></pre>
+<pre class="r"><code>nldas_tsibble %&gt;% 
+  filter(installation == &quot;eglin_afb&quot;) %&gt;% 
+  feasts::STL(wbgt_f) %&gt;% 
+  autoplot()</code></pre>
+<p><img src="nldas_fable_files/figure-html/feasts_viz-2.png" width="672" /></p>
+</div>
+<div id="feature-extraction" class="section level2">
+<h2>Feature extraction</h2>
+<pre class="r"><code>nldas_tsibble %&gt;%
+  features(wbgt_f, feat_stl) </code></pre>
+<pre><code>## # A tibble: 25 x 8
+##    installation trend_strength seasonal_streng~ spikiness linearity curvature
+##    &lt;chr&gt;                 &lt;dbl&gt;            &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+##  1 eglin_afb             0.983            0.898  6.02e-10     187.     142.  
+##  2 fort_bennin~          0.985            0.907  7.87e-10     197.     198.  
+##  3 fort_bliss            0.987            0.882  8.83e-10     283.      19.1 
+##  4 fort_bragg            0.986            0.895  9.56e-10     178.      75.7 
+##  5 fort_campbe~          0.986            0.961  4.92e-10     117.     114.  
+##  6 fort_carson           0.988            0.957  5.14e-10      78.2     92.3 
+##  7 fort_drum             0.982            0.905  7.58e-10     118.     234.  
+##  8 fort_gordon           0.986            0.913  7.74e-10      82.3      7.04
+##  9 fort_hood             0.983            0.903  1.01e- 9     200.     174.  
+## 10 fort_jackson          0.990            0.914  8.24e-10     182.      50.4 
+## # ... with 15 more rows, and 2 more variables: seasonal_peak_day &lt;dbl&gt;,
+## #   seasonal_trough_day &lt;dbl&gt;</code></pre>
+<pre class="r"><code>nldas_tsibble %&gt;%
+  features(wbgt_f, feat_stl) %&gt;%
+  ggplot(aes(x = trend_strength, y = seasonal_strength_day, label = installation)) +
+  geom_point() +
+  ggrepel::geom_text_repel()</code></pre>
+<p><img src="nldas_fable_files/figure-html/feature_extraction-1.png" width="672" /></p>
+</div>
+<div id="forecast-models" class="section level2">
+<h2>Forecast models</h2>
+<p><strong>Transformations</strong></p>
+<pre class="r"><code>nldas_tsibble %&gt;% 
+  filter(installation == &quot;eglin_afb&quot;) %&gt;% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = wbgt_f), binwidth = 0.5)</code></pre>
+<p><img src="nldas_fable_files/figure-html/transformations-1.png" width="672" /></p>
+<pre class="r"><code># Log transformation
+nldas_tsibble %&gt;% 
+  filter(installation == &quot;eglin_afb&quot;) %&gt;% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = log(wbgt_f)), binwidth = 0.025)</code></pre>
+<p><img src="nldas_fable_files/figure-html/transformations-2.png" width="672" /></p>
+<pre class="r"><code># Box-Cox transformation
+nldas_tsibble %&gt;% 
+  filter(installation == &quot;eglin_afb&quot;) %&gt;%
+  features(wbgt_f, guerrero)</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   installation lambda_guerrero
+##   &lt;chr&gt;                  &lt;dbl&gt;
+## 1 eglin_afb               2.00</code></pre>
+<pre class="r"><code>nldas_tsibble %&gt;% 
+  filter(installation == &quot;eglin_afb&quot;) %&gt;% 
+  ggplot() +
+  geom_histogram(mapping = aes(x = BoxCox(wbgt_f, lambda = 2)), binwidth = 5)</code></pre>
+<p><img src="nldas_fable_files/figure-html/transformations-3.png" width="672" /></p>
+<p><strong>Models</strong></p>
+<pre class="r"><code>nldas_fable_models &lt;-
+  nldas_tsibble %&gt;% 
+    filter(installation == &quot;eglin_afb&quot;) %&gt;% 
+    model(
+      ets = ETS(box_cox(wbgt_f, lambda = 2)),
+      arima = ARIMA(wbgt_f),
+      snaive = SNAIVE(wbgt_f))
+   
+nldas_fable_models
+#write_rds(nldas_fable_models, path = &quot;data/nldas_fable_models.rds&quot;)</code></pre>
+<p><strong>Plot</strong></p>
+<pre class="r"><code>nldas_fable_models &lt;-
+  read_rds(&quot;data/nldas_fable_models.rds&quot;)
+
+nldas_fable_models</code></pre>
+<pre><code>## # A mable: 1 x 4
+## # Key:     installation [1]
+##   installation ets          arima                     snaive  
+##   &lt;chr&gt;        &lt;model&gt;      &lt;model&gt;                   &lt;model&gt; 
+## 1 eglin_afb    &lt;ETS(A,N,A)&gt; &lt;ARIMA(3,0,1)(2,1,0)[24]&gt; &lt;SNAIVE&gt;</code></pre>
+<pre class="r"><code>nldas_fable_models %&gt;%
+  forecast(h = 336) %&gt;% 
+  autoplot(dplyr::filter(.data = nldas_tsibble, lubridate::date(utc_dttm) &gt; &quot;2019-06-01&quot;), level = NULL)</code></pre>
+<p><img src="nldas_fable_files/figure-html/read_fable_mods-1.png" width="672" /></p>
 </div>
 
 
