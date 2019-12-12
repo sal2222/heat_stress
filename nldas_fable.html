@@ -372,6 +372,7 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
     <li>
       <a href="shapefiles.html">Installation Shapefiles</a>
     </li>
@@ -385,7 +386,12 @@ div.tocify {
       <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
     </li>
     <li>
-      <a href="nldas_incices.html">NLDAS Conversions and Indices</a>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
     </li>
   </ul>
 </li>
@@ -402,6 +408,21 @@ div.tocify {
       <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
     </li>
     <li class="dropdown-header">Time series (Fable)</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li class="dropdown-header">Daily cases</li>
   </ul>
 </li>
       </ul>
@@ -455,21 +476,9 @@ nldas_nest %&gt;%
 <pre class="r"><code># Issue: duplicate times?
 
 nldas_nest$data[[1]] %&gt;% duplicates() </code></pre>
-<pre><code>## Using `local_dttm` as index variable.</code></pre>
-<pre><code>## # A tibble: 17,120 x 2
-##    local_dttm          value
-##    &lt;dttm&gt;              &lt;dbl&gt;
-##  1 1990-09-30 20:00:00  80.2
-##  2 1990-09-30 20:00:00  79.3
-##  3 1990-09-30 20:00:00  78.4
-##  4 1990-09-30 20:00:00  77.4
-##  5 1990-09-30 20:00:00  77.1
-##  6 1990-09-30 20:00:00  76.9
-##  7 1990-09-30 20:00:00  76.6
-##  8 1990-09-30 20:00:00  76.4
-##  9 1990-09-30 20:00:00  76.2
-## 10 1990-09-30 20:00:00  75.9
-## # ... with 17,110 more rows</code></pre>
+<pre><code>## Using `utc_dttm` as index variable.</code></pre>
+<pre><code>## # A tibble: 0 x 2
+## # ... with 2 variables: utc_dttm &lt;dttm&gt;, value &lt;dbl&gt;</code></pre>
 </div>
 
 

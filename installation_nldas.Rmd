@@ -117,7 +117,7 @@ nldas_list_joint %>%
 Review installation NLDAS files.
 ```{r check_saved_files}
 
-list.files("data/base_nldas")
+list.files("data/base_nldas") 
 
 # Fort Benning (1st set)
 read_rds("data/base_nldas/fort_benning_ga.rds")
@@ -157,10 +157,28 @@ nldas_df
 
 ```
 
+
 ```{r load_nldas_df}
 
 nldas_df <- read_rds("data/nldas_df.rds")
 nldas_df
+
+# Inspect completeness
+nldas_df %>% 
+  group_by(installation) %>% 
+  summarize(unique_hour = n_distinct(.$date_time)) %>% 
+  arrange(unique_hour)
+
+# Inspect duplicates
+
+duplicates <-
+  nldas_df %>% 
+  group_by(installation) %>% 
+  janitor::get_dupes(date_time)
+
+duplicates %>% 
+  count(installation)
+  
 
 ```
 

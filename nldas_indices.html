@@ -345,7 +345,7 @@ div.tocify {
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="index.html">Heat Stress</a>
+      <a class="navbar-brand" href="index.html">Heat Stress Research</a>
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
@@ -372,6 +372,7 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
     <li>
       <a href="shapefiles.html">Installation Shapefiles</a>
     </li>
@@ -385,8 +386,43 @@ div.tocify {
       <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
     </li>
     <li>
-      <a href="nldas_incices.html">NLDAS Conversions and Indices</a>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
     </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-thermometer"></span>
+     
+    Meteorology
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
+    </li>
+    <li class="dropdown-header">Time series (Fable)</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li class="dropdown-header">Daily cases</li>
   </ul>
 </li>
       </ul>
@@ -460,6 +496,9 @@ time_zones  </code></pre>
 <p>This will serve as an input to WBGT estimate calculations.</p>
 <pre class="r"><code>nldas_df &lt;- read_rds(&quot;data/nldas_df.rds&quot;)
 
+# Inspect for missing values
+nldas_df %&gt;% inspectdf::inspect_na()
+
 # timezones cannot be vectorized in lubridate, therefore `case_when` used
 # https://community.rstudio.com/t/working-with-timezones-in-lubridate/4260
 
@@ -485,7 +524,7 @@ nldas_time_zone &lt;-
 <div id="meteorology-conversions-and-heat-index" class="section level2">
 <h2>Meteorology conversions and heat index</h2>
 <p>From original NLDAS variables, add windspeed, temp in F and C, relative humidity, dew point (C), heat index (F)</p>
-<pre class="r"><code>nldas_full &lt;-
+<pre class="r"><code>nldas_wide &lt;-
   nldas_time_zone %&gt;% 
     mutate(windspeed = sqrt(UGRD^2 + VGRD^2),
            tmp_f = weathermetrics::convert_temperature(TMP, old_metric = &quot;kelvin&quot;, new_metric = &quot;fahrenheit&quot;),
@@ -496,7 +535,42 @@ nldas_time_zone &lt;-
                            rh = rh,
                            temperature.metric = &quot;fahrenheit&quot;,
                            output.metric = &quot;fahrenheit&quot;,
-                           round = 2)) </code></pre>
+                           round = 2)) 
+
+
+# Inspect missing data: dew point/ heat index if relative humidity below 0% or above 100%
+
+nldas_wide %&gt;% 
+  inspectdf::inspect_na()
+
+nldas_wide %&gt;% 
+  filter(is.na(dp_c)) %&gt;% 
+  arrange(desc(rh))
+
+# Restrict RH to 100%
+
+nldas_wide &lt;-
+  nldas_time_zone %&gt;% 
+    mutate(windspeed = sqrt(UGRD^2 + VGRD^2),
+           tmp_f = weathermetrics::convert_temperature(TMP, old_metric = &quot;kelvin&quot;, new_metric = &quot;fahrenheit&quot;),
+           tmp_c = weathermetrics::convert_temperature(TMP, old_metric = &quot;kelvin&quot;, new_metric = &quot;celsius&quot;),
+           rh = humidity::SH2RH(SPFH, TMP, p = PRES, isK = TRUE),
+           rh = case_when(
+             rh &gt; 100 ~ 100,
+             rh &lt;= 100 ~ rh
+           ),
+           dp_c = humidity.to.dewpoint(rh = rh, t = tmp_c, temperature.metric = &quot;celsius&quot;),
+           heat_index = weathermetrics::heat.index(t = tmp_f,
+                           rh = rh,
+                           temperature.metric = &quot;fahrenheit&quot;,
+                           output.metric = &quot;fahrenheit&quot;,
+                           round = 2))  
+
+
+nldas_wide %&gt;% 
+  inspectdf::inspect_na()
+
+nldas_wide %&gt;% summary()</code></pre>
 </div>
 <div id="wet-bulb-globe-temperature-wbgt-estimate" class="section level2">
 <h2>Wet Bulb Globe Temperature (WBGT) Estimate</h2>
@@ -536,17 +610,17 @@ base_coordinates </code></pre>
 
                      
 # Join lat and lon
-nldas_full &lt;-
-  nldas_full %&gt;% 
+nldas_wide &lt;-
+  nldas_wide %&gt;% 
   left_join(base_coordinates, by = c(&quot;installation&quot; = &quot;site_name&quot;)) %&gt;% 
   dplyr::select(utc_dttm, local_dttm, installation, longitude, latitude, everything())
 
-nldas_full  
+nldas_wide  
 
 # Create datframe for `wbgt_df` function
 
 wbgt_mdljts_df &lt;-
-  nldas_full %&gt;% 
+  nldas_wide %&gt;% 
     mutate(
       year = lubridate::year(local_dttm), 
       month = lubridate::month(local_dttm), 
@@ -578,20 +652,19 @@ wbgt_mdljts &lt;-
 
 # Bind WBGT column to NLDAS dataframe and add Fahrenheit conversion
 
-nldas_full &lt;-
-  nldas_full %&gt;% 
+nldas_wide &lt;-
+  nldas_wide %&gt;% 
   bind_cols(wbgt_mdljts) %&gt;% 
   mutate(wbgt_f = weathermetrics::convert_temperature(wbgt, old_metric = &quot;celsius&quot;, new_metric = &quot;fahrenheit&quot;))
 
-
-# write_rds(nldas_full, path = &quot;data/nldas_full.rds&quot;)</code></pre>
+# write_rds(nldas_wide, path = &quot;data/nldas_wide.rds&quot;)</code></pre>
 </div>
 <div id="wide-nldas-dataframe" class="section level2">
 <h2>“Wide” NLDAS dataframe</h2>
 <pre class="r"><code># View &quot;wide&quot; NLDAS dataframe
 # 
 nldas_wide &lt;-
-  read_rds(&quot;data/nldas_full.rds&quot;)
+  read_rds(&quot;data/nldas_wide.rds&quot;)
 
 nldas_wide</code></pre>
 <pre><code>## # A tibble: 6,472,525 x 19
@@ -611,7 +684,132 @@ nldas_wide</code></pre>
 ## #   UGRD &lt;dbl&gt;, VGRD &lt;dbl&gt;, DSWRF &lt;dbl&gt;, windspeed &lt;dbl&gt;, tmp_f &lt;dbl&gt;,
 ## #   tmp_c &lt;dbl&gt;, rh &lt;dbl&gt;, dp_c &lt;dbl&gt;, heat_index &lt;dbl&gt;, wbgt &lt;dbl&gt;,
 ## #   wbgt_f &lt;dbl&gt;</code></pre>
-<pre class="r"><code># Mean temperature (K) from Jan 1990 - July 2019 (year-round)
+<pre class="r"><code>nldas_wide %&gt;% summary</code></pre>
+<pre><code>##     utc_dttm                     local_dttm                  installation      
+##  Min.   :1990-01-01 00:00:00   Min.   :1989-12-31 16:00:00   Length:6472525    
+##  1st Qu.:1997-05-20 21:00:00   1st Qu.:1997-05-20 16:00:00   Class :character  
+##  Median :2004-10-07 18:00:00   Median :2004-10-07 13:00:00   Mode  :character  
+##  Mean   :2004-10-07 18:00:00   Mean   :2004-10-07 12:28:58                     
+##  3rd Qu.:2012-02-25 15:00:00   3rd Qu.:2012-02-25 09:00:00                     
+##  Max.   :2019-07-15 12:00:00   Max.   :2019-07-15 08:00:00                     
+##    longitude          latitude          TMP             SPFH          
+##  Min.   :-122.59   Min.   :29.39   Min.   :249.8   Min.   :0.0000255  
+##  1st Qu.:-104.85   1st Qu.:32.25   1st Qu.:284.0   1st Qu.:0.0045288  
+##  Median : -93.12   Median :34.04   Median :291.1   Median :0.0082613  
+##  Mean   : -94.81   Mean   :34.81   Mean   :290.6   Mean   :0.0088687  
+##  3rd Qu.: -81.62   3rd Qu.:36.62   3rd Qu.:297.9   3rd Qu.:0.0126411  
+##  Max.   : -75.59   Max.   :47.03   Max.   :318.8   Max.   :0.0241628  
+##       PRES             UGRD               VGRD              DSWRF         
+##  Min.   : 79748   Min.   :-18.0500   Min.   :-16.3400   Min.   :   0.000  
+##  1st Qu.: 96865   1st Qu.: -1.6500   1st Qu.: -1.3700   1st Qu.:   0.000  
+##  Median : 99882   Median :  0.3200   Median :  0.9000   Median :   2.172  
+##  Mean   : 97565   Mean   :  0.3377   Mean   :  0.7182   Mean   : 207.132  
+##  3rd Qu.:100912   3rd Qu.:  2.2600   3rd Qu.:  2.7800   3rd Qu.: 387.220  
+##  Max.   :104400   Max.   : 17.7500   Max.   : 19.6800   Max.   :1224.570  
+##    windspeed          tmp_f            tmp_c              rh          
+##  Min.   : 0.000   Min.   :-10.03   Min.   :-23.35   Min.   :  0.2157  
+##  1st Qu.: 2.429   1st Qu.: 51.48   1st Qu.: 10.82   1st Qu.: 48.0930  
+##  Median : 3.454   Median : 64.22   Median : 17.90   Median : 68.5091  
+##  Mean   : 3.765   Mean   : 63.37   Mean   : 17.43   Mean   : 64.2367  
+##  3rd Qu.: 4.766   3rd Qu.: 76.60   3rd Qu.: 24.78   3rd Qu.: 84.1217  
+##  Max.   :20.673   Max.   :114.22   Max.   : 45.68   Max.   :100.0000  
+##       dp_c           heat_index          wbgt             wbgt_f      
+##  Min.   :-52.506   Min.   :-10.03   Min.   :-24.400   Min.   :-11.92  
+##  1st Qu.:  1.658   1st Qu.: 49.49   1st Qu.:  8.932   1st Qu.: 48.08  
+##  Median : 10.673   Median : 63.59   Median : 15.987   Median : 60.78  
+##  Mean   :  9.146   Mean   : 63.17   Mean   : 15.210   Mean   : 59.38  
+##  3rd Qu.: 17.309   3rd Qu.: 77.05   3rd Qu.: 22.385   3rd Qu.: 72.29  
+##  Max.   : 27.747   Max.   :117.32   Max.   : 42.050   Max.   :107.69</code></pre>
+<pre class="r"><code># Inspect for missing values
+
+nldas_wide %&gt;% 
+  inspectdf::inspect_na()</code></pre>
+<pre><code>## # A tibble: 19 x 3
+##    col_name       cnt  pcnt
+##    &lt;chr&gt;        &lt;int&gt; &lt;dbl&gt;
+##  1 utc_dttm         0     0
+##  2 local_dttm       0     0
+##  3 installation     0     0
+##  4 longitude        0     0
+##  5 latitude         0     0
+##  6 TMP              0     0
+##  7 SPFH             0     0
+##  8 PRES             0     0
+##  9 UGRD             0     0
+## 10 VGRD             0     0
+## 11 DSWRF            0     0
+## 12 windspeed        0     0
+## 13 tmp_f            0     0
+## 14 tmp_c            0     0
+## 15 rh               0     0
+## 16 dp_c             0     0
+## 17 heat_index       0     0
+## 18 wbgt             0     0
+## 19 wbgt_f           0     0</code></pre>
+<pre class="r"><code># Inspect date coverage
+
+## Unique dates
+nldas_wide %&gt;% 
+  group_by(installation) %&gt;% 
+  summarize(unique_utc = n_distinct(utc_dttm)) %&gt;% 
+  arrange(unique_utc) </code></pre>
+<pre><code>## # A tibble: 25 x 2
+##    installation    unique_utc
+##    &lt;chr&gt;                &lt;int&gt;
+##  1 eglin_afb           258901
+##  2 fort_benning_ga     258901
+##  3 fort_bliss          258901
+##  4 fort_bragg          258901
+##  5 fort_campbell       258901
+##  6 fort_carson         258901
+##  7 fort_drum           258901
+##  8 fort_gordon         258901
+##  9 fort_hood           258901
+## 10 fort_jackson        258901
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code>nldas_wide %&gt;% 
+  group_by(installation) %&gt;% 
+  summarize(unique_local = n_distinct(local_dttm)) %&gt;% 
+  arrange(unique_local)</code></pre>
+<pre><code>## # A tibble: 25 x 2
+##    installation    unique_local
+##    &lt;chr&gt;                  &lt;int&gt;
+##  1 eglin_afb             258872
+##  2 fort_benning_ga       258872
+##  3 fort_bliss            258872
+##  4 fort_bragg            258872
+##  5 fort_campbell         258872
+##  6 fort_carson           258872
+##  7 fort_drum             258872
+##  8 fort_gordon           258872
+##  9 fort_hood             258872
+## 10 fort_jackson          258872
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code>## Duplicate dates
+dup_times &lt;-
+nldas_wide %&gt;% 
+    group_by(installation) %&gt;% 
+    janitor::get_dupes(local_dttm)
+
+dup_times %&gt;% count(local_dttm)</code></pre>
+<pre><code>## # A tibble: 29 x 2
+##    local_dttm              n
+##    &lt;dttm&gt;              &lt;int&gt;
+##  1 1990-10-28 01:00:00    50
+##  2 1991-10-27 01:00:00    50
+##  3 1992-10-25 01:00:00    50
+##  4 1993-10-31 01:00:00    50
+##  5 1994-10-30 01:00:00    50
+##  6 1995-10-29 01:00:00    50
+##  7 1996-10-27 01:00:00    50
+##  8 1997-10-26 01:00:00    50
+##  9 1998-10-25 01:00:00    50
+## 10 1999-10-31 01:00:00    50
+## # ... with 19 more rows</code></pre>
+<pre class="r"><code>  # Duplicates present in local time, occur at 1am local during Oct/Nov time change
+
+
+# Mean temperature (K) from Jan 1990 - July 2019 (year-round)
 nldas_wide %&gt;% 
   group_by(installation) %&gt;% 
   summarise(mean_tmp = mean(TMP)) %&gt;% 
@@ -658,14 +856,12 @@ nldas_wide %&gt;%
 
 nldas_long &lt;-
   nldas_wide %&gt;%
-    dplyr::select(-utc_dttm, -longitude, -latitude) %&gt;% 
-    tidyr::gather(key = &quot;variable&quot;, value = &quot;value&quot;, TMP:wbgt_f) 
+    dplyr::select(installation, utc_dttm, tmp_f, rh, heat_index, wbgt_f) %&gt;% 
+    tidyr::gather(key = &quot;variable&quot;, value = &quot;value&quot;, tmp_f:wbgt_f) 
   
 
 
-# write_rds(nldas_long, path = &quot;data/nldas_long.rds&quot;)
-
-# This long object is 4.2 GB, compared to 1.0 GB for the wide object. We will proceed to nest this dataframe by installation and variable.</code></pre>
+# write_rds(nldas_long, path = &quot;data/nldas_long.rds&quot;)</code></pre>
 <pre class="r"><code>nldas_long &lt;-
   read_rds(&quot;data/nldas_long.rds&quot;)
 
@@ -680,53 +876,52 @@ memory.limit(size = 56000)
 
 nldas_nest &lt;-
   nldas_long %&gt;% 
-  dplyr::select(installation, variable, local_dttm, value) %&gt;% 
-  nest(., data = local_dttm:value)
+  dplyr::select(installation, variable, utc_dttm, value) %&gt;% 
+  nest(., data = utc_dttm:value)
 
-write_rds(nldas_nest, path = &quot;data/nldas_nest.rds&quot;)</code></pre>
+# write_rds(nldas_nest, path = &quot;data/nldas_nest.rds&quot;)</code></pre>
 <pre class="r"><code>nldas_nest &lt;-
   read_rds(&quot;data/nldas_nest.rds&quot;)
 
 nldas_nest</code></pre>
-<pre><code>## # A tibble: 350 x 3
+<pre><code>## # A tibble: 100 x 3
 ##    installation    variable           data
 ##    &lt;chr&gt;           &lt;chr&gt;    &lt;list&lt;df[,2]&gt;&gt;
-##  1 eglin_afb       TMP       [258,901 x 2]
-##  2 fort_benning_ga TMP       [258,901 x 2]
-##  3 fort_bliss      TMP       [258,901 x 2]
-##  4 fort_bragg      TMP       [258,901 x 2]
-##  5 fort_campbell   TMP       [258,901 x 2]
-##  6 fort_carson     TMP       [258,901 x 2]
-##  7 fort_drum       TMP       [258,901 x 2]
-##  8 fort_gordon     TMP       [258,901 x 2]
-##  9 fort_hood       TMP       [258,901 x 2]
-## 10 fort_jackson    TMP       [258,901 x 2]
-## # ... with 340 more rows</code></pre>
+##  1 eglin_afb       tmp_f     [258,901 x 2]
+##  2 fort_benning_ga tmp_f     [258,901 x 2]
+##  3 fort_bliss      tmp_f     [258,901 x 2]
+##  4 fort_bragg      tmp_f     [258,901 x 2]
+##  5 fort_campbell   tmp_f     [258,901 x 2]
+##  6 fort_carson     tmp_f     [258,901 x 2]
+##  7 fort_drum       tmp_f     [258,901 x 2]
+##  8 fort_gordon     tmp_f     [258,901 x 2]
+##  9 fort_hood       tmp_f     [258,901 x 2]
+## 10 fort_jackson    tmp_f     [258,901 x 2]
+## # ... with 90 more rows</code></pre>
 <pre class="r"><code>nldas_nest %&gt;% 
-  filter(installation == &quot;eglin_afb&quot; &amp; variable == &quot;TMP&quot;) %&gt;% 
+  filter(installation == &quot;eglin_afb&quot; &amp; variable == &quot;tmp_f&quot;) %&gt;% 
   pull(data)</code></pre>
 <pre><code>## &lt;list_of&lt;
 ##   tbl_df&lt;
-##     local_dttm: datetime&lt;UTC&gt;
-##     value     : double
+##     utc_dttm: datetime&lt;UTC&gt;
+##     value   : double
 ##   &gt;
 ## &gt;[1]&gt;
 ## [[1]]
 ## # A tibble: 258,901 x 2
-##    local_dttm          value
+##    utc_dttm            value
 ##    &lt;dttm&gt;              &lt;dbl&gt;
-##  1 1989-12-31 18:00:00  291.
-##  2 1989-12-31 19:00:00  290.
-##  3 1989-12-31 20:00:00  289.
-##  4 1989-12-31 21:00:00  288.
-##  5 1989-12-31 22:00:00  287.
-##  6 1989-12-31 23:00:00  287.
-##  7 1990-01-01 00:00:00  286.
-##  8 1990-01-01 01:00:00  285.
-##  9 1990-01-01 02:00:00  284.
-## 10 1990-01-01 03:00:00  283.
+##  1 1990-01-01 00:00:00  64.1
+##  2 1990-01-01 01:00:00  62.5
+##  3 1990-01-01 02:00:00  60.9
+##  4 1990-01-01 03:00:00  59.3
+##  5 1990-01-01 04:00:00  57.8
+##  6 1990-01-01 05:00:00  56.2
+##  7 1990-01-01 06:00:00  54.7
+##  8 1990-01-01 07:00:00  53.2
+##  9 1990-01-01 08:00:00  51.8
+## 10 1990-01-01 09:00:00  50.4
 ## # ... with 258,891 more rows</code></pre>
-<pre class="r"><code># The nested list is 1.4 GB, compared to 4.2 GB for the long dataframe</code></pre>
 </div>
 
 

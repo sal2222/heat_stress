@@ -35,7 +35,9 @@ Environmental Health Sciences
 
 ## Climate 
 
-- Time series formats for NLDAS-2 data [[here]](nldas_timeseries.html)  
+- Time series formats for NLDAS-2 data [[here]](nldas_timeseries.html)
+
+- Climate aggregates and anomalies
 
 ## Heat Stress Outcomes
 

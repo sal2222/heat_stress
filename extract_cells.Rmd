@@ -60,7 +60,7 @@ Extract date and hour from file name.
 # saveRDS(file_list, "data/file_list.rds")
 
 file_list <- readRDS("data/file_list.rds")
-file_list
+file_list 
 
 # Vector of NLDAS-2 file names
 
@@ -249,6 +249,7 @@ This step worked without issue for the first set of files (Army installations).
 The second set of files (other services) resulted in `readRDS` "unknown input format" errors, whether using `lapply` or `map` and regardless of whether the file directory was on an external drive or the computer hard drive.  
 Troubleshooting: slice the files into sections. No issue with the first 100,000 files or second 100,000. Error between 200,000-258,901... tracked down to file #249,176: `"20180605_0700.rds"` (one bad file causing error). Deleted file and re-ran extract function.
 
+Another issue is that when assigning names to the `nldas_list_join` pasting date an hour from file_list resulted in duplicate names. This was corrected by setting the date-time element name from file$value using stringr. We implemented additional checks of unique and duplicate values as a result.  
 
 
 ```{r raster_list, eval = FALSE}
@@ -258,19 +259,32 @@ Troubleshooting: slice the files into sections. No issue with the first 100,000 
 
 nldas_list_joint_files <- list.files(pattern = ".rds") 
 
+
 # read_rds(nldas_list_joint_files[249176])
 
 nldas_list_joint <-
-  map(nldas_list_joint_files, readRDS)
+  list.files(path = "C:/Users/slewa/Documents/data/heat/nldas_raster_joint", pattern = ".rds") %>%
+  map(read_rds)
 
 # Set date/time as list element name
-names(nldas_list_joint) <- paste(
-  stringr::str_replace_all(file_list$date, "-", ""),
-  file_list$hour,
-  sep = "_"
-  )
 
+date_time_names <- 
+  paste0(
+      file_list$value %>%  stringr::str_extract("[1-2][0-9]{7}"),
+      "_",
+      file_list$value %>% stringr::str_extract("\\.[0-2][0-9][0]{2}") %>% str_sub(start = 2L))
+
+date_time_names %>% as_tibble() %>% n_distinct()
+date_time_names %>% as_tibble() %>% janitor::get_dupes(value)
+
+
+names(nldas_list_joint) <- date_time_names 
+  
 nldas_list_joint[1:2]
+
+nldas_list_joint %>% names() %>% as_tibble() %>% n_distinct()
+nldas_list_joint %>% names() %>% as_tibble() %>% janitor::get_dupes(value)
+
 
 # write_rds(nldas_list_joint, path = "data/nldas_list_joint.rds")
 

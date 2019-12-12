@@ -386,7 +386,7 @@ div.tocify {
       <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
     </li>
     <li>
-      <a href="nldas_incices.html">NLDAS Conversions and Indices</a>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Outcome Data</li>
@@ -419,7 +419,9 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Annual cases</li>
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
     <li class="dropdown-header">Daily cases</li>
   </ul>
 </li>
@@ -473,7 +475,7 @@ Extract date and hour from file name.</p>
 # saveRDS(file_list, &quot;data/file_list.rds&quot;)
 
 file_list &lt;- readRDS(&quot;data/file_list.rds&quot;)
-file_list</code></pre>
+file_list </code></pre>
 <pre><code>## # A tibble: 258,901 x 4
 ##    value                        path                            date       hour 
 ##    &lt;chr&gt;                        &lt;chr&gt;                           &lt;date&gt;     &lt;fct&gt;
@@ -705,25 +707,39 @@ file_names &lt;-
 <p>This step worked without issue for the first set of files (Army installations).</p>
 <p>The second set of files (other services) resulted in <code>readRDS</code> “unknown input format” errors, whether using <code>lapply</code> or <code>map</code> and regardless of whether the file directory was on an external drive or the computer hard drive.<br />
 Troubleshooting: slice the files into sections. No issue with the first 100,000 files or second 100,000. Error between 200,000-258,901… tracked down to file #249,176: <code>"20180605_0700.rds"</code> (one bad file causing error). Deleted file and re-ran extract function.</p>
+<p>Another issue is that when assigning names to the <code>nldas_list_join</code> pasting date an hour from file_list resulted in duplicate names. This was corrected by setting the date-time element name from file$value using stringr. We implemented additional checks of unique and duplicate values as a result.</p>
 <pre class="r"><code># https://stackoverflow.com/questions/6473831/readrdsfile-in-r/43509650#43509650
 
 # setwd(&quot;C:/Users/slewa/Documents/data/heat/nldas_raster_joint&quot;)
 
 nldas_list_joint_files &lt;- list.files(pattern = &quot;.rds&quot;) 
 
+
 # read_rds(nldas_list_joint_files[249176])
 
 nldas_list_joint &lt;-
-  map(nldas_list_joint_files, readRDS)
+  list.files(path = &quot;C:/Users/slewa/Documents/data/heat/nldas_raster_joint&quot;, pattern = &quot;.rds&quot;) %&gt;%
+  map(read_rds)
 
 # Set date/time as list element name
-names(nldas_list_joint) &lt;- paste(
-  stringr::str_replace_all(file_list$date, &quot;-&quot;, &quot;&quot;),
-  file_list$hour,
-  sep = &quot;_&quot;
-  )
 
+date_time_names &lt;- 
+  paste0(
+      file_list$value %&gt;%  stringr::str_extract(&quot;[1-2][0-9]{7}&quot;),
+      &quot;_&quot;,
+      file_list$value %&gt;% stringr::str_extract(&quot;\\.[0-2][0-9][0]{2}&quot;) %&gt;% str_sub(start = 2L))
+
+date_time_names %&gt;% as_tibble() %&gt;% n_distinct()
+date_time_names %&gt;% as_tibble() %&gt;% janitor::get_dupes(value)
+
+
+names(nldas_list_joint) &lt;- date_time_names 
+  
 nldas_list_joint[1:2]
+
+nldas_list_joint %&gt;% names() %&gt;% as_tibble() %&gt;% n_distinct()
+nldas_list_joint %&gt;% names() %&gt;% as_tibble() %&gt;% janitor::get_dupes(value)
+
 
 # write_rds(nldas_list_joint, path = &quot;data/nldas_list_joint.rds&quot;)
 

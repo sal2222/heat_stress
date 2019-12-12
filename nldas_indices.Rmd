@@ -93,7 +93,7 @@ From original NLDAS variables, add windspeed, temp in F and C, relative humidity
 
 ```{r nldas_conversions, eval = FALSE}
 
-nldas_full <-
+nldas_wide <-
   nldas_time_zone %>% 
     mutate(windspeed = sqrt(UGRD^2 + VGRD^2),
            tmp_f = weathermetrics::convert_temperature(TMP, old_metric = "kelvin", new_metric = "fahrenheit"),
@@ -107,8 +107,39 @@ nldas_full <-
                            round = 2)) 
 
 
+# Inspect missing data: dew point/ heat index if relative humidity below 0% or above 100%
+
+nldas_wide %>% 
+  inspectdf::inspect_na()
+
+nldas_wide %>% 
+  filter(is.na(dp_c)) %>% 
+  arrange(desc(rh))
+
+# Restrict RH to 100%
+
+nldas_wide <-
+  nldas_time_zone %>% 
+    mutate(windspeed = sqrt(UGRD^2 + VGRD^2),
+           tmp_f = weathermetrics::convert_temperature(TMP, old_metric = "kelvin", new_metric = "fahrenheit"),
+           tmp_c = weathermetrics::convert_temperature(TMP, old_metric = "kelvin", new_metric = "celsius"),
+           rh = humidity::SH2RH(SPFH, TMP, p = PRES, isK = TRUE),
+           rh = case_when(
+             rh > 100 ~ 100,
+             rh <= 100 ~ rh
+           ),
+           dp_c = humidity.to.dewpoint(rh = rh, t = tmp_c, temperature.metric = "celsius"),
+           heat_index = weathermetrics::heat.index(t = tmp_f,
+                           rh = rh,
+                           temperature.metric = "fahrenheit",
+                           output.metric = "fahrenheit",
+                           round = 2))  
 
 
+nldas_wide %>% 
+  inspectdf::inspect_na()
+
+nldas_wide %>% summary()
 ```
 
 
@@ -147,17 +178,17 @@ WBGT with `mdljts` wrapper. Create a dataframe with the required columns for the
 
                      
 # Join lat and lon
-nldas_full <-
-  nldas_full %>% 
+nldas_wide <-
+  nldas_wide %>% 
   left_join(base_coordinates, by = c("installation" = "site_name")) %>% 
   dplyr::select(utc_dttm, local_dttm, installation, longitude, latitude, everything())
 
-nldas_full  
+nldas_wide  
 
 # Create datframe for `wbgt_df` function
 
 wbgt_mdljts_df <-
-  nldas_full %>% 
+  nldas_wide %>% 
     mutate(
       year = lubridate::year(local_dttm), 
       month = lubridate::month(local_dttm), 
@@ -189,27 +220,27 @@ wbgt_mdljts <-
 
 # Bind WBGT column to NLDAS dataframe and add Fahrenheit conversion
 
-nldas_full <-
-  nldas_full %>% 
+nldas_wide <-
+  nldas_wide %>% 
   bind_cols(wbgt_mdljts) %>% 
   mutate(wbgt_f = weathermetrics::convert_temperature(wbgt, old_metric = "celsius", new_metric = "fahrenheit"))
 
-
-# write_rds(nldas_full, path = "data/nldas_full.rds")
+# write_rds(nldas_wide, path = "data/nldas_wide.rds")
 
 ```
 
 ## "Wide" NLDAS dataframe
 
-```{r open_nldas_full}
+```{r open_nldas_wide}
 
 # View "wide" NLDAS dataframe
 # 
 nldas_wide <-
-  read_rds("data/nldas_full.rds")
+  read_rds("data/nldas_wide.rds")
 
 nldas_wide
 
+nldas_wide %>% summary
 
 # Inspect for missing values
 
@@ -225,20 +256,21 @@ nldas_wide %>%
   summarize(unique_utc = n_distinct(utc_dttm)) %>% 
   arrange(unique_utc) 
 
+
 nldas_wide %>% 
   group_by(installation) %>% 
   summarize(unique_local = n_distinct(local_dttm)) %>% 
   arrange(unique_local)
 
 ## Duplicate dates
+dup_times <-
 nldas_wide %>% 
-  group_by(installation) %>% 
-  janitor::get_dupes(utc_dttm)
+    group_by(installation) %>% 
+    janitor::get_dupes(local_dttm)
 
-nldas_wide %>% 
-  group_by(installation) %>% 
-  summarize(unique_utc = n_distinct(utc_dttm)) %>% 
-  arrange(unique_utc) 
+dup_times %>% count(local_dttm)
+
+  # Duplicates present in local time, occur at 1am local during Oct/Nov time change
 
 
 # Mean temperature (K) from Jan 1990 - July 2019 (year-round)
@@ -264,14 +296,14 @@ nldas_wide %>%
 
 nldas_long <-
   nldas_wide %>%
-    dplyr::select(-utc_dttm, -longitude, -latitude) %>% 
-    tidyr::gather(key = "variable", value = "value", TMP:wbgt_f) 
+    dplyr::select(installation, utc_dttm, tmp_f, rh, heat_index, wbgt_f) %>% 
+    tidyr::gather(key = "variable", value = "value", tmp_f:wbgt_f) 
   
 
 
 # write_rds(nldas_long, path = "data/nldas_long.rds")
 
-# This long object is 4.2 GB, compared to 1.0 GB for the wide object. We will proceed to nest this dataframe by installation and variable.
+
 ```
 
 ```{r view_nldas_long, eval = FALSE}
@@ -292,10 +324,10 @@ memory.limit(size = 56000)
 
 nldas_nest <-
   nldas_long %>% 
-  dplyr::select(installation, variable, local_dttm, value) %>% 
-  nest(., data = local_dttm:value)
+  dplyr::select(installation, variable, utc_dttm, value) %>% 
+  nest(., data = utc_dttm:value)
 
-write_rds(nldas_nest, path = "data/nldas_nest.rds")
+# write_rds(nldas_nest, path = "data/nldas_nest.rds")
 
 ```
 
@@ -307,9 +339,9 @@ nldas_nest <-
 nldas_nest
 
 nldas_nest %>% 
-  filter(installation == "eglin_afb" & variable == "TMP") %>% 
+  filter(installation == "eglin_afb" & variable == "tmp_f") %>% 
   pull(data)
 
-# The nested list is 1.4 GB, compared to 4.2 GB for the long dataframe
+
 ```
 

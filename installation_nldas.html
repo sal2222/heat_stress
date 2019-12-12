@@ -386,7 +386,7 @@ div.tocify {
       <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
     </li>
     <li>
-      <a href="nldas_incices.html">NLDAS Conversions and Indices</a>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
     </li>
     <li class="divider"></li>
     <li class="dropdown-header">Outcome Data</li>
@@ -419,7 +419,9 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Annual cases</li>
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
     <li class="dropdown-header">Daily cases</li>
   </ul>
 </li>
@@ -512,7 +514,7 @@ nldas_list_joint %&gt;%
   write_rds(., path = paste0(&quot;data/base_nldas/&quot;,  second_set_bases[i], &quot;.rds&quot; ))
 }  </code></pre>
 <p>Review installation NLDAS files.</p>
-<pre class="r"><code>list.files(&quot;data/base_nldas&quot;)</code></pre>
+<pre class="r"><code>list.files(&quot;data/base_nldas&quot;) </code></pre>
 <pre><code>##  [1] &quot;eglin_afb.rds&quot;                   &quot;fort_benning_ga.rds&quot;            
 ##  [3] &quot;fort_bliss.rds&quot;                  &quot;fort_bragg.rds&quot;                 
 ##  [5] &quot;fort_campbell.rds&quot;               &quot;fort_carson.rds&quot;                
@@ -602,6 +604,36 @@ nldas_df</code></pre>
 ##  9 19900101_0800  284. 0.00693 101537.  5.40 -5.45     0 eglin_afb   
 ## 10 19900101_0900  283. 0.00629 101593.  5.24 -5.64     0 eglin_afb   
 ## # ... with 6,472,515 more rows</code></pre>
+<pre class="r"><code># Inspect completeness
+nldas_df %&gt;% 
+  group_by(installation) %&gt;% 
+  summarize(unique_hour = n_distinct(.$date_time)) %&gt;% 
+  arrange(unique_hour)</code></pre>
+<pre><code>## # A tibble: 25 x 2
+##    installation    unique_hour
+##    &lt;chr&gt;                 &lt;int&gt;
+##  1 eglin_afb            258901
+##  2 fort_benning_ga      258901
+##  3 fort_bliss           258901
+##  4 fort_bragg           258901
+##  5 fort_campbell        258901
+##  6 fort_carson          258901
+##  7 fort_drum            258901
+##  8 fort_gordon          258901
+##  9 fort_hood            258901
+## 10 fort_jackson         258901
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code># Inspect duplicates
+
+duplicates &lt;-
+  nldas_df %&gt;% 
+  group_by(installation) %&gt;% 
+  janitor::get_dupes(date_time)</code></pre>
+<pre><code>## No duplicate combinations found of: date_time</code></pre>
+<pre class="r"><code>duplicates %&gt;% 
+  count(installation)</code></pre>
+<pre><code>## # A tibble: 0 x 2
+## # ... with 2 variables: installation &lt;chr&gt;, n &lt;int&gt;</code></pre>
 </div>
 </div>
 
