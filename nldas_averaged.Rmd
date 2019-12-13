@@ -1,0 +1,158 @@
+---
+title: "nldas_averaged"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(dygraphs)
+library(xts)
+library(timetk)
+library(zoo)
+library(forecast)
+library(fable)
+library(sweep)
+library(viridis)
+library(tsibble)
+library(lubridate)
+```
+
+We want to use local time for daily averages. 
+
+We will modify duplicate times due to the end of daylight savings by adding one second to the repeated time.
+
+```{r}
+nldas_wide <- read_rds("data/nldas_wide.rds")
+
+# Add one second to duplicate times
+local_dst_adjust <-
+  nldas_wide %>%
+    mutate(row = dplyr::row_number()) %>% 
+    tsibble::duplicates(key = installation, index = local_dttm) %>% 
+    filter(local_dttm != lead(local_dttm, default = "1")) %>% 
+    mutate(local_dttm = local_dttm + seconds(1))
+
+local_dst_adjust
+
+# Remove rows with duplicate local times and replace with updated rows (+1 second)
+
+nldas_wide <-
+  nldas_wide %>%
+    mutate(row = dplyr::row_number()) %>% 
+    filter(!row %in% local_dst_adjust$row) %>% 
+    bind_rows(local_dst_adjust) %>% 
+    arrange(local_dttm) %>% 
+    dplyr::select(-row)
+
+# Check for duplicates
+nldas_wide %>% 
+  duplicates(key = installation, index = local_dttm)
+
+
+nldas_tsibble <-
+  nldas_wide %>% 
+    dplyr::select(installation, local_dttm, tmp_f, heat_index, wbgt_f) %>% 
+    tsibble::as_tsibble(., key = installation, index = local_dttm)
+
+```
+
+## Aggregate over calendar periods  
+
+### Averaged from hourly to daily
+```{r nldas_daily}
+
+nldas_daily <-
+  nldas_tsibble %>% 
+    tsibble::group_by_key() %>%
+    tsibble::index_by(date = ~ as.Date(.)) %>% # daily aggregates
+    dplyr::summarise(
+                mean_tmp = mean(tmp_f),
+                max_tmp = max(tmp_f),
+                min_tmp = min(tmp_f),
+                sd_tmp = sd(tmp_f),
+                mean_hi = mean(heat_index),
+                max_hi = max(heat_index),
+                min_hi = min(heat_index),
+                sd_hi = sd(heat_index),
+                mean_wbgt = mean(wbgt_f),
+                max_wbgt = max(wbgt_f),
+                min_wbgt = max(wbgt_f),
+                sd_wbgt = sd(wbgt_f)
+      ) %>% 
+  filter(date >= date("1990-01-01"))
+  
+nldas_daily
+
+nldas_daily %>% 
+  filter(date >= date("2019-07-01")) %>% 
+    autoplot(mean_wbgt)
+
+```
+
+### Averaged from hourly to monthly
+
+```{r nldas_monthly}
+
+nldas_monthly <-
+  nldas_tsibble %>% 
+    tsibble::group_by_key() %>%
+    tsibble::index_by(year_month = ~ yearmonth(.)) %>% # daily aggregates
+    dplyr::summarise(
+                mean_tmp = mean(tmp_f),
+                max_tmp = max(tmp_f),
+                min_tmp = min(tmp_f),
+                sd_tmp = sd(tmp_f),
+                mean_hi = mean(heat_index),
+                max_hi = max(heat_index),
+                min_hi = min(heat_index),
+                sd_hi = sd(heat_index),
+                mean_wbgt = mean(wbgt_f),
+                max_wbgt = max(wbgt_f),
+                min_wbgt = max(wbgt_f),
+                sd_wbgt = sd(wbgt_f)
+      ) %>% 
+  filter(year_month >= date("1990-01-01"))
+  
+nldas_monthly
+
+nldas_monthly %>% 
+  filter(year_month >= date("2018-01-01")) %>% 
+    autoplot(mean_wbgt)
+
+```
+
+### Averaged from hourly to annual
+
+```{r}
+nldas_annual <-
+  nldas_tsibble %>% 
+    tsibble::group_by_key() %>%
+    tsibble::index_by(year = ~ lubridate::year(.)) %>% # daily aggregates
+    dplyr::summarise(
+                mean_tmp = mean(tmp_f),
+                max_tmp = max(tmp_f),
+                min_tmp = min(tmp_f),
+                sd_tmp = sd(tmp_f),
+                mean_hi = mean(heat_index),
+                max_hi = max(heat_index),
+                min_hi = min(heat_index),
+                sd_hi = sd(heat_index),
+                mean_wbgt = mean(wbgt_f),
+                max_wbgt = max(wbgt_f),
+                min_wbgt = max(wbgt_f),
+                sd_wbgt = sd(wbgt_f)
+      ) %>% 
+  filter(!year %in% "1989")
+  
+nldas_annual
+
+nldas_annual %>% 
+    autoplot(mean_wbgt)
+```
+
