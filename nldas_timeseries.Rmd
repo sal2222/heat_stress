@@ -75,6 +75,8 @@ tmp_f_ts$data_ts[[1]] %>% head()
 
 
 ## Example dynamic graph of temperature time series
+(Select segment with cursor to zoom)
+
 ```{r}
 
 # Sample time series dynamic graph
@@ -138,18 +140,22 @@ tmp_f_fit %>%
 # Forecasting the model
 
 tmp_f_fit_fcast <- tmp_f_fit %>%
-    mutate(fcast_ets = map(fit_ets, forecast, h = 720),
+    mutate(fcast_ets = map(fit_ets, forecast, h = 336),
            sweep = map(fcast_ets, sweep::sw_sweep, fitted = FALSE, timetk_idx = TRUE)) %>%
     unnest(sweep)
     
 tmp_f_fit_fcast
 
 
+```
+
+```{r plot_forecast, eval = FALSE}
+
 # Plot forecast
 
 tmp_f_fit_fcast %>%
     filter(installation == "eglin_afb",
-           index > as.Date("2019-01-01")) %>% 
+           index > as.Date("2019-05-01")) %>% 
     ggplot(aes(x = index, y = value, color = key)) +
     geom_ribbon(aes(ymin = lo.95, ymax = hi.95), 
                 fill = "#D5DBFF", color = NA, size = 0) +
@@ -162,8 +168,9 @@ tmp_f_fit_fcast %>%
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-
 ```
+
+
 
 ### Multiple seasonal decomposition
 

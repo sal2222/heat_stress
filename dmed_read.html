@@ -411,6 +411,12 @@ div.tocify {
     <li>
       <a href="nldas_fable.html">Time series (Fable)</a>
     </li>
+    <li>
+      <a href="nldas_averaged.html">Aggregate over calendar periods</a>
+    </li>
+    <li>
+      <a href="climatologies.html">Climatologies/Normals</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -967,53 +973,19 @@ icd10_from2016_df &lt;-
   read_rds(&quot;D:/dmed/dmed_tidy.rds&quot;)
 
 dmed_tidy</code></pre>
-<pre><code>## # A tibble: 11,010 x 9
-##    type            category  year count population  rate location strata hsi    
-##    &lt;fct&gt;           &lt;fct&gt;    &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;  &lt;fct&gt;  
-##  1 Ambulatory Data Male      1997     0      6057.     0 jackson  gender hexhsa~
-##  2 Ambulatory Data Female    1997     0      2749.     0 jackson  gender hexhsa~
-##  3 Ambulatory Data Total     1997     0      8806.     0 jackson  gender hexhsa~
-##  4 Hospitalizatio~ Male      1997     0      6057.     0 jackson  gender hexhsa~
-##  5 Hospitalizatio~ Female    1997     0      2749.     0 jackson  gender hexhsa~
-##  6 Hospitalizatio~ Total     1997     0      8806.     0 jackson  gender hexhsa~
-##  7 Reportable Eve~ Male      1997     0      6057.     0 jackson  gender hexhsa~
-##  8 Reportable Eve~ Female    1997     0      2749.     0 jackson  gender hexhsa~
-##  9 Reportable Eve~ Total     1997     0      8806.     0 jackson  gender hexhsa~
-## 10 Ambulatory Data Male      1998     0      6456.     0 jackson  gender hexhsa~
-## # ... with 11,000 more rows</code></pre>
 </div>
 <div id="inspect-missing-data" class="section level2">
 <h2>Inspect missing data</h2>
-<pre class="r"><code>colSums(is.na(dmed_tidy)) </code></pre>
-<pre><code>##       type   category       year      count population       rate   location 
-##          0          0          0          0          0          0          0 
-##     strata        hsi 
-##          0          0</code></pre>
-<pre class="r"><code>dmed_tidy %&gt;% 
+<pre class="r"><code>colSums(is.na(dmed_tidy)) 
+
+
+dmed_tidy %&gt;% 
   filter(is.na(year)) %&gt;% 
-  count(location)</code></pre>
-<pre><code>## Warning: Factor `location` contains implicit NA, consider using
-## `forcats::fct_explicit_na`</code></pre>
-<pre><code>## # A tibble: 1 x 2
-##   location     n
-##   &lt;fct&gt;    &lt;int&gt;
-## 1 &lt;NA&gt;         0</code></pre>
-<pre class="r"><code>dmed_tidy %&gt;%
+  count(location)
+
+
+dmed_tidy %&gt;%
   count(year)</code></pre>
-<pre><code>## # A tibble: 29 x 2
-##     year     n
-##    &lt;int&gt; &lt;int&gt;
-##  1  1990    94
-##  2  1991    94
-##  3  1992    94
-##  4  1993    94
-##  5  1994    94
-##  6  1995   188
-##  7  1996   188
-##  8  1997   282
-##  9  1998   282
-## 10  1999   282
-## # ... with 19 more rows</code></pre>
 </div>
 
 

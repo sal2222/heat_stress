@@ -32,6 +32,10 @@ left:
           href: nldas_timeseries.html
         - text: "Time series (Fable)"
           href: nldas_fable.html
+        - text: "Aggregate over calendar periods"
+          href: nldas_averaged.html
+        - text: "Climatologies/Normals"
+          href: climatologies.html  
     - text: "Heat Illness"
       icon: fa-medkit  
       menu: 

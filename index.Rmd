@@ -39,7 +39,9 @@ Environmental Health Sciences
 
 - Fable/tsibble time series format for NLDAS-2 data [[here]](nldas_fable.html)
 
-- Climate aggregates and anomalies
+- Aggregate over calendar periods [[here]](nldas_averaged.html) 
+
+- Climatologies (1990-2018) [[here]](climatologies.html) 
 
 ## Heat Stress Outcomes
 

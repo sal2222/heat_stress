@@ -577,7 +577,7 @@ dmed_tidy <-
 
 ```
 
-```{r view_dmed}
+```{r view_dmed, eval = FALSE}
 
 dmed_tidy <- 
   read_rds("D:/dmed/dmed_tidy.rds")
@@ -587,7 +587,7 @@ dmed_tidy
 ```
 
 ## Inspect missing data
-```{r missing_data}
+```{r missing_data, eval = FALSE}
 colSums(is.na(dmed_tidy)) 
 
 
