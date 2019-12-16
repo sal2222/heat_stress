@@ -412,6 +412,12 @@ div.tocify {
     <li>
       <a href="nldas_fable.html">Time series (Fable)</a>
     </li>
+    <li>
+      <a href="nldas_averaged.html">Aggregate over calendar periods</a>
+    </li>
+    <li>
+      <a href="climatologies.html">Climatologies/Normals</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -460,7 +466,7 @@ div.tocify {
 <p>Summary of data from DMED queries.</p>
 <p>Data preparation code is available at: <a href="dmed_read.html">(link)</a></p>
 <pre class="r"><code>dmed_tidy &lt;- 
-  read_rds(&quot;D:/dmed/dmed_tidy.rds&quot;)
+  read_rds(&quot;data/dmed_tidy.rds&quot;)
 
 dmed_tidy</code></pre>
 <pre><code>## # A tibble: 11,010 x 9

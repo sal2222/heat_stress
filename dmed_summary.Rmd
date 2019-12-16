@@ -36,7 +36,7 @@ Data preparation code is available at: [(link)](dmed_read.html)
 ```{r view_dmed}
 
 dmed_tidy <- 
-  read_rds("D:/dmed/dmed_tidy.rds")
+  read_rds("data/dmed_tidy.rds")
 
 dmed_tidy
 

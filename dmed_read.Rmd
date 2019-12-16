@@ -580,7 +580,7 @@ dmed_tidy <-
 ```{r view_dmed, eval = FALSE}
 
 dmed_tidy <- 
-  read_rds("D:/dmed/dmed_tidy.rds")
+  read_rds("data/dmed_tidy.rds")
 
 dmed_tidy
 
