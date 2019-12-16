@@ -41,7 +41,7 @@ Environmental Health Sciences
 
 - Aggregate over calendar periods [[here]](nldas_averaged.html) 
 
-- Climatologies (1990-2018) [[here]](climatologies.html) 
+- Climatologies (1990-2018) [[here]](climatology.html) 
 
 ## Heat Stress Outcomes
 

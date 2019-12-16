@@ -575,7 +575,7 @@ nest_nldas</code></pre>
                   hi_95th = quantile(heat_index, probs = 0.95),
                   mean_wbgt = mean(wbgt_f),
                   max_wbgt = max(wbgt_f),
-                  min_wbgt = max(wbgt_f),
+                  min_wbgt = min(wbgt_f),
                   sd_wbgt = sd(wbgt_f),
                   wbgt_95th = quantile(wbgt_f, probs = 0.95) 
             ) %&gt;% 
@@ -604,11 +604,8 @@ nldas_climatology</code></pre>
 ##  9 fort_hood        [254,208 x 6] &lt;tibble [366 x 18]&gt;
 ## 10 fort_jackson     [254,208 x 6] &lt;tibble [366 x 18]&gt;
 ## # ... with 15 more rows</code></pre>
-<pre class="r"><code>nldas_climatology %&gt;% 
-  slice(1) %&gt;% 
-  pull(climatology) </code></pre>
-<pre><code>## [[1]]
-## # A tibble: 366 x 18
+<pre class="r"><code>nldas_climatology$climatology[[1]]</code></pre>
+<pre><code>## # A tibble: 366 x 18
 ## # Groups:   month [12]
 ##    mon_day month   day mean_tmp max_tmp min_tmp sd_tmp tmp_95th mean_hi max_hi
 ##    &lt;chr&gt;   &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
@@ -628,33 +625,163 @@ nldas_climatology</code></pre>
 </div>
 <div id="plot-climatologies" class="section level2">
 <h2>Plot climatologies</h2>
+<div id="single-plot" class="section level3">
+<h3>Single plot</h3>
+<pre class="r"><code>nldas_climatology$climatology[[1]] %&gt;%
+    ungroup() %&gt;% 
+    dplyr::select(-c(month, day, sd_tmp, sd_hi, sd_wbgt)) %&gt;%
+    mutate(mon_day = paste0(&quot;2019&quot;, &quot;-&quot;, mon_day),
+           mon_day = as.Date(mon_day)) %&gt;% 
+    gather(., key = &quot;variable&quot;, value = &quot;value&quot;, mean_tmp:wbgt_95th) %&gt;% 
+    na.omit(mon_day) %&gt;%   # Feb 29 coded as NA &quot;leap year&quot;
+    filter(variable == c(&quot;max_wbgt&quot;, &quot;mean_wbgt&quot;, &quot;min_wbgt&quot;, &quot;wbgt_95th&quot;)) %&gt;% 
+    ggplot(aes(x = mon_day, y = value, color = variable)) + 
+    geom_smooth(alpha = 0.1) +
+    geom_point() +
+    scale_x_date(labels = date_format(&quot;%b-%d&quot;),
+               breaks = date_breaks(&quot;months&quot;)) +
+    labs(
+      title = &quot;Eglin AFB WBGT Climatology&quot;,
+      x = &quot;Month-Day of Year&quot;,
+      y = &quot;WBGT (°F)&quot;
+    ) +
+    theme(legend.position = &quot;bottom&quot;) +
+    theme_bw()</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatology_single-1.png" width="672" /></p>
+</div>
+<div id="all-plots" class="section level3">
+<h3>All plots</h3>
 <pre class="r"><code># Plot function
 climatology_plot &lt;- function(df) {
   df %&gt;%
     ungroup() %&gt;% 
-    dplyr::select(-c(month, day, sd_tmp, sd_hi, sd_wbgt)) %&gt;% 
+    dplyr::select(-c(month, day, sd_tmp, sd_hi, sd_wbgt)) %&gt;%
+    mutate(mon_day = paste0(&quot;2019&quot;, &quot;-&quot;, mon_day),
+           mon_day = as.Date(mon_day)) %&gt;% 
     gather(., key = &quot;variable&quot;, value = &quot;value&quot;, mean_tmp:wbgt_95th) %&gt;% 
-    ggplot(aes(x = mon_day, y = value, color = variable, group = 1)) + 
-    geom_line() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 6)) +
+    na.omit(mon_day) %&gt;%   # Feb 29 coded as NA &quot;leap year&quot;
+    filter(variable == c(&quot;max_wbgt&quot;, &quot;mean_wbgt&quot;, &quot;min_wbgt&quot;, &quot;wbgt_95th&quot;)) %&gt;% 
+    ggplot(aes(x = mon_day, y = value, color = variable)) + 
+    geom_smooth(alpha = 0.1) +
+    geom_point() +
+    scale_x_date(labels = date_format(&quot;%b-%d&quot;),
+               breaks = date_breaks(&quot;months&quot;)) +
+    labs(
+      title = &quot;WBGT Climatology&quot;,
+      x = &quot;Month-Day of Year&quot;,
+      y = &quot;WBGT (°F)&quot;
+    ) +
     theme(legend.position = &quot;bottom&quot;) +
     theme_bw()
 }
 
 # Map plot function over list
 
-map(nldas_climatology$climatology, climatology_plot)
+names(nldas_climatology$climatology) &lt;- nldas_climatology$installation
+  
 
-
-
-nldas_climatology$climatology[1] %&gt;%
-    dplyr::select(-c(month, day, sd_tmp, sd_hi, sd_wbgt)) %&gt;% 
-    gather(., key = &quot;variable&quot;, value = &quot;value&quot;, mean_tmp:wbgt_95th) %&gt;% 
-    ggplot(aes(x = mon_day, y = value, color = variable, group = 1)) + 
-    geom_line() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 6)) +
-    theme(legend.position = &quot;bottom&quot;) +
-    theme_bw()</code></pre>
+map(nldas_climatology$climatology, climatology_plot)</code></pre>
+<pre><code>## $eglin_afb</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-1.png" width="672" /></p>
+<pre><code>## 
+## $fort_benning_ga</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-2.png" width="672" /></p>
+<pre><code>## 
+## $fort_bliss</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-3.png" width="672" /></p>
+<pre><code>## 
+## $fort_bragg</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-4.png" width="672" /></p>
+<pre><code>## 
+## $fort_campbell</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-5.png" width="672" /></p>
+<pre><code>## 
+## $fort_carson</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-6.png" width="672" /></p>
+<pre><code>## 
+## $fort_drum</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-7.png" width="672" /></p>
+<pre><code>## 
+## $fort_gordon</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-8.png" width="672" /></p>
+<pre><code>## 
+## $fort_hood</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-9.png" width="672" /></p>
+<pre><code>## 
+## $fort_jackson</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-10.png" width="672" /></p>
+<pre><code>## 
+## $fort_leonard_wood</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-11.png" width="672" /></p>
+<pre><code>## 
+## $fort_lewis</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-12.png" width="672" /></p>
+<pre><code>## 
+## $fort_polk</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-13.png" width="672" /></p>
+<pre><code>## 
+## $fort_riley</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-14.png" width="672" /></p>
+<pre><code>## 
+## $fort_sam_houston</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-15.png" width="672" /></p>
+<pre><code>## 
+## $fort_sill</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-16.png" width="672" /></p>
+<pre><code>## 
+## $fort_stewart</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-17.png" width="672" /></p>
+<pre><code>## 
+## $lackland_afb</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-18.png" width="672" /></p>
+<pre><code>## 
+## $mcb_camp_lejeune</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-19.png" width="672" /></p>
+<pre><code>## 
+## $mcb_camp_pendleton</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-20.png" width="672" /></p>
+<pre><code>## 
+## $mcb_quantico</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-21.png" width="672" /></p>
+<pre><code>## 
+## $mcrd_beaufort_parris_island</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-22.png" width="672" /></p>
+<pre><code>## 
+## $mcrd_san_diego</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-23.png" width="672" /></p>
+<pre><code>## 
+## $ntc_and_fort_irwin</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-24.png" width="672" /></p>
+<pre><code>## 
+## $twentynine_palms_main_base</code></pre>
+<pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
+<p><img src="climatology_files/figure-html/plot_climatologies_map-25.png" width="672" /></p>
+</div>
 </div>
 
 
