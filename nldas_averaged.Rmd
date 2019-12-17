@@ -67,31 +67,23 @@ nldas_tsibble <-
 ### Averaged from hourly to daily
 ```{r nldas_daily}
 
+
 nldas_daily <-
   nldas_tsibble %>% 
     tsibble::group_by_key() %>%
     tsibble::index_by(date = ~ as.Date(.)) %>% # daily aggregates
-    dplyr::summarise(
-                mean_tmp = mean(tmp_f),
-                max_tmp = max(tmp_f),
-                min_tmp = min(tmp_f),
-                sd_tmp = sd(tmp_f),
-                mean_hi = mean(heat_index),
-                max_hi = max(heat_index),
-                min_hi = min(heat_index),
-                sd_hi = sd(heat_index),
-                mean_wbgt = mean(wbgt_f),
-                max_wbgt = max(wbgt_f),
-                min_wbgt = max(wbgt_f),
-                sd_wbgt = sd(wbgt_f)
-      ) %>% 
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = "mean", max = "max", min = "min", sd = "sd")) %>% 
   filter(date >= date("1990-01-01"))
-  
+
+
+
 nldas_daily
 
 nldas_daily %>% 
   filter(date >= date("2019-07-01")) %>% 
-    autoplot(mean_wbgt)
+    autoplot(wbgt_f_mean)
 
 ```
 
@@ -103,27 +95,16 @@ nldas_monthly <-
   nldas_tsibble %>% 
     tsibble::group_by_key() %>%
     tsibble::index_by(year_month = ~ yearmonth(.)) %>% # daily aggregates
-    dplyr::summarise(
-                mean_tmp = mean(tmp_f),
-                max_tmp = max(tmp_f),
-                min_tmp = min(tmp_f),
-                sd_tmp = sd(tmp_f),
-                mean_hi = mean(heat_index),
-                max_hi = max(heat_index),
-                min_hi = min(heat_index),
-                sd_hi = sd(heat_index),
-                mean_wbgt = mean(wbgt_f),
-                max_wbgt = max(wbgt_f),
-                min_wbgt = max(wbgt_f),
-                sd_wbgt = sd(wbgt_f)
-      ) %>% 
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = "mean", max = "max", min = "min", sd = "sd")) %>% 
   filter(year_month >= date("1990-01-01"))
   
 nldas_monthly
 
 nldas_monthly %>% 
   filter(year_month >= date("2018-01-01")) %>% 
-    autoplot(mean_wbgt)
+    autoplot(wbgt_f_mean)
 
 ```
 
@@ -134,25 +115,160 @@ nldas_annual <-
   nldas_tsibble %>% 
     tsibble::group_by_key() %>%
     tsibble::index_by(year = ~ lubridate::year(.)) %>% # daily aggregates
-    dplyr::summarise(
-                mean_tmp = mean(tmp_f),
-                max_tmp = max(tmp_f),
-                min_tmp = min(tmp_f),
-                sd_tmp = sd(tmp_f),
-                mean_hi = mean(heat_index),
-                max_hi = max(heat_index),
-                min_hi = min(heat_index),
-                sd_hi = sd(heat_index),
-                mean_wbgt = mean(wbgt_f),
-                max_wbgt = max(wbgt_f),
-                min_wbgt = max(wbgt_f),
-                sd_wbgt = sd(wbgt_f)
-      ) %>% 
+    dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(mean = "mean", max = "max", min = "min", sd = "sd")) %>% 
   filter(!year %in% "1989")
   
 nldas_annual
 
 nldas_annual %>% 
-    autoplot(mean_wbgt)
+    autoplot(wbgt_f_mean)
+```
+
+## Annual Heat Risk Days
+
+Counts of days per year above Heat Index and WBGT category limits.
+
+Heat Index groups: maximum daily heat index above 80, 90, 103, 125°F  
+
+WBGT groups: maximum daily WBGT above 82, 85, 88, 90°F  
+
+```{r, heat_risk_days}
+
+heat_risk_days <-
+  nldas_daily %>% 
+    group_by(installation) %>% 
+    index_by(year = lubridate::year(date)) %>% 
+      summarise(
+        days_hi_g80 = sum(heat_index_max > 80),
+        days_hi_g90 = sum(heat_index_max > 90),
+        days_hi_g103 = sum(heat_index_max > 103),
+        days_hi_g125 = sum(heat_index_max > 125),
+        days_wbgt_gt82 = sum(wbgt_f_max > 82),
+        days_wbgt_gt85 = sum(wbgt_f_max > 85),
+        days_wbgt_gt88 = sum(wbgt_f_max > 88),
+        days_wbgt_gt90 = sum(wbgt_f_max > 90)
+      )
+  
+heat_risk_days
+
+
+```
+
+### Boxplots of heat risk day counts per year 
+```{r heat_risk_boxplot}
+
+heat_risk_days %>% 
+  gather(key = "metric", value = "count", days_hi_g80:days_wbgt_gt90) %>%
+  filter(metric == c("days_hi_g90", "days_wbgt_gt85")) %>%
+  ggplot(aes(x = fct_reorder(installation, count), y = count, fill = metric)) +
+    geom_boxplot() +
+    coord_flip() +
+    theme_bw() +
+    theme(legend.position = "bottom")
+
+```
+
+
+### Bar chart heat risk day counts per year 
+```{r heat_risk_plot_by_year, , fig.width = 12, fig.height = 24}
+
+heat_risk_days %>%
+  filter(!year %in% "1989") %>% 
+  gather(key = "metric", value = "count", days_hi_g80:days_wbgt_gt90) %>% 
+  ggplot(aes(x = year, y = count, fill = metric)) +
+    geom_col(position = "dodge") +
+    facet_wrap(~ installation, ncol = 1) +
+    theme_bw() +
+    theme(strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm"))) +
+    theme(legend.position = "bottom")
+
+
+```
+
+### Annual heat risk days trend: Heat Index
+```{r heat_risk_day_trend}
+
+heat_risk_days %>%
+  filter(!year %in% "1989") %>%
+  gather(key = "metric", value = "count", days_hi_g80:days_wbgt_gt90) %>%
+  filter(metric == "days_hi_g90") %>% 
+  ggplot(aes(x = year, y = count, color = installation)) +
+  geom_point() +
+  geom_smooth(size = 0.5, method = lm, se = FALSE) +
+  labs(
+    title = "Heat Risk Days: Heat Index Above 90°F",
+    x = "Year",
+    y = "Days with Heat Index > 90°F") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+### Annual heat risk days trend: WBGT
+
+```{r heat_risk_day_trend_wbgt}
+
+heat_risk_days %>%
+  filter(!year %in% "1989") %>%
+  gather(key = "metric", value = "count", days_hi_g80:days_wbgt_gt90) %>% 
+  filter(metric == "days_wbgt_gt85") %>% 
+  ggplot(aes(x = year, y = count, color = installation)) +
+  geom_point() +
+  geom_smooth(size = 0.5, method = lm, se = FALSE) +
+  labs(
+    title = "Heat Risk Days: WBGT Above 85°F",
+    x = "Year",
+    y = "Days with WBGT > 85°F") +
+  theme_bw() +
+  theme(legend.position = "bottom")
+
+```
+
+
+## Annual Heat Risk Hours
+
+Counts of days per year above Heat Index and WBGT category limits.
+
+Heat Index groups: hourly heat index above 80, 90, 103, 125°F  
+
+WBGT groups: hourly WBGT above 82, 85, 88, 90°F  
+
+
+
+```{r heat_risk_hours}
+
+heat_risk_hours <-
+  nldas_tsibble %>% 
+    group_by(installation) %>% 
+    index_by(year = lubridate::year(local_dttm)) %>% 
+      summarise(
+        hours_hi_g80 = sum(heat_index > 80),
+        hours_hi_g90 = sum(heat_index > 90),
+        hours_hi_g103 = sum(heat_index > 103),
+        hours_hi_g125 = sum(heat_index > 125),
+        hours_wbgt_gt82 = sum(wbgt_f > 82),
+        hours_wbgt_gt85 = sum(wbgt_f > 85),
+        hours_wbgt_gt88 = sum(wbgt_f > 88),
+        hours_wbgt_gt90 = sum(wbgt_f > 90)
+      )
+
+heat_risk_hours
+```
+
+
+### Boxplots of heat risk hour counts per year 
+```{r heat_risk_hours_boxplot}
+
+heat_risk_hours %>%
+  filter(!year %in% "1989") %>% 
+  gather(key = "metric", value = "count", hours_hi_g80:hours_wbgt_gt90) %>%
+  filter(metric == c("hours_hi_g90", "hours_wbgt_gt85")) %>%
+  ggplot(aes(x = fct_reorder(installation, count), y = count, fill = metric)) +
+    geom_boxplot() +
+    coord_flip() +
+    theme_bw() +
+    theme(legend.position = "bottom")
+
 ```
 
