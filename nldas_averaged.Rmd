@@ -141,10 +141,10 @@ heat_risk_days <-
     group_by(installation) %>% 
     index_by(year = lubridate::year(date)) %>% 
       summarise(
-        days_hi_g80 = sum(heat_index_max > 80),
-        days_hi_g90 = sum(heat_index_max > 90),
-        days_hi_g103 = sum(heat_index_max > 103),
-        days_hi_g125 = sum(heat_index_max > 125),
+        days_hi_gt80 = sum(heat_index_max > 80),
+        days_hi_gt90 = sum(heat_index_max > 90),
+        days_hi_gt103 = sum(heat_index_max > 103),
+        days_hi_gt125 = sum(heat_index_max > 125),
         days_wbgt_gt82 = sum(wbgt_f_max > 82),
         days_wbgt_gt85 = sum(wbgt_f_max > 85),
         days_wbgt_gt88 = sum(wbgt_f_max > 88),
@@ -160,8 +160,8 @@ heat_risk_days
 ```{r heat_risk_boxplot}
 
 heat_risk_days %>% 
-  gather(key = "metric", value = "count", days_hi_g80:days_wbgt_gt90) %>%
-  filter(metric == c("days_hi_g90", "days_wbgt_gt85")) %>%
+  gather(key = "metric", value = "count", days_hi_gt80:days_wbgt_gt90) %>%
+  filter(metric == c("days_hi_gt90", "days_wbgt_gt85")) %>%
   ggplot(aes(x = fct_reorder(installation, count), y = count, fill = metric)) +
     geom_boxplot() +
     coord_flip() +
@@ -176,7 +176,7 @@ heat_risk_days %>%
 
 heat_risk_days %>%
   filter(!year %in% "1989") %>% 
-  gather(key = "metric", value = "count", days_hi_g80:days_wbgt_gt90) %>% 
+  gather(key = "metric", value = "count", days_hi_gt80:days_wbgt_gt90) %>% 
   ggplot(aes(x = year, y = count, fill = metric)) +
     geom_col(position = "dodge") +
     facet_wrap(~ installation, ncol = 1) +
@@ -192,8 +192,8 @@ heat_risk_days %>%
 
 heat_risk_days %>%
   filter(!year %in% "1989") %>%
-  gather(key = "metric", value = "count", days_hi_g80:days_wbgt_gt90) %>%
-  filter(metric == "days_hi_g90") %>% 
+  gather(key = "metric", value = "count", days_hi_gt80:days_wbgt_gt90) %>%
+  filter(metric == "days_hi_gt90") %>% 
   ggplot(aes(x = year, y = count, color = installation)) +
   geom_point() +
   geom_smooth(size = 0.5, method = lm, se = FALSE) +
@@ -211,7 +211,7 @@ heat_risk_days %>%
 
 heat_risk_days %>%
   filter(!year %in% "1989") %>%
-  gather(key = "metric", value = "count", days_hi_g80:days_wbgt_gt90) %>% 
+  gather(key = "metric", value = "count", days_hi_gt80:days_wbgt_gt90) %>% 
   filter(metric == "days_wbgt_gt85") %>% 
   ggplot(aes(x = year, y = count, color = installation)) +
   geom_point() +
@@ -243,10 +243,10 @@ heat_risk_hours <-
     group_by(installation) %>% 
     index_by(year = lubridate::year(local_dttm)) %>% 
       summarise(
-        hours_hi_g80 = sum(heat_index > 80),
-        hours_hi_g90 = sum(heat_index > 90),
-        hours_hi_g103 = sum(heat_index > 103),
-        hours_hi_g125 = sum(heat_index > 125),
+        hours_hi_gt80 = sum(heat_index > 80),
+        hours_hi_gt90 = sum(heat_index > 90),
+        hours_hi_gt103 = sum(heat_index > 103),
+        hours_hi_gt125 = sum(heat_index > 125),
         hours_wbgt_gt82 = sum(wbgt_f > 82),
         hours_wbgt_gt85 = sum(wbgt_f > 85),
         hours_wbgt_gt88 = sum(wbgt_f > 88),
@@ -262,7 +262,7 @@ heat_risk_hours
 
 heat_risk_hours %>%
   filter(!year %in% "1989") %>% 
-  gather(key = "metric", value = "count", hours_hi_g80:hours_wbgt_gt90) %>%
+  gather(key = "metric", value = "count", hours_hi_gt80:hours_wbgt_gt90) %>%
   filter(metric == c("hours_hi_g90", "hours_wbgt_gt85")) %>%
   ggplot(aes(x = fct_reorder(installation, count), y = count, fill = metric)) +
     geom_boxplot() +

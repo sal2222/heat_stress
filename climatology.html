@@ -504,6 +504,8 @@ nldas_wide &lt;-
 <h2>Construct climatology (1990-2018)</h2>
 <pre class="r"><code>#Construct climatology (1990-2018)
 
+# Create month and day columns, restrict years
+
 nldas_wide &lt;-
   nldas_wide %&gt;% 
   filter(lubridate::year(local_dttm) &lt; 2019 &amp;
@@ -526,7 +528,8 @@ nldas_wide</code></pre>
 ##  9 fort_hood       1990-01-01 00:00:00  58.4       58.4   57.2     1     1
 ## 10 fort_jackson    1990-01-01 00:00:00  23.2       23.2   20.6     1     1
 ## # ... with 6,355,190 more rows</code></pre>
-<pre class="r"><code>nest_nldas &lt;-
+<pre class="r"><code># Nest by installation
+nest_nldas &lt;-
   nldas_wide %&gt;% 
     nest(., data = local_dttm:day)
 
@@ -560,28 +563,45 @@ nest_nldas</code></pre>
 ##  9 eglin_afb    1990-01-01 08:00:00  46.0       43.7   44.8     1     1
 ## 10 eglin_afb    1990-01-01 09:00:00  46.0       43.5   46.1     1     1
 ## # ... with 254,198 more rows</code></pre>
-<pre class="r"><code>climatology_function &lt;- function(df) {
+<pre class="r"><code># Define Percentile Functions 
+  # https://tbradley1013.github.io/2018/10/01/calculating-quantiles-for-groups-with-dplyr-summarize-and-purrr-partial/
+
+percentiles &lt;- c(0.85, 0.9, 0.95)
+
+percentile_names &lt;- map_chr(percentiles, ~paste0(.x * 100, &quot;%&quot;))
+
+percentile_funs &lt;- map(percentiles, ~partial(quantile, probs = .x, na.rm = TRUE)) %&gt;% 
+  set_names(nm = percentile_names)
+
+percentile_funs</code></pre>
+<pre><code>## $`85%`
+## &lt;partialised&gt;
+## function (...) 
+## quantile(probs = .x, na.rm = TRUE, ...)
+## 
+## $`90%`
+## &lt;partialised&gt;
+## function (...) 
+## quantile(probs = .x, na.rm = TRUE, ...)
+## 
+## $`95%`
+## &lt;partialised&gt;
+## function (...) 
+## quantile(probs = .x, na.rm = TRUE, ...)</code></pre>
+<pre class="r"><code># Climatology (daily) function
+
+climatology_function &lt;- function(df) {
   df %&gt;% 
     group_by(month, day) %&gt;% 
-        summarise(mean_tmp = mean(tmp_f),
-                  max_tmp = max(tmp_f),
-                  min_tmp = min(tmp_f),
-                  sd_tmp = sd(tmp_f),
-                  tmp_95th = quantile(tmp_f, probs = 0.95),
-                  mean_hi = mean(heat_index),
-                  max_hi = max(heat_index),
-                  min_hi = min(heat_index),
-                  sd_hi = sd(heat_index),
-                  hi_95th = quantile(heat_index, probs = 0.95),
-                  mean_wbgt = mean(wbgt_f),
-                  max_wbgt = max(wbgt_f),
-                  min_wbgt = min(wbgt_f),
-                  sd_wbgt = sd(wbgt_f),
-                  wbgt_95th = quantile(wbgt_f, probs = 0.95) 
-            ) %&gt;% 
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = &quot;mean&quot;, max = &quot;max&quot;, min = &quot;min&quot;, sd = &quot;sd&quot;, percentile_funs)) %&gt;% 
     unite(mon_day, month:day, sep = &quot;-&quot;, remove = FALSE)
 }
 
+      ## Percentiles are averaged over all daily temperatures, not daily maximums
+
+# Map climatology function
 
 nldas_climatology &lt;- 
   nest_nldas %&gt;% 
@@ -593,35 +613,546 @@ nldas_climatology</code></pre>
 <pre><code>## # A tibble: 25 x 3
 ##    installation              data climatology        
 ##    &lt;chr&gt;           &lt;list&lt;df[,6]&gt;&gt; &lt;list&gt;             
-##  1 eglin_afb        [254,208 x 6] &lt;tibble [366 x 18]&gt;
-##  2 fort_benning_ga  [254,208 x 6] &lt;tibble [366 x 18]&gt;
-##  3 fort_bliss       [254,208 x 6] &lt;tibble [366 x 18]&gt;
-##  4 fort_bragg       [254,208 x 6] &lt;tibble [366 x 18]&gt;
-##  5 fort_campbell    [254,208 x 6] &lt;tibble [366 x 18]&gt;
-##  6 fort_carson      [254,208 x 6] &lt;tibble [366 x 18]&gt;
-##  7 fort_drum        [254,208 x 6] &lt;tibble [366 x 18]&gt;
-##  8 fort_gordon      [254,208 x 6] &lt;tibble [366 x 18]&gt;
-##  9 fort_hood        [254,208 x 6] &lt;tibble [366 x 18]&gt;
-## 10 fort_jackson     [254,208 x 6] &lt;tibble [366 x 18]&gt;
+##  1 eglin_afb        [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  2 fort_benning_ga  [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  3 fort_bliss       [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  4 fort_bragg       [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  5 fort_campbell    [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  6 fort_carson      [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  7 fort_drum        [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  8 fort_gordon      [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  9 fort_hood        [254,208 x 6] &lt;tibble [366 x 24]&gt;
+## 10 fort_jackson     [254,208 x 6] &lt;tibble [366 x 24]&gt;
 ## # ... with 15 more rows</code></pre>
 <pre class="r"><code>nldas_climatology$climatology[[1]]</code></pre>
-<pre><code>## # A tibble: 366 x 18
+<pre><code>## # A tibble: 366 x 24
 ## # Groups:   month [12]
-##    mon_day month   day mean_tmp max_tmp min_tmp sd_tmp tmp_95th mean_hi max_hi
-##    &lt;chr&gt;   &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
-##  1 1-1         1     1     55.4    74.6    28.6   10.4     70.2    54.9   75.7
-##  2 1-2         1     2     54.4    74.1    26.1   11.9     71.1    53.9   75.1
-##  3 1-3         1     3     51.3    75.1    26.0   13.1     71.1    50.7   75.8
-##  4 1-4         1     4     51.6    75.3    28.7   12.6     70.9    50.8   75.9
-##  5 1-5         1     5     53.4    74.7    23.8   11.8     68.9    52.8   75.6
-##  6 1-6         1     6     54.2    75.2    26.0   10.8     70.1    53.5   76.0
-##  7 1-7         1     7     51.9    74.2    20.3   11.9     68.5    51.2   75.3
-##  8 1-8         1     8     51.7    73.0    21.3   12.5     68.3    51.1   73.6
-##  9 1-9         1     9     53.8    75.4    24.4   11.6     69.3    53.3   76.2
-## 10 1-10        1    10     54.2    76.6    26.6   11.3     69.8    53.6   77.4
-## # ... with 356 more rows, and 8 more variables: min_hi &lt;dbl&gt;, sd_hi &lt;dbl&gt;,
-## #   hi_95th &lt;dbl&gt;, mean_wbgt &lt;dbl&gt;, max_wbgt &lt;dbl&gt;, min_wbgt &lt;dbl&gt;,
-## #   sd_wbgt &lt;dbl&gt;, wbgt_95th &lt;dbl&gt;</code></pre>
+##    mon_day month   day tmp_f_mean heat_index_mean wbgt_f_mean tmp_f_max
+##    &lt;chr&gt;   &lt;dbl&gt; &lt;int&gt;      &lt;dbl&gt;           &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
+##  1 1-1         1     1       55.4            54.9        54.1      74.6
+##  2 1-2         1     2       54.4            53.9        53.1      74.1
+##  3 1-3         1     3       51.3            50.7        49.8      75.1
+##  4 1-4         1     4       51.6            50.8        50.2      75.3
+##  5 1-5         1     5       53.4            52.8        52.3      74.7
+##  6 1-6         1     6       54.2            53.5        52.9      75.2
+##  7 1-7         1     7       51.9            51.2        50.6      74.2
+##  8 1-8         1     8       51.7            51.1        50.5      73.0
+##  9 1-9         1     9       53.8            53.3        52.6      75.4
+## 10 1-10        1    10       54.2            53.6        53.0      76.6
+## # ... with 356 more rows, and 17 more variables: heat_index_max &lt;dbl&gt;,
+## #   wbgt_f_max &lt;dbl&gt;, tmp_f_min &lt;dbl&gt;, heat_index_min &lt;dbl&gt;, wbgt_f_min &lt;dbl&gt;,
+## #   tmp_f_sd &lt;dbl&gt;, heat_index_sd &lt;dbl&gt;, wbgt_f_sd &lt;dbl&gt;, `tmp_f_85%` &lt;dbl&gt;,
+## #   `heat_index_85%` &lt;dbl&gt;, `wbgt_f_85%` &lt;dbl&gt;, `tmp_f_90%` &lt;dbl&gt;,
+## #   `heat_index_90%` &lt;dbl&gt;, `wbgt_f_90%` &lt;dbl&gt;, `tmp_f_95%` &lt;dbl&gt;,
+## #   `heat_index_95%` &lt;dbl&gt;, `wbgt_f_95%` &lt;dbl&gt;</code></pre>
+</div>
+<div id="anomalies-daily" class="section level2">
+<h2>Anomalies (Daily)</h2>
+<div id="daily-anomaly-mean" class="section level3">
+<h3>Daily anomaly (mean)</h3>
+<p>Mean daily temperature/index compared to the mean of the temperatures over the climatology period on the same day of year.</p>
+<pre class="r"><code># Single Installation
+
+## Mean daily anomalies
+nldas_climatology$data[[1]] %&gt;% 
+  mutate(date = as.Date(local_dttm)) %&gt;% 
+  group_by(date) %&gt;% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = &quot;mean&quot;)) %&gt;%
+    ungroup() %&gt;%
+    mutate(month = month(date),
+           day = day(date)) %&gt;% 
+    left_join(., nldas_climatology$climatology[[1]], by = c(&quot;month&quot;, &quot;day&quot;)) %&gt;% 
+    mutate(tmp_f_mean_anomaly = tmp_f_mean.x - tmp_f_mean.y, 
+            heat_index_mean_anomaly = heat_index_mean.x - heat_index_mean.y,
+            wbgt_f_mean_anomaly = wbgt_f_mean.x - wbgt_f_mean.y) %&gt;% 
+  dplyr::select(date, tmp_f_mean_anomaly, heat_index_mean_anomaly, wbgt_f_mean_anomaly)</code></pre>
+<pre><code>## # A tibble: 10,592 x 4
+##    date       tmp_f_mean_anomaly heat_index_mean_anomaly wbgt_f_mean_anomaly
+##    &lt;date&gt;                  &lt;dbl&gt;                   &lt;dbl&gt;               &lt;dbl&gt;
+##  1 1990-01-01             -7.49                  -9.21                 -8.33
+##  2 1990-01-02             -6.61                  -8.40                 -8.19
+##  3 1990-01-03              4.46                   4.26                  4.46
+##  4 1990-01-04              8.41                   9.07                  9.04
+##  5 1990-01-05              7.32                   8.00                  7.78
+##  6 1990-01-06              6.31                   6.96                  7.04
+##  7 1990-01-07              8.68                   9.50                  9.32
+##  8 1990-01-08              0.580                  0.0591                1.11
+##  9 1990-01-09             -2.29                  -3.03                 -2.05
+## 10 1990-01-10              1.92                   1.58                  1.81
+## # ... with 10,582 more rows</code></pre>
+<pre class="r"><code># Function
+### Daily Mean
+anomaly_daily_mean_function &lt;- function(data, climatology) {
+data %&gt;% 
+  mutate(date = as.Date(local_dttm)) %&gt;% 
+  group_by(date) %&gt;% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = &quot;mean&quot;)) %&gt;%
+    mutate(month = month(date),
+           day = day(date)) %&gt;% 
+    left_join(., climatology, by = c(&quot;month&quot;, &quot;day&quot;)) %&gt;% 
+    mutate(tmp_f_mean_anomaly = tmp_f_mean.x - tmp_f_mean.y, 
+            heat_index_mean_anomaly = heat_index_mean.x - heat_index_mean.y,
+            wbgt_f_mean_anomaly = wbgt_f_mean.x - wbgt_f_mean.y) %&gt;% 
+  dplyr::select(date, tmp_f_mean_anomaly, heat_index_mean_anomaly, wbgt_f_mean_anomaly) %&gt;% 
+  group_by(year = lubridate::year(date)) %&gt;% 
+       summarise_at(
+         .vars = vars(tmp_f_mean_anomaly, heat_index_mean_anomaly, wbgt_f_mean_anomaly),
+            .funs = c(mean = &quot;mean&quot;)) 
+}
+
+
+nldas_climatology &lt;-
+  nldas_climatology %&gt;% 
+    mutate(anomaly_daily_mean =
+        map2(.x = nldas_climatology$data, .y = nldas_climatology$climatology, .f = anomaly_daily_mean_function))
+
+nldas_climatology</code></pre>
+<pre><code>## # A tibble: 25 x 4
+##    installation              data climatology         anomaly_daily_mean
+##    &lt;chr&gt;           &lt;list&lt;df[,6]&gt;&gt; &lt;list&gt;              &lt;list&gt;            
+##  1 eglin_afb        [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  2 fort_benning_ga  [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  3 fort_bliss       [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  4 fort_bragg       [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  5 fort_campbell    [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  6 fort_carson      [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  7 fort_drum        [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  8 fort_gordon      [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  9 fort_hood        [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+## 10 fort_jackson     [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code>nldas_climatology$anomaly_daily_mean[1]</code></pre>
+<pre><code>## [[1]]
+## # A tibble: 29 x 4
+##     year tmp_f_mean_anomaly_me~ heat_index_mean_anomaly_~ wbgt_f_mean_anomaly_m~
+##    &lt;dbl&gt;                  &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
+##  1  1990                 1.16                       1.14                  0.928 
+##  2  1991                 0.366                      0.304                 0.200 
+##  3  1992                -0.853                     -1.37                 -1.06  
+##  4  1993                -0.724                     -0.908                -1.00  
+##  5  1994                -0.0144                    -0.486                -0.0829
+##  6  1995                -0.218                     -0.232                -0.398 
+##  7  1996                -0.955                     -1.20                 -1.07  
+##  8  1997                -0.486                     -0.664                -0.566 
+##  9  1998                 1.20                       1.60                  1.10  
+## 10  1999                 0.297                      0.161                -0.0552
+## # ... with 19 more rows</code></pre>
+</div>
+<div id="daily-anomaly-maximum" class="section level3">
+<h3>Daily anomaly (maximum)</h3>
+<p>Maximum daily temperature/index compared to the mean of the maximum daily temperatures on the same day of year over the climatology period.</p>
+<pre class="r"><code>left_join(
+nldas_climatology$data[[1]] %&gt;% 
+  mutate(date = as.Date(local_dttm)) %&gt;% 
+  group_by(date) %&gt;% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(max = &quot;max&quot;)) %&gt;%
+    mutate(month = month(date),
+           day = day(date)),
+
+nldas_climatology$data[[1]] %&gt;% 
+  mutate(date = as.Date(local_dttm)) %&gt;% 
+  group_by(date) %&gt;% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(max = &quot;max&quot;)) %&gt;%
+    mutate(month = month(date),
+           day = day(date)) %&gt;% 
+  group_by(month, day) %&gt;% 
+     summarise(mean_tmp_f_max = mean(tmp_f_max),
+               mean_heat_index_max = mean(heat_index_max),
+               mean_wbgt_f_max = mean(wbgt_f_max)),
+by = c(&quot;month&quot;, &quot;day&quot;)
+) %&gt;% 
+  mutate(tmp_f_max_anomaly = tmp_f_max - mean_tmp_f_max, 
+         heat_index_max_anomaly = heat_index_max - mean_heat_index_max,
+         wbgt_f_max_anomaly = wbgt_f_max - mean_wbgt_f_max) %&gt;% 
+   group_by(year = lubridate::year(date)) %&gt;% 
+   summarise_at(
+         .vars = vars(tmp_f_max_anomaly, heat_index_max_anomaly, wbgt_f_max_anomaly),
+            .funs = c(mean = &quot;mean&quot;)) </code></pre>
+<pre><code>## # A tibble: 29 x 4
+##     year tmp_f_max_anomaly_mean heat_index_max_anomaly_m~ wbgt_f_max_anomaly_me~
+##    &lt;dbl&gt;                  &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
+##  1  1990                 1.58                       1.56                   1.39 
+##  2  1991                -0.0538                    -0.111                 -0.174
+##  3  1992                -1.01                      -1.71                  -1.23 
+##  4  1993                -0.762                     -1.26                  -1.17 
+##  5  1994                -0.337                     -0.805                 -0.398
+##  6  1995                -0.238                     -0.373                 -0.572
+##  7  1996                -0.784                     -1.19                  -0.957
+##  8  1997                -1.20                      -1.53                  -0.932
+##  9  1998                 1.10                       1.53                   0.610
+## 10  1999                 0.617                      0.387                  0.196
+## # ... with 19 more rows</code></pre>
+<pre class="r"><code># Function
+### Daily Max
+anomaly_daily_max_function &lt;- function(data) {
+  left_join(
+    data %&gt;% 
+      mutate(date = as.Date(local_dttm)) %&gt;% 
+      group_by(date) %&gt;% # daily aggregates
+        dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(max = &quot;max&quot;)) %&gt;%
+        mutate(month = month(date),
+               day = day(date)),
+  
+    data %&gt;% 
+      mutate(date = as.Date(local_dttm)) %&gt;% 
+      group_by(date) %&gt;% # daily aggregates
+        dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(max = &quot;max&quot;)) %&gt;%
+        mutate(month = month(date),
+               day = day(date)) %&gt;% 
+      group_by(month, day) %&gt;% 
+         summarise(mean_tmp_f_max = mean(tmp_f_max),
+                   mean_heat_index_max = mean(heat_index_max),
+                   mean_wbgt_f_max = mean(wbgt_f_max)),
+    by = c(&quot;month&quot;, &quot;day&quot;)
+    ) %&gt;% 
+      mutate(tmp_f_max_anomaly = tmp_f_max - mean_tmp_f_max, 
+             heat_index_max_anomaly = heat_index_max - mean_heat_index_max,
+             wbgt_f_max_anomaly = wbgt_f_max - mean_wbgt_f_max) %&gt;% 
+       group_by(year = lubridate::year(date)) %&gt;% 
+       summarise_at(
+             .vars = vars(tmp_f_max_anomaly, heat_index_max_anomaly, wbgt_f_max_anomaly),
+                .funs = c(mean = &quot;mean&quot;)) 
+  }
+
+
+nldas_climatology &lt;-
+  nldas_climatology %&gt;% 
+    mutate(anomaly_daily_max =
+        map(.x = nldas_climatology$data, .f = anomaly_daily_max_function))
+
+nldas_climatology</code></pre>
+<pre><code>## # A tibble: 25 x 5
+##    installation            data climatology    anomaly_daily_m~ anomaly_daily_m~
+##    &lt;chr&gt;         &lt;list&lt;df[,6]&gt;&gt; &lt;list&gt;         &lt;list&gt;           &lt;list&gt;          
+##  1 eglin_afb      [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  2 fort_benning~  [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  3 fort_bliss     [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  4 fort_bragg     [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  5 fort_campbell  [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  6 fort_carson    [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  7 fort_drum      [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  8 fort_gordon    [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  9 fort_hood      [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+## 10 fort_jackson   [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code>nldas_climatology$anomaly_daily_max[1]</code></pre>
+<pre><code>## [[1]]
+## # A tibble: 29 x 4
+##     year tmp_f_max_anomaly_mean heat_index_max_anomaly_m~ wbgt_f_max_anomaly_me~
+##    &lt;dbl&gt;                  &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
+##  1  1990                 1.58                       1.56                   1.39 
+##  2  1991                -0.0538                    -0.111                 -0.174
+##  3  1992                -1.01                      -1.71                  -1.23 
+##  4  1993                -0.762                     -1.26                  -1.17 
+##  5  1994                -0.337                     -0.805                 -0.398
+##  6  1995                -0.238                     -0.373                 -0.572
+##  7  1996                -0.784                     -1.19                  -0.957
+##  8  1997                -1.20                      -1.53                  -0.932
+##  9  1998                 1.10                       1.53                   0.610
+## 10  1999                 0.617                      0.387                  0.196
+## # ... with 19 more rows</code></pre>
+</div>
+<div id="days-mean-temperature-index-above-climate-normal-percentile-averaged-over-all-hours-of-day" class="section level3">
+<h3>Days mean temperature index above climate normal percentile (averaged over all hours of day)</h3>
+<pre class="r"><code># Single installation
+
+nldas_climatology$data[[1]] %&gt;% 
+  mutate(date = as.Date(local_dttm)) %&gt;% 
+  group_by(date) %&gt;% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = &quot;mean&quot;, max = &quot;max&quot;, min = &quot;min&quot;)) %&gt;%
+    ungroup() %&gt;%
+    mutate(month = month(date),
+           day = day(date)) %&gt;% 
+    left_join(., nldas_climatology$climatology[[1]], by = c(&quot;month&quot;, &quot;day&quot;)) %&gt;% 
+    group_by(year = lubridate::year(date)) %&gt;% 
+     summarise(
+      days_tmp_gt85pct = sum(tmp_f_mean.x &gt; `tmp_f_85%`), 
+      days_tmp_gt90pct = sum(tmp_f_mean.x &gt; `tmp_f_90%`),  
+      days_tmp_gt95pct = sum(tmp_f_mean.x &gt; `tmp_f_95%`),
+      days_heat_index_gt85pct = sum(heat_index_mean.x &gt; `heat_index_85%`), 
+      days_heat_index_gt90pct = sum(heat_index_mean.x &gt; `heat_index_90%`),  
+      days_heat_index_gt95pct = sum(heat_index_mean.x &gt; `heat_index_95%`), 
+      days_wbgt_gt85pct = sum(wbgt_f_mean.x &gt; `wbgt_f_85%`), 
+      days_wbgt_gt90pct = sum(wbgt_f_mean.x &gt; `wbgt_f_90%`),  
+      days_wbgt_gt95pct = sum(wbgt_f_mean.x &gt; `wbgt_f_95%`)) </code></pre>
+<pre><code>## # A tibble: 29 x 10
+##     year days_tmp_gt85pct days_tmp_gt90pct days_tmp_gt95pct days_heat_index~
+##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
+##  1  1990               22               12                1               25
+##  2  1991               11                4                0               16
+##  3  1992                2                0                0                5
+##  4  1993                7                3                0                9
+##  5  1994               10                4                0               13
+##  6  1995                5                1                0               13
+##  7  1996               11                3                0               20
+##  8  1997               15                5                0               23
+##  9  1998               17                5                0               25
+## 10  1999               22                9                0               32
+## # ... with 19 more rows, and 5 more variables: days_heat_index_gt90pct &lt;int&gt;,
+## #   days_heat_index_gt95pct &lt;int&gt;, days_wbgt_gt85pct &lt;int&gt;,
+## #   days_wbgt_gt90pct &lt;int&gt;, days_wbgt_gt95pct &lt;int&gt;</code></pre>
+<pre class="r"><code># Function
+
+anomaly_days_function &lt;- function(data, climatology) {
+  data %&gt;% 
+    mutate(date = as.Date(local_dttm)) %&gt;% 
+    group_by(date) %&gt;% # daily aggregates
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(mean = &quot;mean&quot;, max = &quot;max&quot;, min = &quot;min&quot;)) %&gt;%
+      ungroup() %&gt;%
+      mutate(month = month(date),
+             day = day(date)) %&gt;% 
+      left_join(., climatology, by = c(&quot;month&quot;, &quot;day&quot;)) %&gt;% 
+      group_by(year = lubridate::year(date)) %&gt;% 
+       summarise(
+        days_tmp_gt85pct = sum(tmp_f_mean.x &gt; `tmp_f_85%`), 
+        days_tmp_gt90pct = sum(tmp_f_mean.x &gt; `tmp_f_90%`),  
+        days_tmp_gt95pct = sum(tmp_f_mean.x &gt; `tmp_f_95%`),
+        days_heat_index_gt85pct = sum(heat_index_mean.x &gt; `heat_index_85%`), 
+        days_heat_index_gt90pct = sum(heat_index_mean.x &gt; `heat_index_90%`),  
+        days_heat_index_gt95pct = sum(heat_index_mean.x &gt; `heat_index_95%`), 
+        days_wbgt_gt85pct = sum(wbgt_f_mean.x &gt; `wbgt_f_85%`), 
+        days_wbgt_gt90pct = sum(wbgt_f_mean.x &gt; `wbgt_f_90%`),  
+        days_wbgt_gt95pct = sum(wbgt_f_mean.x &gt; `wbgt_f_95%`)) 
+}
+
+nldas_climatology &lt;-
+  nldas_climatology %&gt;% 
+    mutate(anomaly_days_mean =
+        map2(.x = nldas_climatology$data, .y = nldas_climatology$climatology, .f = anomaly_days_function))
+
+nldas_climatology</code></pre>
+<pre><code>## # A tibble: 25 x 6
+##    installation          data climatology anomaly_daily_m~ anomaly_daily_m~
+##    &lt;chr&gt;        &lt;list&lt;df[,6]&gt; &lt;list&gt;      &lt;list&gt;           &lt;list&gt;          
+##  1 eglin_afb    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  2 fort_bennin~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  3 fort_bliss   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  4 fort_bragg   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  5 fort_campbe~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  6 fort_carson  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  7 fort_drum    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  8 fort_gordon  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  9 fort_hood    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+## 10 fort_jackson [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+## # ... with 15 more rows, and 1 more variable: anomaly_days_mean &lt;list&gt;</code></pre>
+<pre class="r"><code>nldas_climatology$anomaly_days_mean[1]</code></pre>
+<pre><code>## [[1]]
+## # A tibble: 29 x 10
+##     year days_tmp_gt85pct days_tmp_gt90pct days_tmp_gt95pct days_heat_index~
+##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
+##  1  1990               22               12                1               25
+##  2  1991               11                4                0               16
+##  3  1992                2                0                0                5
+##  4  1993                7                3                0                9
+##  5  1994               10                4                0               13
+##  6  1995                5                1                0               13
+##  7  1996               11                3                0               20
+##  8  1997               15                5                0               23
+##  9  1998               17                5                0               25
+## 10  1999               22                9                0               32
+## # ... with 19 more rows, and 5 more variables: days_heat_index_gt90pct &lt;int&gt;,
+## #   days_heat_index_gt95pct &lt;int&gt;, days_wbgt_gt85pct &lt;int&gt;,
+## #   days_wbgt_gt90pct &lt;int&gt;, days_wbgt_gt95pct &lt;int&gt;</code></pre>
+</div>
+<div id="days-max-temperature-index-above-max-daily-climate-normal-percentile" class="section level3">
+<h3>Days max temperature index above max daily climate normal percentile</h3>
+<pre class="r"><code># Single installation
+
+  left_join(
+      nldas_climatology$data[[1]]  %&gt;% 
+      group_by(date = date(local_dttm)) %&gt;% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = &quot;max&quot;)) %&gt;% 
+        mutate(month = month(date), day = day(date)), 
+      nldas_climatology$data[[1]] %&gt;% 
+      group_by(date = date(local_dttm)) %&gt;% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = &quot;max&quot;)) %&gt;% 
+    group_by(month = month(date), day = day(date)) %&gt;% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f_max, heat_index_max, wbgt_f_max),
+            .funs = percentile_funs), 
+    by = c(&quot;month&quot;, &quot;day&quot;)) %&gt;% 
+  group_by(year = lubridate::year(date)) %&gt;% 
+      dplyr::summarise(
+        days_tmp_max_gt85pct = sum(tmp_f_max &gt; `tmp_f_max_85%`), 
+        days_tmp_max_gt90pct = sum(tmp_f_max &gt; `tmp_f_max_90%`),  
+        days_tmp_max_gt95pct = sum(tmp_f_max &gt; `tmp_f_max_95%`),
+        days_heat_index_max_gt85pct = sum(heat_index_max &gt; `heat_index_max_85%`), 
+        days_heat_index_max_gt90pct = sum(heat_index_max &gt; `heat_index_max_90%`),  
+        days_heat_index_max_gt95pct = sum(heat_index_max &gt; `heat_index_max_95%`), 
+        days_wbgt_max_gt85pct = sum(wbgt_f_max &gt; `wbgt_f_max_85%`), 
+        days_wbgt_max_gt90pct = sum(wbgt_f_max &gt; `wbgt_f_max_90%`),  
+        days_wbgt_max_gt95pct = sum(wbgt_f_max &gt; `wbgt_f_max_95%`)) </code></pre>
+<pre><code>## # A tibble: 29 x 10
+##     year days_tmp_max_gt~ days_tmp_max_gt~ days_tmp_max_gt~ days_heat_index~
+##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
+##  1  1990               78               53               37               73
+##  2  1991               57               32               20               64
+##  3  1992               30               13                7               20
+##  4  1993               36               23               12               28
+##  5  1994               41               24               11               40
+##  6  1995               63               30               15               59
+##  7  1996               63               32               17               57
+##  8  1997               40               19               13               45
+##  9  1998              101               67               43               93
+## 10  1999               70               45               38               63
+## # ... with 19 more rows, and 5 more variables:
+## #   days_heat_index_max_gt90pct &lt;int&gt;, days_heat_index_max_gt95pct &lt;int&gt;,
+## #   days_wbgt_max_gt85pct &lt;int&gt;, days_wbgt_max_gt90pct &lt;int&gt;,
+## #   days_wbgt_max_gt95pct &lt;int&gt;</code></pre>
+<pre class="r"><code># Function: daily max anomalies
+
+anomaly_days_max_function &lt;- function(data) {
+   left_join(
+      data %&gt;% 
+        group_by(date = date(local_dttm)) %&gt;% 
+        dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(max = &quot;max&quot;)) %&gt;% 
+          mutate(month = month(date), day = day(date)), 
+      data %&gt;% 
+      group_by(date = date(local_dttm)) %&gt;% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = &quot;max&quot;)) %&gt;% 
+    group_by(month = month(date), day = day(date)) %&gt;% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f_max, heat_index_max, wbgt_f_max),
+            .funs = percentile_funs), 
+    by = c(&quot;month&quot;, &quot;day&quot;)) %&gt;% 
+  group_by(year = lubridate::year(date)) %&gt;% 
+      dplyr::summarise(
+        days_tmp_max_gt85pct = sum(tmp_f_max &gt; `tmp_f_max_85%`), 
+        days_tmp_max_gt90pct = sum(tmp_f_max &gt; `tmp_f_max_90%`),  
+        days_tmp_max_gt95pct = sum(tmp_f_max &gt; `tmp_f_max_95%`),
+        days_heat_index_max_gt85pct = sum(heat_index_max &gt; `heat_index_max_85%`), 
+        days_heat_index_max_gt90pct = sum(heat_index_max &gt; `heat_index_max_90%`),  
+        days_heat_index_max_gt95pct = sum(heat_index_max &gt; `heat_index_max_95%`), 
+        days_wbgt_max_gt85pct = sum(wbgt_f_max &gt; `wbgt_f_max_85%`), 
+        days_wbgt_max_gt90pct = sum(wbgt_f_max &gt; `wbgt_f_max_90%`),  
+        days_wbgt_max_gt95pct = sum(wbgt_f_max &gt; `wbgt_f_max_95%`)) 
+}
+  
+ 
+
+nldas_climatology &lt;-
+  nldas_climatology %&gt;% 
+    mutate(anomaly_days_max =
+        map(.x = nldas_climatology$data, .f = anomaly_days_max_function))
+
+
+nldas_climatology</code></pre>
+<pre><code>## # A tibble: 25 x 7
+##    installation          data climatology anomaly_daily_m~ anomaly_daily_m~
+##    &lt;chr&gt;        &lt;list&lt;df[,6]&gt; &lt;list&gt;      &lt;list&gt;           &lt;list&gt;          
+##  1 eglin_afb    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  2 fort_bennin~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  3 fort_bliss   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  4 fort_bragg   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  5 fort_campbe~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  6 fort_carson  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  7 fort_drum    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  8 fort_gordon  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  9 fort_hood    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+## 10 fort_jackson [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+## # ... with 15 more rows, and 2 more variables: anomaly_days_mean &lt;list&gt;,
+## #   anomaly_days_max &lt;list&gt;</code></pre>
+<pre class="r"><code>nldas_climatology$anomaly_days_max[1]</code></pre>
+<pre><code>## [[1]]
+## # A tibble: 29 x 10
+##     year days_tmp_max_gt~ days_tmp_max_gt~ days_tmp_max_gt~ days_heat_index~
+##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
+##  1  1990               78               53               37               73
+##  2  1991               57               32               20               64
+##  3  1992               30               13                7               20
+##  4  1993               36               23               12               28
+##  5  1994               41               24               11               40
+##  6  1995               63               30               15               59
+##  7  1996               63               32               17               57
+##  8  1997               40               19               13               45
+##  9  1998              101               67               43               93
+## 10  1999               70               45               38               63
+## # ... with 19 more rows, and 5 more variables:
+## #   days_heat_index_max_gt90pct &lt;int&gt;, days_heat_index_max_gt95pct &lt;int&gt;,
+## #   days_wbgt_max_gt85pct &lt;int&gt;, days_wbgt_max_gt90pct &lt;int&gt;,
+## #   days_wbgt_max_gt95pct &lt;int&gt;</code></pre>
+</div>
+</div>
+<div id="daily-anomaly-plots" class="section level2">
+<h2>Daily anomaly plots</h2>
+<div id="days-with-mean-temperature-exceeding-percentiles" class="section level3">
+<h3>Days with mean temperature exceeding percentiles</h3>
+<pre class="r"><code>nldas_climatology$anomaly_days_mean[[1]] %&gt;% 
+  gather(key = &quot;metric&quot;, value = &quot;num_days&quot;, days_tmp_gt85pct:days_wbgt_gt90pct) %&gt;% 
+  ggplot(aes(x = year, y = num_days, color = metric)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Eglin AFB Anomaly Days - mean temperatures&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Number of Days Exceeding Percentile&quot;
+    ) +
+    theme(legend.position = &quot;bottom&quot;) +
+    theme_bw()</code></pre>
+<p><img src="climatology_files/figure-html/anomaly_day_plot-1.png" width="672" /></p>
+<pre class="r"><code>nldas_climatology$anomaly_days_mean[[1]] %&gt;% 
+  gather(key = &quot;metric&quot;, value = &quot;num_days&quot;, days_tmp_gt85pct:days_wbgt_gt90pct) %&gt;% 
+  ggplot(aes(x = year, y = num_days, color = metric)) +
+    geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+    labs(
+      title = &quot;Eglin AFB Anomaly Days - mean temperatures&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Number of Days Exceeding Percentile&quot;
+    ) +
+    theme_bw()  </code></pre>
+<p><img src="climatology_files/figure-html/anomaly_day_plot-2.png" width="672" /></p>
+</div>
+<div id="days-with-maximum-temperature-exceeding-maximum-daily-percentiles" class="section level3">
+<h3>Days with maximum temperature exceeding maximum daily percentiles</h3>
+<pre class="r"><code>nldas_climatology$anomaly_days_max[[1]] %&gt;% 
+  gather(key = &quot;metric&quot;, value = &quot;num_days&quot;, days_tmp_max_gt85pct:days_wbgt_max_gt90pct) %&gt;% 
+  ggplot(aes(x = year, y = num_days, color = metric)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Eglin AFB Anomaly Days - maximum temperatures&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Number of Days Exceeding Percentile&quot;
+    ) +
+    theme(legend.position = &quot;bottom&quot;) +
+    theme_bw()</code></pre>
+<p><img src="climatology_files/figure-html/anomaly_day_max_plot-1.png" width="672" /></p>
+<pre class="r"><code>nldas_climatology$anomaly_days_max[[1]] %&gt;% 
+  gather(key = &quot;metric&quot;, value = &quot;num_days&quot;, days_tmp_max_gt85pct:days_wbgt_max_gt90pct) %&gt;% 
+  ggplot(aes(x = year, y = num_days, color = metric)) +
+    geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+    labs(
+      title = &quot;Eglin AFB Anomaly Days - maximum temperatures&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Number of Days Exceeding Percentile&quot;
+    ) +
+    theme_bw()  </code></pre>
+<p><img src="climatology_files/figure-html/anomaly_day_max_plot-2.png" width="672" /></p>
+</div>
 </div>
 <div id="plot-climatologies" class="section level2">
 <h2>Plot climatologies</h2>
@@ -629,12 +1160,12 @@ nldas_climatology</code></pre>
 <h3>Single plot</h3>
 <pre class="r"><code>nldas_climatology$climatology[[1]] %&gt;%
     ungroup() %&gt;% 
-    dplyr::select(-c(month, day, sd_tmp, sd_hi, sd_wbgt)) %&gt;%
+    dplyr::select(-c(month, day, tmp_f_sd, heat_index_sd, wbgt_f_sd)) %&gt;%
     mutate(mon_day = paste0(&quot;2019&quot;, &quot;-&quot;, mon_day),
            mon_day = as.Date(mon_day)) %&gt;% 
-    gather(., key = &quot;variable&quot;, value = &quot;value&quot;, mean_tmp:wbgt_95th) %&gt;% 
+    gather(., key = &quot;variable&quot;, value = &quot;value&quot;, tmp_f_mean:`wbgt_f_95%`) %&gt;% 
     na.omit(mon_day) %&gt;%   # Feb 29 coded as NA &quot;leap year&quot;
-    filter(variable == c(&quot;max_wbgt&quot;, &quot;mean_wbgt&quot;, &quot;min_wbgt&quot;, &quot;wbgt_95th&quot;)) %&gt;% 
+    filter(variable == c(&quot;wbgt_f_max&quot;, &quot;wbgt_f_mean&quot;, &quot;wbgt_f_min&quot;, &quot;wbgt_f_85%&quot;, &quot;wbgt_f_90%&quot;, &quot;wbgt_f_95%&quot;)) %&gt;% 
     ggplot(aes(x = mon_day, y = value, color = variable)) + 
     geom_smooth(alpha = 0.1) +
     geom_point() +
@@ -656,12 +1187,12 @@ nldas_climatology</code></pre>
 climatology_plot &lt;- function(df) {
   df %&gt;%
     ungroup() %&gt;% 
-    dplyr::select(-c(month, day, sd_tmp, sd_hi, sd_wbgt)) %&gt;%
+    dplyr::select(-c(month, day, tmp_f_sd, heat_index_sd, wbgt_f_sd)) %&gt;%
     mutate(mon_day = paste0(&quot;2019&quot;, &quot;-&quot;, mon_day),
            mon_day = as.Date(mon_day)) %&gt;% 
-    gather(., key = &quot;variable&quot;, value = &quot;value&quot;, mean_tmp:wbgt_95th) %&gt;% 
+    gather(., key = &quot;variable&quot;, value = &quot;value&quot;, tmp_f_mean:`wbgt_f_95%`) %&gt;% 
     na.omit(mon_day) %&gt;%   # Feb 29 coded as NA &quot;leap year&quot;
-    filter(variable == c(&quot;max_wbgt&quot;, &quot;mean_wbgt&quot;, &quot;min_wbgt&quot;, &quot;wbgt_95th&quot;)) %&gt;% 
+    filter(variable == c(&quot;wbgt_f_max&quot;, &quot;wbgt_f_mean&quot;, &quot;wbgt_f_min&quot;, &quot;wbgt_f_85%&quot;, &quot;wbgt_f_90%&quot;, &quot;wbgt_f_95%&quot;)) %&gt;% 
     ggplot(aes(x = mon_day, y = value, color = variable)) + 
     geom_smooth(alpha = 0.1) +
     geom_point() +

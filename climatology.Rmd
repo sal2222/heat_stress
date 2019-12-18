@@ -24,7 +24,7 @@ library(scales)
 ```
 
 
-```{r}
+```{r read_in}
 nldas_wide <- read_rds("data/nldas_wide.rds")
 
 # Add one second to duplicate times
@@ -54,8 +54,10 @@ nldas_wide <-
 
 ## Construct climatology (1990-2018)
 
-```{r}
+```{r climatology_function}
 #Construct climatology (1990-2018)
+
+# Create month and day columns, restrict years
 
 nldas_wide <-
   nldas_wide %>% 
@@ -66,6 +68,7 @@ nldas_wide <-
 
 nldas_wide
 
+# Nest by installation
 nest_nldas <-
   nldas_wide %>% 
     nest(., data = local_dttm:day)
@@ -76,28 +79,35 @@ nest_nldas %>% slice(1) %>% unnest(data)
 
 
 
+
+# Define Percentile Functions 
+  # https://tbradley1013.github.io/2018/10/01/calculating-quantiles-for-groups-with-dplyr-summarize-and-purrr-partial/
+
+percentiles <- c(0.85, 0.9, 0.95)
+
+percentile_names <- map_chr(percentiles, ~paste0(.x * 100, "%"))
+
+percentile_funs <- map(percentiles, ~partial(quantile, probs = .x, na.rm = TRUE)) %>% 
+  set_names(nm = percentile_names)
+
+percentile_funs
+
+
+
+# Climatology (daily) function
+
 climatology_function <- function(df) {
   df %>% 
     group_by(month, day) %>% 
-        summarise(mean_tmp = mean(tmp_f),
-                  max_tmp = max(tmp_f),
-                  min_tmp = min(tmp_f),
-                  sd_tmp = sd(tmp_f),
-                  tmp_95th = quantile(tmp_f, probs = 0.95),
-                  mean_hi = mean(heat_index),
-                  max_hi = max(heat_index),
-                  min_hi = min(heat_index),
-                  sd_hi = sd(heat_index),
-                  hi_95th = quantile(heat_index, probs = 0.95),
-                  mean_wbgt = mean(wbgt_f),
-                  max_wbgt = max(wbgt_f),
-                  min_wbgt = min(wbgt_f),
-                  sd_wbgt = sd(wbgt_f),
-                  wbgt_95th = quantile(wbgt_f, probs = 0.95) 
-            ) %>% 
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = "mean", max = "max", min = "min", sd = "sd", percentile_funs)) %>% 
     unite(mon_day, month:day, sep = "-", remove = FALSE)
 }
 
+      ## Percentiles are averaged over all daily temperatures, not daily maximums
+
+# Map climatology function
 
 nldas_climatology <- 
   nest_nldas %>% 
@@ -110,6 +120,385 @@ nldas_climatology
 nldas_climatology$climatology[[1]]
 ```
 
+
+## Anomalies (Daily)
+
+
+### Daily anomaly (mean)
+
+Mean daily temperature/index compared to the mean of the temperatures over the climatology period on the same day of year.
+
+```{r mean_daily_anomalies}
+
+# Single Installation
+
+## Mean daily anomalies
+nldas_climatology$data[[1]] %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = "mean")) %>%
+    ungroup() %>%
+    mutate(month = month(date),
+           day = day(date)) %>% 
+    left_join(., nldas_climatology$climatology[[1]], by = c("month", "day")) %>% 
+    mutate(tmp_f_mean_anomaly = tmp_f_mean.x - tmp_f_mean.y, 
+            heat_index_mean_anomaly = heat_index_mean.x - heat_index_mean.y,
+            wbgt_f_mean_anomaly = wbgt_f_mean.x - wbgt_f_mean.y) %>% 
+  dplyr::select(date, tmp_f_mean_anomaly, heat_index_mean_anomaly, wbgt_f_mean_anomaly)
+
+
+
+
+# Function
+### Daily Mean
+anomaly_daily_mean_function <- function(data, climatology) {
+data %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = "mean")) %>%
+    mutate(month = month(date),
+           day = day(date)) %>% 
+    left_join(., climatology, by = c("month", "day")) %>% 
+    mutate(tmp_f_mean_anomaly = tmp_f_mean.x - tmp_f_mean.y, 
+            heat_index_mean_anomaly = heat_index_mean.x - heat_index_mean.y,
+            wbgt_f_mean_anomaly = wbgt_f_mean.x - wbgt_f_mean.y) %>% 
+  dplyr::select(date, tmp_f_mean_anomaly, heat_index_mean_anomaly, wbgt_f_mean_anomaly) %>% 
+  group_by(year = lubridate::year(date)) %>% 
+       summarise_at(
+         .vars = vars(tmp_f_mean_anomaly, heat_index_mean_anomaly, wbgt_f_mean_anomaly),
+            .funs = c(mean = "mean")) 
+}
+
+
+nldas_climatology <-
+  nldas_climatology %>% 
+    mutate(anomaly_daily_mean =
+        map2(.x = nldas_climatology$data, .y = nldas_climatology$climatology, .f = anomaly_daily_mean_function))
+
+nldas_climatology
+nldas_climatology$anomaly_daily_mean[1]
+
+
+     
+
+```
+
+### Daily anomaly (maximum)
+
+Maximum daily temperature/index compared to the mean of the maximum daily temperatures on the same day of year over the climatology period.
+
+```{r daily_anomaly_max}
+
+
+left_join(
+nldas_climatology$data[[1]] %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(max = "max")) %>%
+    mutate(month = month(date),
+           day = day(date)),
+
+nldas_climatology$data[[1]] %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(max = "max")) %>%
+    mutate(month = month(date),
+           day = day(date)) %>% 
+  group_by(month, day) %>% 
+     summarise(mean_tmp_f_max = mean(tmp_f_max),
+               mean_heat_index_max = mean(heat_index_max),
+               mean_wbgt_f_max = mean(wbgt_f_max)),
+by = c("month", "day")
+) %>% 
+  mutate(tmp_f_max_anomaly = tmp_f_max - mean_tmp_f_max, 
+         heat_index_max_anomaly = heat_index_max - mean_heat_index_max,
+         wbgt_f_max_anomaly = wbgt_f_max - mean_wbgt_f_max) %>% 
+   group_by(year = lubridate::year(date)) %>% 
+   summarise_at(
+         .vars = vars(tmp_f_max_anomaly, heat_index_max_anomaly, wbgt_f_max_anomaly),
+            .funs = c(mean = "mean")) 
+
+
+
+# Function
+### Daily Max
+anomaly_daily_max_function <- function(data) {
+  left_join(
+    data %>% 
+      mutate(date = as.Date(local_dttm)) %>% 
+      group_by(date) %>% # daily aggregates
+        dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(max = "max")) %>%
+        mutate(month = month(date),
+               day = day(date)),
+  
+    data %>% 
+      mutate(date = as.Date(local_dttm)) %>% 
+      group_by(date) %>% # daily aggregates
+        dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(max = "max")) %>%
+        mutate(month = month(date),
+               day = day(date)) %>% 
+      group_by(month, day) %>% 
+         summarise(mean_tmp_f_max = mean(tmp_f_max),
+                   mean_heat_index_max = mean(heat_index_max),
+                   mean_wbgt_f_max = mean(wbgt_f_max)),
+    by = c("month", "day")
+    ) %>% 
+      mutate(tmp_f_max_anomaly = tmp_f_max - mean_tmp_f_max, 
+             heat_index_max_anomaly = heat_index_max - mean_heat_index_max,
+             wbgt_f_max_anomaly = wbgt_f_max - mean_wbgt_f_max) %>% 
+       group_by(year = lubridate::year(date)) %>% 
+       summarise_at(
+             .vars = vars(tmp_f_max_anomaly, heat_index_max_anomaly, wbgt_f_max_anomaly),
+                .funs = c(mean = "mean")) 
+  }
+
+
+nldas_climatology <-
+  nldas_climatology %>% 
+    mutate(anomaly_daily_max =
+        map(.x = nldas_climatology$data, .f = anomaly_daily_max_function))
+
+nldas_climatology
+nldas_climatology$anomaly_daily_max[1]
+
+
+
+```
+
+
+
+
+### Days mean temperature index above climate normal percentile (averaged over all hours of day)
+```{r mean_anomaly_days}
+
+# Single installation
+
+nldas_climatology$data[[1]] %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = "mean", max = "max", min = "min")) %>%
+    ungroup() %>%
+    mutate(month = month(date),
+           day = day(date)) %>% 
+    left_join(., nldas_climatology$climatology[[1]], by = c("month", "day")) %>% 
+    group_by(year = lubridate::year(date)) %>% 
+     summarise(
+      days_tmp_gt85pct = sum(tmp_f_mean.x > `tmp_f_85%`), 
+      days_tmp_gt90pct = sum(tmp_f_mean.x > `tmp_f_90%`),  
+      days_tmp_gt95pct = sum(tmp_f_mean.x > `tmp_f_95%`),
+      days_heat_index_gt85pct = sum(heat_index_mean.x > `heat_index_85%`), 
+      days_heat_index_gt90pct = sum(heat_index_mean.x > `heat_index_90%`),  
+      days_heat_index_gt95pct = sum(heat_index_mean.x > `heat_index_95%`), 
+      days_wbgt_gt85pct = sum(wbgt_f_mean.x > `wbgt_f_85%`), 
+      days_wbgt_gt90pct = sum(wbgt_f_mean.x > `wbgt_f_90%`),  
+      days_wbgt_gt95pct = sum(wbgt_f_mean.x > `wbgt_f_95%`)) 
+
+
+
+# Function
+
+anomaly_days_function <- function(data, climatology) {
+  data %>% 
+    mutate(date = as.Date(local_dttm)) %>% 
+    group_by(date) %>% # daily aggregates
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(mean = "mean", max = "max", min = "min")) %>%
+      ungroup() %>%
+      mutate(month = month(date),
+             day = day(date)) %>% 
+      left_join(., climatology, by = c("month", "day")) %>% 
+      group_by(year = lubridate::year(date)) %>% 
+       summarise(
+        days_tmp_gt85pct = sum(tmp_f_mean.x > `tmp_f_85%`), 
+        days_tmp_gt90pct = sum(tmp_f_mean.x > `tmp_f_90%`),  
+        days_tmp_gt95pct = sum(tmp_f_mean.x > `tmp_f_95%`),
+        days_heat_index_gt85pct = sum(heat_index_mean.x > `heat_index_85%`), 
+        days_heat_index_gt90pct = sum(heat_index_mean.x > `heat_index_90%`),  
+        days_heat_index_gt95pct = sum(heat_index_mean.x > `heat_index_95%`), 
+        days_wbgt_gt85pct = sum(wbgt_f_mean.x > `wbgt_f_85%`), 
+        days_wbgt_gt90pct = sum(wbgt_f_mean.x > `wbgt_f_90%`),  
+        days_wbgt_gt95pct = sum(wbgt_f_mean.x > `wbgt_f_95%`)) 
+}
+
+nldas_climatology <-
+  nldas_climatology %>% 
+    mutate(anomaly_days_mean =
+        map2(.x = nldas_climatology$data, .y = nldas_climatology$climatology, .f = anomaly_days_function))
+
+nldas_climatology
+nldas_climatology$anomaly_days_mean[1]
+
+
+```
+
+
+
+
+### Days max temperature index above max daily climate normal percentile
+```{r max_anomaly_days}
+# Single installation
+
+  left_join(
+      nldas_climatology$data[[1]]  %>% 
+      group_by(date = date(local_dttm)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = "max")) %>% 
+        mutate(month = month(date), day = day(date)), 
+      nldas_climatology$data[[1]] %>% 
+      group_by(date = date(local_dttm)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = "max")) %>% 
+    group_by(month = month(date), day = day(date)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f_max, heat_index_max, wbgt_f_max),
+            .funs = percentile_funs), 
+    by = c("month", "day")) %>% 
+  group_by(year = lubridate::year(date)) %>% 
+      dplyr::summarise(
+        days_tmp_max_gt85pct = sum(tmp_f_max > `tmp_f_max_85%`), 
+        days_tmp_max_gt90pct = sum(tmp_f_max > `tmp_f_max_90%`),  
+        days_tmp_max_gt95pct = sum(tmp_f_max > `tmp_f_max_95%`),
+        days_heat_index_max_gt85pct = sum(heat_index_max > `heat_index_max_85%`), 
+        days_heat_index_max_gt90pct = sum(heat_index_max > `heat_index_max_90%`),  
+        days_heat_index_max_gt95pct = sum(heat_index_max > `heat_index_max_95%`), 
+        days_wbgt_max_gt85pct = sum(wbgt_f_max > `wbgt_f_max_85%`), 
+        days_wbgt_max_gt90pct = sum(wbgt_f_max > `wbgt_f_max_90%`),  
+        days_wbgt_max_gt95pct = sum(wbgt_f_max > `wbgt_f_max_95%`)) 
+  
+
+
+
+# Function: daily max anomalies
+
+anomaly_days_max_function <- function(data) {
+   left_join(
+      data %>% 
+        group_by(date = date(local_dttm)) %>% 
+        dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(max = "max")) %>% 
+          mutate(month = month(date), day = day(date)), 
+      data %>% 
+      group_by(date = date(local_dttm)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = "max")) %>% 
+    group_by(month = month(date), day = day(date)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f_max, heat_index_max, wbgt_f_max),
+            .funs = percentile_funs), 
+    by = c("month", "day")) %>% 
+  group_by(year = lubridate::year(date)) %>% 
+      dplyr::summarise(
+        days_tmp_max_gt85pct = sum(tmp_f_max > `tmp_f_max_85%`), 
+        days_tmp_max_gt90pct = sum(tmp_f_max > `tmp_f_max_90%`),  
+        days_tmp_max_gt95pct = sum(tmp_f_max > `tmp_f_max_95%`),
+        days_heat_index_max_gt85pct = sum(heat_index_max > `heat_index_max_85%`), 
+        days_heat_index_max_gt90pct = sum(heat_index_max > `heat_index_max_90%`),  
+        days_heat_index_max_gt95pct = sum(heat_index_max > `heat_index_max_95%`), 
+        days_wbgt_max_gt85pct = sum(wbgt_f_max > `wbgt_f_max_85%`), 
+        days_wbgt_max_gt90pct = sum(wbgt_f_max > `wbgt_f_max_90%`),  
+        days_wbgt_max_gt95pct = sum(wbgt_f_max > `wbgt_f_max_95%`)) 
+}
+  
+ 
+
+nldas_climatology <-
+  nldas_climatology %>% 
+    mutate(anomaly_days_max =
+        map(.x = nldas_climatology$data, .f = anomaly_days_max_function))
+
+
+nldas_climatology
+nldas_climatology$anomaly_days_max[1]
+
+
+
+
+
+```
+
+
+## Daily anomaly plots
+### Days with mean temperature exceeding percentiles
+```{r anomaly_day_plot}
+
+nldas_climatology$anomaly_days_mean[[1]] %>% 
+  gather(key = "metric", value = "num_days", days_tmp_gt85pct:days_wbgt_gt90pct) %>% 
+  ggplot(aes(x = year, y = num_days, color = metric)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Eglin AFB Anomaly Days - mean temperatures",
+      x = "Year",
+      y = "Number of Days Exceeding Percentile"
+    ) +
+    theme(legend.position = "bottom") +
+    theme_bw()
+
+nldas_climatology$anomaly_days_mean[[1]] %>% 
+  gather(key = "metric", value = "num_days", days_tmp_gt85pct:days_wbgt_gt90pct) %>% 
+  ggplot(aes(x = year, y = num_days, color = metric)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(
+      title = "Eglin AFB Anomaly Days - mean temperatures",
+      x = "Year",
+      y = "Number of Days Exceeding Percentile"
+    ) +
+    theme_bw()  
+
+```
+
+
+### Days with maximum temperature exceeding maximum daily percentiles
+
+```{r anomaly_day_max_plot}
+
+nldas_climatology$anomaly_days_max[[1]] %>% 
+  gather(key = "metric", value = "num_days", days_tmp_max_gt85pct:days_wbgt_max_gt90pct) %>% 
+  ggplot(aes(x = year, y = num_days, color = metric)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Eglin AFB Anomaly Days - maximum temperatures",
+      x = "Year",
+      y = "Number of Days Exceeding Percentile"
+    ) +
+    theme(legend.position = "bottom") +
+    theme_bw()
+
+nldas_climatology$anomaly_days_max[[1]] %>% 
+  gather(key = "metric", value = "num_days", days_tmp_max_gt85pct:days_wbgt_max_gt90pct) %>% 
+  ggplot(aes(x = year, y = num_days, color = metric)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(
+      title = "Eglin AFB Anomaly Days - maximum temperatures",
+      x = "Year",
+      y = "Number of Days Exceeding Percentile"
+    ) +
+    theme_bw()  
+
+```
+
+
+
 ## Plot climatologies
 
 ### Single plot
@@ -118,12 +507,12 @@ nldas_climatology$climatology[[1]]
 
 nldas_climatology$climatology[[1]] %>%
     ungroup() %>% 
-    dplyr::select(-c(month, day, sd_tmp, sd_hi, sd_wbgt)) %>%
+    dplyr::select(-c(month, day, tmp_f_sd, heat_index_sd, wbgt_f_sd)) %>%
     mutate(mon_day = paste0("2019", "-", mon_day),
            mon_day = as.Date(mon_day)) %>% 
-    gather(., key = "variable", value = "value", mean_tmp:wbgt_95th) %>% 
+    gather(., key = "variable", value = "value", tmp_f_mean:`wbgt_f_95%`) %>% 
     na.omit(mon_day) %>%   # Feb 29 coded as NA "leap year"
-    filter(variable == c("max_wbgt", "mean_wbgt", "min_wbgt", "wbgt_95th")) %>% 
+    filter(variable == c("wbgt_f_max", "wbgt_f_mean", "wbgt_f_min", "wbgt_f_85%", "wbgt_f_90%", "wbgt_f_95%")) %>% 
     ggplot(aes(x = mon_day, y = value, color = variable)) + 
     geom_smooth(alpha = 0.1) +
     geom_point() +
@@ -150,12 +539,12 @@ nldas_climatology$climatology[[1]] %>%
 climatology_plot <- function(df) {
   df %>%
     ungroup() %>% 
-    dplyr::select(-c(month, day, sd_tmp, sd_hi, sd_wbgt)) %>%
+    dplyr::select(-c(month, day, tmp_f_sd, heat_index_sd, wbgt_f_sd)) %>%
     mutate(mon_day = paste0("2019", "-", mon_day),
            mon_day = as.Date(mon_day)) %>% 
-    gather(., key = "variable", value = "value", mean_tmp:wbgt_95th) %>% 
+    gather(., key = "variable", value = "value", tmp_f_mean:`wbgt_f_95%`) %>% 
     na.omit(mon_day) %>%   # Feb 29 coded as NA "leap year"
-    filter(variable == c("max_wbgt", "mean_wbgt", "min_wbgt", "wbgt_95th")) %>% 
+    filter(variable == c("wbgt_f_max", "wbgt_f_mean", "wbgt_f_min", "wbgt_f_85%", "wbgt_f_90%", "wbgt_f_95%")) %>% 
     ggplot(aes(x = mon_day, y = value, color = variable)) + 
     geom_smooth(alpha = 0.1) +
     geom_point() +
