@@ -631,10 +631,10 @@ nldas_annual</code></pre>
     group_by(installation) %&gt;% 
     index_by(year = lubridate::year(date)) %&gt;% 
       summarise(
-        days_hi_g80 = sum(heat_index_max &gt; 80),
-        days_hi_g90 = sum(heat_index_max &gt; 90),
-        days_hi_g103 = sum(heat_index_max &gt; 103),
-        days_hi_g125 = sum(heat_index_max &gt; 125),
+        days_hi_gt80 = sum(heat_index_max &gt; 80),
+        days_hi_gt90 = sum(heat_index_max &gt; 90),
+        days_hi_gt103 = sum(heat_index_max &gt; 103),
+        days_hi_gt125 = sum(heat_index_max &gt; 125),
         days_wbgt_gt82 = sum(wbgt_f_max &gt; 82),
         days_wbgt_gt85 = sum(wbgt_f_max &gt; 85),
         days_wbgt_gt88 = sum(wbgt_f_max &gt; 88),
@@ -644,25 +644,25 @@ nldas_annual</code></pre>
 heat_risk_days</code></pre>
 <pre><code>## # A tsibble: 750 x 10 [1Y]
 ## # Key:       installation [25]
-##    installation  year days_hi_g80 days_hi_g90 days_hi_g103 days_hi_g125
-##    &lt;chr&gt;        &lt;dbl&gt;       &lt;int&gt;       &lt;int&gt;        &lt;int&gt;        &lt;int&gt;
-##  1 eglin_afb     1990         185         123            5            0
-##  2 eglin_afb     1991         197         106            1            0
-##  3 eglin_afb     1992         178          86            2            0
-##  4 eglin_afb     1993         166         108            4            0
-##  5 eglin_afb     1994         194          74            0            0
-##  6 eglin_afb     1995         186         108            6            0
-##  7 eglin_afb     1996         176          99            2            0
-##  8 eglin_afb     1997         163          91            4            0
-##  9 eglin_afb     1998         189         137           13            0
-## 10 eglin_afb     1999         189          96            8            0
+##    installation  year days_hi_gt80 days_hi_gt90 days_hi_gt103 days_hi_gt125
+##    &lt;chr&gt;        &lt;dbl&gt;        &lt;int&gt;        &lt;int&gt;         &lt;int&gt;         &lt;int&gt;
+##  1 eglin_afb     1990          185          123             5             0
+##  2 eglin_afb     1991          197          106             1             0
+##  3 eglin_afb     1992          178           86             2             0
+##  4 eglin_afb     1993          166          108             4             0
+##  5 eglin_afb     1994          194           74             0             0
+##  6 eglin_afb     1995          186          108             6             0
+##  7 eglin_afb     1996          176           99             2             0
+##  8 eglin_afb     1997          163           91             4             0
+##  9 eglin_afb     1998          189          137            13             0
+## 10 eglin_afb     1999          189           96             8             0
 ## # ... with 740 more rows, and 4 more variables: days_wbgt_gt82 &lt;int&gt;,
 ## #   days_wbgt_gt85 &lt;int&gt;, days_wbgt_gt88 &lt;int&gt;, days_wbgt_gt90 &lt;int&gt;</code></pre>
 <div id="boxplots-of-heat-risk-day-counts-per-year" class="section level3">
 <h3>Boxplots of heat risk day counts per year</h3>
 <pre class="r"><code>heat_risk_days %&gt;% 
-  gather(key = &quot;metric&quot;, value = &quot;count&quot;, days_hi_g80:days_wbgt_gt90) %&gt;%
-  filter(metric == c(&quot;days_hi_g90&quot;, &quot;days_wbgt_gt85&quot;)) %&gt;%
+  gather(key = &quot;metric&quot;, value = &quot;count&quot;, days_hi_gt80:days_wbgt_gt90) %&gt;%
+  filter(metric == c(&quot;days_hi_gt90&quot;, &quot;days_wbgt_gt85&quot;)) %&gt;%
   ggplot(aes(x = fct_reorder(installation, count), y = count, fill = metric)) +
     geom_boxplot() +
     coord_flip() +
@@ -674,7 +674,7 @@ heat_risk_days</code></pre>
 <h3>Bar chart heat risk day counts per year</h3>
 <pre class="r"><code>heat_risk_days %&gt;%
   filter(!year %in% &quot;1989&quot;) %&gt;% 
-  gather(key = &quot;metric&quot;, value = &quot;count&quot;, days_hi_g80:days_wbgt_gt90) %&gt;% 
+  gather(key = &quot;metric&quot;, value = &quot;count&quot;, days_hi_gt80:days_wbgt_gt90) %&gt;% 
   ggplot(aes(x = year, y = count, fill = metric)) +
     geom_col(position = &quot;dodge&quot;) +
     facet_wrap(~ installation, ncol = 1) +
@@ -687,8 +687,8 @@ heat_risk_days</code></pre>
 <h3>Annual heat risk days trend: Heat Index</h3>
 <pre class="r"><code>heat_risk_days %&gt;%
   filter(!year %in% &quot;1989&quot;) %&gt;%
-  gather(key = &quot;metric&quot;, value = &quot;count&quot;, days_hi_g80:days_wbgt_gt90) %&gt;%
-  filter(metric == &quot;days_hi_g90&quot;) %&gt;% 
+  gather(key = &quot;metric&quot;, value = &quot;count&quot;, days_hi_gt80:days_wbgt_gt90) %&gt;%
+  filter(metric == &quot;days_hi_gt90&quot;) %&gt;% 
   ggplot(aes(x = year, y = count, color = installation)) +
   geom_point() +
   geom_smooth(size = 0.5, method = lm, se = FALSE) +
@@ -704,7 +704,7 @@ heat_risk_days</code></pre>
 <h3>Annual heat risk days trend: WBGT</h3>
 <pre class="r"><code>heat_risk_days %&gt;%
   filter(!year %in% &quot;1989&quot;) %&gt;%
-  gather(key = &quot;metric&quot;, value = &quot;count&quot;, days_hi_g80:days_wbgt_gt90) %&gt;% 
+  gather(key = &quot;metric&quot;, value = &quot;count&quot;, days_hi_gt80:days_wbgt_gt90) %&gt;% 
   filter(metric == &quot;days_wbgt_gt85&quot;) %&gt;% 
   ggplot(aes(x = year, y = count, color = installation)) +
   geom_point() +
@@ -728,10 +728,10 @@ heat_risk_days</code></pre>
     group_by(installation) %&gt;% 
     index_by(year = lubridate::year(local_dttm)) %&gt;% 
       summarise(
-        hours_hi_g80 = sum(heat_index &gt; 80),
-        hours_hi_g90 = sum(heat_index &gt; 90),
-        hours_hi_g103 = sum(heat_index &gt; 103),
-        hours_hi_g125 = sum(heat_index &gt; 125),
+        hours_hi_gt80 = sum(heat_index &gt; 80),
+        hours_hi_gt90 = sum(heat_index &gt; 90),
+        hours_hi_gt103 = sum(heat_index &gt; 103),
+        hours_hi_gt125 = sum(heat_index &gt; 125),
         hours_wbgt_gt82 = sum(wbgt_f &gt; 82),
         hours_wbgt_gt85 = sum(wbgt_f &gt; 85),
         hours_wbgt_gt88 = sum(wbgt_f &gt; 88),
@@ -741,25 +741,25 @@ heat_risk_days</code></pre>
 heat_risk_hours</code></pre>
 <pre><code>## # A tsibble: 775 x 10 [1Y]
 ## # Key:       installation [25]
-##    installation  year hours_hi_g80 hours_hi_g90 hours_hi_g103 hours_hi_g125
-##    &lt;chr&gt;        &lt;dbl&gt;        &lt;int&gt;        &lt;int&gt;         &lt;int&gt;         &lt;int&gt;
-##  1 eglin_afb     1989            0            0             0             0
-##  2 eglin_afb     1990         2829         1227            12             0
-##  3 eglin_afb     1991         2995          987             1             0
-##  4 eglin_afb     1992         2575          768             4             0
-##  5 eglin_afb     1993         2771         1209            11             0
-##  6 eglin_afb     1994         2529          513             0             0
-##  7 eglin_afb     1995         2863         1143            42             0
-##  8 eglin_afb     1996         2842          976             3             0
-##  9 eglin_afb     1997         2552          950            41             0
-## 10 eglin_afb     1998         3114         1523            57             0
+##    installation  year hours_hi_gt80 hours_hi_gt90 hours_hi_gt103 hours_hi_gt125
+##    &lt;chr&gt;        &lt;dbl&gt;         &lt;int&gt;         &lt;int&gt;          &lt;int&gt;          &lt;int&gt;
+##  1 eglin_afb     1989             0             0              0              0
+##  2 eglin_afb     1990          2829          1227             12              0
+##  3 eglin_afb     1991          2995           987              1              0
+##  4 eglin_afb     1992          2575           768              4              0
+##  5 eglin_afb     1993          2771          1209             11              0
+##  6 eglin_afb     1994          2529           513              0              0
+##  7 eglin_afb     1995          2863          1143             42              0
+##  8 eglin_afb     1996          2842           976              3              0
+##  9 eglin_afb     1997          2552           950             41              0
+## 10 eglin_afb     1998          3114          1523             57              0
 ## # ... with 765 more rows, and 4 more variables: hours_wbgt_gt82 &lt;int&gt;,
 ## #   hours_wbgt_gt85 &lt;int&gt;, hours_wbgt_gt88 &lt;int&gt;, hours_wbgt_gt90 &lt;int&gt;</code></pre>
 <div id="boxplots-of-heat-risk-hour-counts-per-year" class="section level3">
 <h3>Boxplots of heat risk hour counts per year</h3>
 <pre class="r"><code>heat_risk_hours %&gt;%
   filter(!year %in% &quot;1989&quot;) %&gt;% 
-  gather(key = &quot;metric&quot;, value = &quot;count&quot;, hours_hi_g80:hours_wbgt_gt90) %&gt;%
+  gather(key = &quot;metric&quot;, value = &quot;count&quot;, hours_hi_gt80:hours_wbgt_gt90) %&gt;%
   filter(metric == c(&quot;hours_hi_g90&quot;, &quot;hours_wbgt_gt85&quot;)) %&gt;%
   ggplot(aes(x = fct_reorder(installation, count), y = count, fill = metric)) +
     geom_boxplot() +
