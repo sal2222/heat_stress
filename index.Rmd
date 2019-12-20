@@ -43,6 +43,8 @@ Environmental Health Sciences
 
 - Climatologies (1990-2018) [[here]](climatology.html) 
 
+- Annual temperature and heat indices [[here]](annual_tables.html)
+
 ## Heat Stress Outcomes
 
 - DMED Summary (annual) [[here]](dmed_summary.html)  

@@ -436,6 +436,438 @@ nldas_climatology$anomaly_days_max[1]
 ```
 
 
+
+
+### Days max temperature index above 1 or 2 Standard Deviation(s) of max daily temperature climate normal
+```{r sd_anomaly_days_max}
+
+# Single installation
+
+left_join(
+
+(left_join(
+nldas_climatology$data[[1]] %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(max = "max")) %>%
+    mutate(month = month(date),
+           day = day(date)),
+
+nldas_climatology$data[[1]] %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(max = "max")) %>%
+    mutate(month = month(date),
+           day = day(date)) %>% 
+  group_by(month, day) %>% 
+     summarise(mean_tmp_f_max = mean(tmp_f_max),
+               mean_heat_index_max = mean(heat_index_max),
+               mean_wbgt_f_max = mean(wbgt_f_max)),
+ by = c("month", "day"))
+),
+
+(left_join(
+      nldas_climatology$data[[1]]  %>% 
+      group_by(date = date(local_dttm)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = "max")) %>% 
+        mutate(month = month(date), day = day(date)), 
+      
+      nldas_climatology$data[[1]] %>% 
+      group_by(date = date(local_dttm)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = "max")) %>% 
+    group_by(month = month(date), day = day(date)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f_max, heat_index_max, wbgt_f_max),
+            funs(sd = sd)),
+    by = c("month", "day")) %>% 
+    dplyr::select(month:wbgt_f_max_sd)
+ ),
+
+by = c("month" = "month", "day" = "day")) %>%
+  dplyr::distinct() %>% 
+
+  group_by(year = lubridate::year(date)) %>% 
+      dplyr::summarise(
+        days_tmp_max_gt1sd = sum(tmp_f_max > (mean_tmp_f_max + tmp_f_max_sd)), 
+        days_heat_index_max_gt1sd = sum(heat_index_max > (mean_heat_index_max + heat_index_max_sd)),
+        days_wbgt_max_gt1sd = sum(wbgt_f_max > (mean_wbgt_f_max + wbgt_f_max_sd)),
+        days_tmp_max_gt2sd = sum(tmp_f_max > (mean_tmp_f_max + 2 * tmp_f_max_sd)), 
+        days_heat_index_max_gt2sd = sum(heat_index_max > (mean_heat_index_max + 2 * heat_index_max_sd)),
+        days_wbgt_max_gt2sd = sum(wbgt_f_max > (mean_wbgt_f_max + 2 * wbgt_f_max_sd)))
+
+
+
+# Function: daily max standard dev anomalies
+
+sd_days_max_function <- function(data) {
+  left_join(
+    (left_join(
+    data %>% 
+      mutate(date = as.Date(local_dttm)) %>% 
+      group_by(date) %>% # daily aggregates
+        dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(max = "max")) %>%
+        mutate(month = month(date),
+               day = day(date)),
+    
+    data %>% 
+      mutate(date = as.Date(local_dttm)) %>% 
+      group_by(date) %>% # daily aggregates
+        dplyr::summarise_at(
+              .vars = vars(tmp_f, heat_index, wbgt_f),
+              .funs = c(max = "max")) %>%
+        mutate(month = month(date),
+               day = day(date)) %>% 
+      group_by(month, day) %>% 
+         summarise(mean_tmp_f_max = mean(tmp_f_max),
+                   mean_heat_index_max = mean(heat_index_max),
+                   mean_wbgt_f_max = mean(wbgt_f_max)),
+     by = c("month", "day"))
+    ),
+    
+    (left_join(
+          data  %>% 
+          group_by(date = date(local_dttm)) %>% 
+          dplyr::summarise_at(
+                .vars = vars(tmp_f, heat_index, wbgt_f),
+                .funs = c(max = "max")) %>% 
+            mutate(month = month(date), day = day(date)), 
+          
+          nldas_climatology$data[[1]] %>% 
+          group_by(date = date(local_dttm)) %>% 
+          dplyr::summarise_at(
+                .vars = vars(tmp_f, heat_index, wbgt_f),
+                .funs = c(max = "max")) %>% 
+        group_by(month = month(date), day = day(date)) %>% 
+          dplyr::summarise_at(
+                .vars = vars(tmp_f_max, heat_index_max, wbgt_f_max),
+                funs(sd = sd)),
+        by = c("month", "day")) %>% 
+        dplyr::select(month:wbgt_f_max_sd)
+     ),
+    
+    by = c("month" = "month", "day" = "day")) %>%
+      dplyr::distinct() %>% 
+    
+      group_by(year = lubridate::year(date)) %>% 
+          dplyr::summarise(
+            days_tmp_max_gt1sd = sum(tmp_f_max > (mean_tmp_f_max + tmp_f_max_sd)), 
+            days_heat_index_max_gt1sd = sum(heat_index_max > (mean_heat_index_max + heat_index_max_sd)),
+            days_wbgt_max_gt1sd = sum(wbgt_f_max > (mean_wbgt_f_max + wbgt_f_max_sd)),
+            days_tmp_max_gt2sd = sum(tmp_f_max > (mean_tmp_f_max + 2 * tmp_f_max_sd)), 
+            days_heat_index_max_gt2sd = sum(heat_index_max > (mean_heat_index_max + 2 * heat_index_max_sd)),
+            days_wbgt_max_gt2sd = sum(wbgt_f_max > (mean_wbgt_f_max + 2 * wbgt_f_max_sd)))
+}
+  
+ 
+
+nldas_climatology <-
+  nldas_climatology %>% 
+    mutate(sd_days_max =
+        map(.x = nldas_climatology$data, .f = sd_days_max_function))
+
+
+nldas_climatology
+nldas_climatology$sd_days_max[1]
+
+
+
+
+
+```
+
+
+### Days mean temperature index above 1 or 2 Standard Deviation(s) of mean daily temperature climate normal
+```{r sd_anomaly_days_mean}
+
+# Single installation
+
+left_join(
+
+(left_join(
+nldas_climatology$data[[1]] %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = "mean")) %>%
+    mutate(month = month(date),
+           day = day(date)),
+
+nldas_climatology$data[[1]] %>% 
+  mutate(date = as.Date(local_dttm)) %>% 
+  group_by(date) %>% # daily aggregates
+    dplyr::summarise_at(
+          .vars = vars(tmp_f, heat_index, wbgt_f),
+          .funs = c(mean = "mean")) %>%
+    mutate(month = month(date),
+           day = day(date)) %>% 
+  group_by(month, day) %>% 
+     summarise(mean_tmp_f_mean = mean(tmp_f_mean),
+               mean_heat_index_mean = mean(heat_index_mean),
+               mean_wbgt_f_mean = mean(wbgt_f_mean)),
+ by = c("month", "day"))
+),
+
+(left_join(
+      nldas_climatology$data[[1]]  %>% 
+      group_by(date = date(local_dttm)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(max = "mean")) %>% 
+        mutate(month = month(date), day = day(date)), 
+      
+      nldas_climatology$data[[1]] %>% 
+      group_by(date = date(local_dttm)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f, heat_index, wbgt_f),
+            .funs = c(mean = "mean")) %>% 
+    group_by(month = month(date), day = day(date)) %>% 
+      dplyr::summarise_at(
+            .vars = vars(tmp_f_mean, heat_index_mean, wbgt_f_mean),
+            funs(sd = sd)),
+    by = c("month", "day")) %>% 
+    dplyr::select(month:wbgt_f_mean_sd)
+ ),
+
+by = c("month" = "month", "day" = "day")) %>%
+  dplyr::distinct() %>% 
+
+  group_by(year = lubridate::year(date)) %>% 
+      dplyr::summarise(
+        days_tmp_mean_gt1sd = sum(tmp_f_mean > (mean_tmp_f_mean + tmp_f_mean_sd)), 
+        days_heat_index_mean_gt1sd = sum(heat_index_mean > (mean_heat_index_mean + heat_index_mean_sd)),
+        days_wbgt_mean_gt1sd = sum(wbgt_f_mean > (mean_wbgt_f_mean + wbgt_f_mean_sd)),
+        days_tmp_mean_gt2sd = sum(tmp_f_mean > (mean_tmp_f_mean + 2 * tmp_f_mean_sd)), 
+        days_heat_index_mean_gt2sd = sum(heat_index_mean > (mean_heat_index_mean + 2 * heat_index_mean_sd)),
+        days_wbgt_mean_gt2sd = sum(wbgt_f_mean > (mean_wbgt_f_mean + 2 * wbgt_f_mean_sd)))
+
+
+
+# Function: daily mean standard dev anomalies
+
+sd_days_mean_function <- function(data) {
+  left_join(
+
+    (left_join(
+        data %>% 
+          mutate(date = as.Date(local_dttm)) %>% 
+          group_by(date) %>% # daily aggregates
+            dplyr::summarise_at(
+                  .vars = vars(tmp_f, heat_index, wbgt_f),
+                  .funs = c(mean = "mean")) %>%
+            mutate(month = month(date),
+                   day = day(date)),
+        
+        data %>% 
+          mutate(date = as.Date(local_dttm)) %>% 
+          group_by(date) %>% # daily aggregates
+            dplyr::summarise_at(
+                  .vars = vars(tmp_f, heat_index, wbgt_f),
+                  .funs = c(mean = "mean")) %>%
+            mutate(month = month(date),
+                   day = day(date)) %>% 
+          group_by(month, day) %>% 
+             summarise(mean_tmp_f_mean = mean(tmp_f_mean),
+                       mean_heat_index_mean = mean(heat_index_mean),
+                       mean_wbgt_f_mean = mean(wbgt_f_mean)),
+         by = c("month", "day"))
+    ),
+    
+    (left_join(
+          data  %>% 
+          group_by(date = date(local_dttm)) %>% 
+          dplyr::summarise_at(
+                .vars = vars(tmp_f, heat_index, wbgt_f),
+                .funs = c(max = "mean")) %>% 
+            mutate(month = month(date), day = day(date)), 
+          
+          nldas_climatology$data[[1]] %>% 
+          group_by(date = date(local_dttm)) %>% 
+          dplyr::summarise_at(
+                .vars = vars(tmp_f, heat_index, wbgt_f),
+                .funs = c(mean = "mean")) %>% 
+        group_by(month = month(date), day = day(date)) %>% 
+          dplyr::summarise_at(
+                .vars = vars(tmp_f_mean, heat_index_mean, wbgt_f_mean),
+                funs(sd = sd)),
+        by = c("month", "day")) %>% 
+        dplyr::select(month:wbgt_f_mean_sd)
+     ),
+    
+    by = c("month" = "month", "day" = "day")) %>%
+  dplyr::distinct() %>% 
+
+  group_by(year = lubridate::year(date)) %>% 
+      dplyr::summarise(
+        days_tmp_mean_gt1sd = sum(tmp_f_mean > (mean_tmp_f_mean + tmp_f_mean_sd)), 
+        days_heat_index_mean_gt1sd = sum(heat_index_mean > (mean_heat_index_mean + heat_index_mean_sd)),
+        days_wbgt_mean_gt1sd = sum(wbgt_f_mean > (mean_wbgt_f_mean + wbgt_f_mean_sd)),
+        days_tmp_mean_gt2sd = sum(tmp_f_mean > (mean_tmp_f_mean + 2 * tmp_f_mean_sd)), 
+        days_heat_index_mean_gt2sd = sum(heat_index_mean > (mean_heat_index_mean + 2 * heat_index_mean_sd)),
+        days_wbgt_mean_gt2sd = sum(wbgt_f_mean > (mean_wbgt_f_mean + 2 * wbgt_f_mean_sd)))
+}
+  
+ 
+
+nldas_climatology <-
+  nldas_climatology %>% 
+    mutate(sd_days_mean =
+        map(.x = nldas_climatology$data, .f = sd_days_mean_function))
+
+
+nldas_climatology
+nldas_climatology$sd_days_mean[1]
+
+# write_rds(nldas_climatology, "data/nldas_climatology.rds")
+
+
+
+```
+
+
+
+## "Heat season" Anomalies
+
+For purposes of training guidance, summer ‘heat season’ is routinely defined as 1 May through 30 September (APHC, Public Health Report No. WS.0022479-15, APG, MD, June 2015).
+
+### Filter MAY-SEP Data and Climatology 
+
+Maximum daily temperature/index compared to the mean of the maximum daily temperatures on the same day of year over the climatology period during the "heat season".
+
+
+```{r summer_data_climatology}
+
+nldas_climatology_summer <-
+  nldas_climatology %>%
+    mutate(summer_data =
+             map(data, ~ filter(., month %in% 5:9))) %>%
+    mutate(summer_climatology =
+             map(climatology, ~ filter(., month %in% 5:9))) %>% 
+    dplyr::select(installation, summer_data, summer_climatology)
+
+```
+
+
+### MAY-SEP Daily anomaly (mean)
+
+Mean daily temperature/index compared to the mean of the temperatures over the climatology period on the same day of year.
+
+```{r mean_daily_anomalies_summer}
+
+
+nldas_climatology_summer <-
+  nldas_climatology_summer %>% 
+    mutate(anomaly_daily_mean_may_sep =
+        map2(.x = nldas_climatology_summer$summer_data, .y = nldas_climatology_summer$summer_climatology, .f = anomaly_daily_mean_function))
+
+nldas_climatology_summer
+nldas_climatology_summer$anomaly_daily_mean_may_sep[1]
+
+
+     
+
+```
+
+
+
+### MAY-SEP Daily anomaly (maximum)
+```{r daily_anomaly_max_summer}
+
+nldas_climatology_summer <-
+  nldas_climatology_summer %>% 
+    mutate(anomaly_daily_max_may_sep =
+        map(.x = nldas_climatology_summer$summer_data, .f = anomaly_daily_max_function))
+
+nldas_climatology_summer
+nldas_climatology_summer$anomaly_daily_max_may_sep[1]
+
+```
+
+
+### MAY-SEP Days mean temperature index above climate normal percentile (averaged over all hours of day)
+```{r mean_anomaly_days_summer}
+
+nldas_climatology_summer <-
+  nldas_climatology_summer %>% 
+    mutate(anomaly_days_mean_may_sep =
+        map2(.x = nldas_climatology_summer$summer_data, .y = nldas_climatology_summer$summer_climatology, .f = anomaly_days_function))
+
+nldas_climatology_summer
+nldas_climatology_summer$anomaly_days_mean_may_sep[1]
+
+```
+
+
+
+
+### MAY-SEP Days max temperature index above max daily climate normal percentile
+```{r sd_anomaly_days_max_summer}
+
+nldas_climatology_summer <-
+  nldas_climatology_summer %>% 
+    mutate(anomaly_days_max_may_sep =
+        map(.x = nldas_climatology_summer$summer_data, .f = anomaly_days_max_function))
+
+
+nldas_climatology_summer
+nldas_climatology_summer$anomaly_days_max_may_sep[1]
+
+
+
+
+
+```
+
+
+
+### MAY-SEP Days max temperature index above 1 or 2 Standard Deviation(s) of max daily temperature climate normal
+```{r sd_anomaly_days_mean_summer}
+
+nldas_climatology_summer <-
+  nldas_climatology_summer %>% 
+    mutate(sd_days_max_may_sep =
+        map(.x = nldas_climatology_summer$summer_data, .f = sd_days_max_function))
+
+
+nldas_climatology_summer
+nldas_climatology_summer$sd_days_max_may_sep[1]
+
+
+```
+
+
+### MAY-SEP  Days mean temperature index above 1 or 2 Standard Deviation(s) of mean daily temperature climate normal
+```{r max_anomaly_days_summer}
+
+nldas_climatology_summer <-
+  nldas_climatology_summer %>% 
+    mutate(sd_days_mean_may_sep =
+        map(.x = nldas_climatology_summer$summer_data, .f = sd_days_mean_function))
+
+
+nldas_climatology_summer
+nldas_climatology_summer$sd_days_mean_may_sep[1]
+
+# write_rds(nldas_climatology_summer, "data/nldas_climatology_summer.rds")
+
+names(nldas_climatology)
+names(nldas_climatology_summer)
+
+```
+
+
+
+
 ## Daily anomaly plots
 ### Days with mean temperature exceeding percentiles
 ```{r anomaly_day_plot}

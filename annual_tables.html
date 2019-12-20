@@ -11,7 +11,7 @@
 
 
 
-<title>Heat Stress Research</title>
+<title>annual_tables</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -415,10 +415,7 @@ div.tocify {
       <a href="nldas_averaged.html">Aggregate over calendar periods</a>
     </li>
     <li>
-      <a href="climatology.html">Climatologies / Anomalies</a>
-    </li>
-    <li>
-      <a href="annual_tables.html">Annual index tables</a>
+      <a href="climatology.html">Climatologies/Normals</a>
     </li>
   </ul>
 </li>
@@ -460,54 +457,102 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Heat Stress Research</h1>
+<h1 class="title toc-ignore">annual_tables</h1>
 
 </div>
 
 
-<p>Welcome to our heat stress research website!</p>
-<p><strong>Stephen Lewandowski</strong><br />
-<strong>Advisor: Jeffrey Shaman</strong></p>
-<p>Columbia University Mailman School of Public Health<br />
-Environmental Health Sciences<br />
-<a href="https://www.mailman.columbia.edu/research/climate-and-health-program">Climate and Health Program</a></p>
-<div id="data-preparation" class="section level2">
-<h2>Data Preparation</h2>
-<div id="nldas-2-weather-data-preparation" class="section level3">
-<h3>NLDAS-2 Weather Data Preparation</h3>
-<ul>
-<li><p>Examine location shapefiles and NLDAS-2 grid overlays <a href="shapefiles.html">[here]</a></p></li>
-<li><p>Instructions to download NLDAS-2 files using <code>wget</code> command <a href="nldas_wget.html">[here]</a></p></li>
-<li><p>Extract locations (cells) and variables from NLDAS-2 .nc4 files with conversion to raster brick <a href="extract_cells.html">[here]</a></p></li>
-<li><p>Link NLDAS estimates assembled in <code>extract_cells</code>to specific locations and summarizes the data <a href="installation_nldas.html">[here]</a></p></li>
-<li><p>Add unit conversions, calculate new variables, and add Heat Index and WBGT indices <a href="nldas_indices.html">[here]</a></p></li>
-</ul>
+<p>Compile annual index tables for temperature/heat exposures (Absolute and Relative)</p>
+<div id="summary-of-indices" class="section level2">
+<h2>Summary of indices</h2>
+<div id="absolute-indices" class="section level3">
+<h3>“Absolute” indices</h3>
+<p><strong>Annual mean</strong> (full-year): temperature, heat index, WBGT<br />
+<strong>Annual heat risk days / hours</strong> - Heat index above 80 / 90 / 103 / 125 °F - WBGT above 82 / 85 / 88 / 90 °F</p>
 </div>
-<div id="heat-stress-illness-data-preparation" class="section level3">
-<h3>Heat Stress Illness Data Preparation</h3>
-<ul>
-<li>Functions to read and compile Defense Medical Epidemiology Database (DMED) queries <a href="dmed_read.html">[here]</a></li>
-</ul>
+<div id="relative-indices" class="section level3">
+<h3>“Relative” indices</h3>
+<p><strong>Annual mean daily anomaly</strong> (full-year): temperature, heat index, WBGT<br />
+<strong>Annual maximum daily anomaly</strong> (full-year): temperature, heat index, WBGT<br />
+<strong>Days mean temperature index above daily climate normal percentile</strong> (averaged over all hours of day)<br />
+- temperature, heat index, WBGT above 85th / 90th / 95th percentiles<br />
+<strong>Days maximum temperature index above daily climate normal maximum percentile</strong><br />
+- temperature, heat index, WBGT above 85th / 90th / 95th percentiles<br />
+<strong>Days mean temperature index above Standard Deviation(s) of mean daily temperature climate normal</strong><br />
+- temperature, heat index, WBGT above 1 or 2 standard deviations of daily normal<br />
+<strong>Days maximum temperature index above Standard Deviation(s) of max daily temperature climate normal</strong><br />
+- temperature, heat index, WBGT above 1 or 2 standard deviations of maximum daily normal</p>
+<p>Read-in data prepared in <a href="nldas_averaged.html"><code>nldas_averaged</code></a> and <a href="climatology.html"><code>climatology</code></a> pages.</p>
+<pre class="r"><code># Read data saved in &quot;nldas_averaged&quot; and &quot;climatology&quot; pages
+
+nldas_annual &lt;- read_rds(&quot;data/nldas_annual.rds&quot;)
+heat_risk_days &lt;- read_rds(&quot;data/heat_risk_days.rds&quot;)
+heat_risk_hours &lt;- read_rds(&quot;data/heat_risk_hours.rds&quot;)
+nldas_climatology &lt;- read_rds(&quot;data/nldas_climatology.rds&quot;)</code></pre>
+<p>Convert <code>tsibbles</code> to nested tibble</p>
+<pre class="r"><code>nldas_annual &lt;-
+  nldas_annual %&gt;% 
+    dplyr::select(installation:wbgt_f_mean) %&gt;%
+    filter(year &lt; 2019) %&gt;% 
+    as_tibble() %&gt;% 
+    nest(., annual_mean = year:wbgt_f_mean)
+
+heat_risk_days &lt;-
+  heat_risk_days %&gt;% 
+    filter(year &lt; 2019) %&gt;% 
+    as_tibble() %&gt;% 
+    nest(., heat_risk_days = year:days_wbgt_gt90)
+
+heat_risk_hours &lt;-
+  heat_risk_hours %&gt;% 
+    filter(year &lt; 2019,
+           year &gt; 1989) %&gt;% 
+    as_tibble() %&gt;% 
+    nest(., heat_risk_hours = year:hours_wbgt_gt90)
+
+absolutes_annual &lt;-
+  nldas_annual %&gt;% 
+  left_join(heat_risk_days, by = &quot;installation&quot;) %&gt;% 
+  left_join(heat_risk_hours, by = &quot;installation&quot;)
+
+absolutes_annual</code></pre>
+<pre><code>## # A tibble: 25 x 4
+##    installation       annual_mean heat_risk_days heat_risk_hours
+##    &lt;chr&gt;           &lt;list&lt;df[,4]&gt;&gt; &lt;list&lt;df[,9]&gt;&gt;  &lt;list&lt;df[,9]&gt;&gt;
+##  1 eglin_afb             [29 x 4]       [29 x 9]        [29 x 9]
+##  2 fort_benning_ga       [29 x 4]       [29 x 9]        [29 x 9]
+##  3 fort_bliss            [29 x 4]       [29 x 9]        [29 x 9]
+##  4 fort_bragg            [29 x 4]       [29 x 9]        [29 x 9]
+##  5 fort_campbell         [29 x 4]       [29 x 9]        [29 x 9]
+##  6 fort_carson           [29 x 4]       [29 x 9]        [29 x 9]
+##  7 fort_drum             [29 x 4]       [29 x 9]        [29 x 9]
+##  8 fort_gordon           [29 x 4]       [29 x 9]        [29 x 9]
+##  9 fort_hood             [29 x 4]       [29 x 9]        [29 x 9]
+## 10 fort_jackson          [29 x 4]       [29 x 9]        [29 x 9]
+## # ... with 15 more rows</code></pre>
+<p>Join absolute and relative nested list-columns</p>
+<pre class="r"><code>annual_index_nested &lt;-
+  absolutes_annual %&gt;%
+  left_join(nldas_climatology, by = &quot;installation&quot;) %&gt;% 
+  dplyr::select(-c(data, climatology))
+
+annual_index_nested</code></pre>
+<pre><code>## # A tibble: 25 x 9
+##    installation annual_mean heat_risk_days heat_risk_hours anomaly_daily_m~
+##    &lt;chr&gt;        &lt;list&lt;df[,&gt; &lt;list&lt;df[,9]&gt;&gt;  &lt;list&lt;df[,9]&gt;&gt; &lt;list&gt;          
+##  1 eglin_afb       [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+##  2 fort_bennin~    [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+##  3 fort_bliss      [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+##  4 fort_bragg      [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+##  5 fort_campbe~    [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+##  6 fort_carson     [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+##  7 fort_drum       [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+##  8 fort_gordon     [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+##  9 fort_hood       [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+## 10 fort_jackson    [29 x 4]       [29 x 9]        [29 x 9] &lt;tibble [29 x 4~
+## # ... with 15 more rows, and 4 more variables: anomaly_daily_max &lt;list&gt;,
+## #   anomaly_days_mean &lt;list&gt;, anomaly_days_max &lt;list&gt;, sd_days_max &lt;list&gt;</code></pre>
 </div>
-</div>
-<div id="climate" class="section level2">
-<h2>Climate</h2>
-<ul>
-<li><p>Time series formats for NLDAS-2 data (zoo, xts, ts) <a href="nldas_timeseries.html">[here]</a></p></li>
-<li><p>Fable/tsibble time series format for NLDAS-2 data <a href="nldas_fable.html">[here]</a></p></li>
-<li><p>Aggregate over calendar periods <a href="nldas_averaged.html">[here]</a></p></li>
-<li><p>Climatologies (1990-2018) <a href="climatology.html">[here]</a></p></li>
-<li><p>Annual temperature and heat indices <a href="annual_tables.html">[here]</a></p></li>
-</ul>
-</div>
-<div id="heat-stress-outcomes" class="section level2">
-<h2>Heat Stress Outcomes</h2>
-<ul>
-<li>DMED Summary (annual) <a href="dmed_summary.html">[here]</a></li>
-</ul>
-</div>
-<div id="models" class="section level2">
-<h2>Models</h2>
 </div>
 
 

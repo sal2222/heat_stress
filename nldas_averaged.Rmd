@@ -122,6 +122,8 @@ nldas_annual <-
   
 nldas_annual
 
+# write_rds(nldas_annual, "data/nldas_annual.rds")
+
 nldas_annual %>% 
     autoplot(wbgt_f_mean)
 ```
@@ -153,6 +155,7 @@ heat_risk_days <-
   
 heat_risk_days
 
+# write_rds(heat_risk_days, "data/heat_risk_days.rds")
 
 ```
 
@@ -254,6 +257,8 @@ heat_risk_hours <-
       )
 
 heat_risk_hours
+
+# write_rds(heat_risk_hours, "data/heat_risk_hours.rds")
 ```
 
 

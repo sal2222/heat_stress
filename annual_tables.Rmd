@@ -1,0 +1,152 @@
+---
+title: "annual_tables"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(dygraphs)
+library(xts)
+library(timetk)
+library(zoo)
+library(forecast)
+library(fable)
+library(sweep)
+library(viridis)
+library(lubridate)
+library(scales)
+```
+
+## Introduction
+
+There are numerous approaches to obtaining annual indices of temperature and heat. We examine multiple absolute and relative methods including mean values, mean anomalies, counts of days and hours above threshold values, counts above percentiles, and counts above standard deviations. 
+
+The methods below are averaged over the entire year as reports indicate that the risk extends throughout the year. For certain locations, we may want to restrict to "hot weather" months. 
+
+Regardless of the method, these annual indices represent a 8,760*x* simplification where hourly measures are available. However, these indices may be useful to examine long-term trends and are necessary when health outcome data are aggregated annually.
+
+
+On this page, we compile annual index tables for temperature/heat exposures (Absolute and Relative).
+
+## Summary of indices
+
+### "Absolute" indices  
+
+**Annual mean** (full-year): temperature, heat index, WBGT  
+**Annual heat risk days / hours**
+  - Heat index above 80 / 90 / 103 / 125 °F
+  - WBGT above 82 / 85 / 88 / 90 °F
+
+### "Relative" indices  
+
+**Annual mean daily anomaly** (full-year): temperature, heat index, WBGT  
+**Annual maximum daily anomaly** (full-year): temperature, heat index, WBGT  
+**Days mean temperature index above daily climate normal percentile** (averaged over all hours of day)  
+  - temperature, heat index, WBGT above 85th / 90th / 95th percentiles  
+**Days maximum temperature index above daily climate normal maximum percentile**   
+  - temperature, heat index, WBGT above 85th / 90th / 95th percentiles    
+**Days mean temperature index above Standard Deviation(s) of mean daily temperature climate normal**  
+  - temperature, heat index, WBGT above 1 or 2 standard deviations of daily normal  
+**Days maximum temperature index above Standard Deviation(s) of max daily temperature climate normal**  
+  - temperature, heat index, WBGT above 1 or 2 standard deviations of maximum daily normal  
+
+  
+## Data preparation    
+
+Read-in data prepared in [`nldas_averaged`](nldas_averaged.html) and [`climatology`](climatology.html) pages.  
+
+```{r read_data_annual}
+# Read data saved in "nldas_averaged" and "climatology" pages
+
+nldas_annual <- read_rds("data/nldas_annual.rds") %>% 
+        filter(year < 2019,
+               year > 1989)
+heat_risk_days <- read_rds("data/heat_risk_days.rds") %>% 
+        filter(year < 2019,
+              year > 1989)
+heat_risk_hours <- read_rds("data/heat_risk_hours.rds") %>% 
+        filter(year < 2019,
+               year > 1989)
+nldas_climatology <- read_rds("data/nldas_climatology.rds")
+
+```
+
+Convert `tsibbles` to nested tibble 
+```{r absolutes_nested}
+
+nldas_annual_nest <-
+  nldas_annual %>% 
+    dplyr::select(installation:wbgt_f_mean) %>%
+    filter(year < 2019) %>% 
+    as_tibble() %>% 
+    nest(., annual_mean = year:wbgt_f_mean)
+
+heat_risk_days_nest <-
+  heat_risk_days %>% 
+    filter(year < 2019) %>% 
+    as_tibble() %>% 
+    nest(., heat_risk_days = year:days_wbgt_gt90)
+
+heat_risk_hours_nest <-
+  heat_risk_hours %>% 
+    filter(year < 2019,
+           year > 1989) %>% 
+    as_tibble() %>% 
+    nest(., heat_risk_hours = year:hours_wbgt_gt90)
+
+absolutes_annual_nest <-
+  nldas_annual %>% 
+  left_join(heat_risk_days_nest, by = "installation") %>% 
+  left_join(heat_risk_hours_nest, by = "installation")
+
+absolutes_annual_nest
+
+```
+
+Join absolute and relative nested list-columns 
+```{r join_abs_rel}
+
+annual_index_nested <-
+  absolutes_annual_nest %>%
+  left_join(nldas_climatology, by = "installation") %>% 
+  dplyr::select(-c(data, climatology))
+
+annual_index_nested
+
+
+```
+
+
+```{r}
+nldas_annual %>% 
+  left_join(heat_risk_days) %>% 
+  left_join(heat_risk_hours) %>% 
+  bind_cols(
+
+    unnest(nldas_climatology, cols = anomaly_daily_mean) %>% 
+      dplyr::select("tmp_f_mean_anomaly_mean":"wbgt_f_mean_anomaly_mean"),
+    
+    unnest(nldas_climatology, cols = anomaly_daily_max) %>% 
+      dplyr::select("tmp_f_max_anomaly_mean":"wbgt_f_max_anomaly_mean"),
+      
+    unnest(nldas_climatology, cols = anomaly_days_mean) %>% 
+      dplyr::select("days_tmp_gt85pct":"days_wbgt_gt95pct"),
+    
+    unnest(nldas_climatology, cols = anomaly_days_max) %>% 
+      dplyr::select("days_tmp_max_gt85pct":"days_wbgt_max_gt90pct"),
+    
+    unnest(nldas_climatology, cols = sd_days_max) %>% 
+        dplyr::select("days_tmp_max_gt1sd":"days_wbgt_max_gt2sd")
+)
+
+
+
+```
+
+  
