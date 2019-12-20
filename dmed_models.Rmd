@@ -24,7 +24,233 @@ library(furniture)
 library(kableExtra)
 library(visdat)
 library(naniar)
+library(modelr)
 
 ```
 
 Annual models from DMED data.
+
+
+Scope:
+
+  CONUS Army Installations:  
+  
+    Fort Jackson, SC     
+    Fort Benning, GA    
+    Fort Bragg, NC  
+    Fort Campbell, KY  
+    
+    Fort Polk, LA  
+    Fort Hood, TX  
+    Fort Stewart, GA  
+    Fort Leonard Wood, MO
+    Fort Riley, KS  
+    Fort Irwin, CA  
+    Fort Bliss, TX  
+      
+Active-duty service members  
+
+Outcome: 
+  Ambulatory(Out-patient)  
+  Rate of Heat Stress Illness (any type)  
+  1997 - 2018
+
+
+```{r read_data}
+
+# Outcomes
+dmed_tidy <- 
+  read_rds("data/dmed_tidy.rds")
+
+dmed_tidy
+
+# Exposures
+annual_tables_list <-
+  read_rds("data/annual_tables_list.rds")
+
+annual_tables_list
+
+```
+
+## Table of HSI Ambulatory Rates
+Ambulatory rates of any heat stress illness type (active-duty)
+```{r rates_table}
+
+dmed_tidy <- 
+  read_rds("data/dmed_tidy.rds")
+
+dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+  dplyr::select(location, year, rate) %>% 
+  pivot_wider(., names_from = year, values_from = rate) %>% 
+   knitr::kable(digits = 2) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(width = "700px") 
+  
+
+```
+
+(Jackson, Bragg, Campbell, Benning complete at present)
+
+```{r join_tables}
+
+index_long <-
+  annual_tables_list %>% 
+    filter(installation %in% c("fort_benning_ga", "fort_bragg", "fort_campbell", "fort_jackson")) %>% 
+    unnest(data) %>% 
+    pivot_longer(., cols = `1990`:`2018`, names_to = "year", values_to = "value") %>% 
+    mutate(year = as.integer(year))
+
+
+hsi_rates <-
+  dmed_tidy %>% 
+    filter(location %in% c("benning", "bragg", "campbell", "jackson"),
+           type == "Ambulatory Data",
+           hsi == "all",
+           strata == "gender",
+           category == "Total") %>% 
+    dplyr::select(location, year, rate) %>% 
+    mutate(location = recode(location, jackson = "fort_jackson"),
+           location = recode(location, benning = "fort_benning_ga"),                 
+           location = recode(location, bragg = "fort_bragg"),
+           location = recode(location, campbell = "fort_campbell"),
+           location = as.character(location))
+
+
+# Join table
+
+joined_rate <-
+  index_long %>% 
+    left_join(hsi_rates, by = c("installation" = "location", "year" = "year")) %>% 
+    drop_na(rate)
+
+joined_rate
+          
+ 
+          
+```
+
+## Scatterplots of Temperature/Heat Index and HSI Rates
+
+Each point represents a year from 1997 - 2018.  
+The back line is a linear regression and the blue curve is a `loess` smoothed conditional means curve.
+
+```{r scatterplots, fig.height = 14, fig.width = 10, warning = FALSE}
+
+joined_rate %>%
+    filter(installation == "fort_benning_ga") %>% 
+    ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.5, color = "black") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_wrap(~ index, scales = "free_x") +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates and Annual Temperature/Heat Indices \n Fort Benning, GA",
+      x = "Index value",
+      y = "HSI rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  
+  
+
+joined_rate %>%
+    filter(installation == "fort_benning_ga") %>% 
+    ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.5, color = "black") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_wrap(~ index, scales = "free_x") +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates and Annual Temperature/Heat Indices \n Fort Benning, GA",
+      x = "Index value",
+      y = "HSI rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  
+  
+ joined_rate %>%
+    filter(installation == "fort_jackson") %>% 
+    ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.5, color = "black") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_wrap(~ index, scales = "free_x") +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates and Annual Temperature/Heat Indices \n Fort Jackson, SC",
+      x = "Index value",
+      y = "HSI rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  
+ joined_rate %>%
+    filter(installation == "fort_campbell") %>% 
+    ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.5, color = "black") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_wrap(~ index, scales = "free_x") +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates and Annual Temperature/Heat Indices \n Fort Campbell, KY",
+      x = "Index value",
+      y = "HSI rate (per 1,000 persons per year)",
+      caption = "Primary diagnosis"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    
+    
+  
+
+```
+
+## Linear models
+
+```{r linear_models}
+
+# Linear regression function
+annual_lm = function(df) {
+  df %>% 
+    lm(rate ~ value, data = .)
+}
+
+# Nest by each installation - index pair
+
+annual_hsi_nest <-
+  joined_rate %>% 
+    nest(data = year:rate) %>% 
+    mutate(linear_models = map(data, annual_lm),
+           glance = map(linear_models, broom::glance),
+           tidy =   map(linear_models, broom::glance))
+           
+  
+
+annual_hsi_nest
+
+# Model summaries
+
+annual_hsi_nest %>%
+  unnest(glance) %>% 
+  unnest(tidy, names_repair = "universal") %>% 
+  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "700px")
+
+
+
+```
+

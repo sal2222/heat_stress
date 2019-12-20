@@ -43,6 +43,8 @@ left:
       menu: 
         - text: "Annual cases"
           href: dmed_summary.html
+        - text: "Annual models"
+          href: dmed_models.html
         - text: "Daily cases"
 right:
     - icon: fa-envelope fa-lg

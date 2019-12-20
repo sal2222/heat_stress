@@ -198,6 +198,7 @@ annual_tables_list <-
 
 annual_tables_list 
 
+# write_rds(annual_tables_list, "data/annual_tables_list.rds")
 
 ```
 
@@ -212,4 +213,3 @@ annual_tables_list$data[[1]] %>%
   
 ```
 
-  
