@@ -21,13 +21,16 @@ library(sweep)
 library(viridis)
 library(lubridate)
 library(scales)
+library(kableExtra)
+library(formattable)
+
 ```
 
 ## Introduction
 
 There are numerous approaches to obtaining annual indices of temperature and heat. We examine multiple absolute and relative methods including mean values, mean anomalies, counts of days and hours above threshold values, counts above percentiles, and counts above standard deviations. 
 
-The methods below are averaged over the entire year as reports indicate that the risk extends throughout the year. For certain locations, we may want to restrict to "hot weather" months. 
+The relative measures are averaged both over the entire year and over a common "heat season" from 01 May - 30 September. 
 
 Regardless of the method, these annual indices represent a 8,760*x* simplification where hourly measures are available. However, these indices may be useful to examine long-term trends and are necessary when health outcome data are aggregated annually.
 
@@ -43,10 +46,11 @@ On this page, we compile annual index tables for temperature/heat exposures (Abs
   - Heat index above 80 / 90 / 103 / 125 °F
   - WBGT above 82 / 85 / 88 / 90 °F
 
-### "Relative" indices  
+### "Relative" indices    
+*Assessed over full-year and "heat season"(May-Sept)*  
 
-**Annual mean daily anomaly** (full-year): temperature, heat index, WBGT  
-**Annual maximum daily anomaly** (full-year): temperature, heat index, WBGT  
+**Annual mean daily anomaly** : temperature, heat index, WBGT  
+**Annual maximum daily anomaly** : temperature, heat index, WBGT  
 **Days mean temperature index above daily climate normal percentile** (averaged over all hours of day)  
   - temperature, heat index, WBGT above 85th / 90th / 95th percentiles  
 **Days maximum temperature index above daily climate normal maximum percentile**   
@@ -75,9 +79,10 @@ heat_risk_hours <- read_rds("data/heat_risk_hours.rds") %>%
                year > 1989)
 nldas_climatology <- read_rds("data/nldas_climatology.rds")
 
+nldas_climatology_summer <- read_rds("data/nldas_climatology_summer.rds")
 ```
 
-Convert `tsibbles` to nested tibble 
+### Convert `tsibbles` to nested tibble 
 ```{r absolutes_nested}
 
 nldas_annual_nest <-
@@ -108,45 +113,103 @@ absolutes_annual_nest <-
 absolutes_annual_nest
 
 ```
-
-Join absolute and relative nested list-columns 
+  
+  
+### Join absolute and relative nested list-columns
+  
 ```{r join_abs_rel}
 
 annual_index_nested <-
   absolutes_annual_nest %>%
   left_join(nldas_climatology, by = "installation") %>% 
-  dplyr::select(-c(data, climatology))
-
+  dplyr::select(-c(data, climatology)) %>% 
+  left_join(nldas_climatology_summer, by = "installation") %>% 
+  dplyr::select(-c(summer_data, summer_climatology))
+  
 annual_index_nested
 
 
 ```
+  
+  
+### Compile in a `wide` dataframe.  
+We have 25 installations, 28 years, and 86 index measures of temperature or heat each location-year.   
+  
+  
 
+```{r compile_annual_index}
 
-```{r}
-nldas_annual %>% 
-  left_join(heat_risk_days) %>% 
-  left_join(heat_risk_hours) %>% 
-  bind_cols(
-
-    unnest(nldas_climatology, cols = anomaly_daily_mean) %>% 
-      dplyr::select("tmp_f_mean_anomaly_mean":"wbgt_f_mean_anomaly_mean"),
-    
-    unnest(nldas_climatology, cols = anomaly_daily_max) %>% 
-      dplyr::select("tmp_f_max_anomaly_mean":"wbgt_f_max_anomaly_mean"),
+nldas_annual_index <- 
+  
+  nldas_annual %>% 
+    left_join(heat_risk_days) %>% 
+    left_join(heat_risk_hours) %>% 
+    bind_cols(
+  
+      unnest(nldas_climatology, cols = anomaly_daily_mean) %>% 
+        dplyr::select("tmp_f_mean_anomaly_mean":"wbgt_f_mean_anomaly_mean"),
       
-    unnest(nldas_climatology, cols = anomaly_days_mean) %>% 
-      dplyr::select("days_tmp_gt85pct":"days_wbgt_gt95pct"),
-    
-    unnest(nldas_climatology, cols = anomaly_days_max) %>% 
-      dplyr::select("days_tmp_max_gt85pct":"days_wbgt_max_gt90pct"),
-    
-    unnest(nldas_climatology, cols = sd_days_max) %>% 
-        dplyr::select("days_tmp_max_gt1sd":"days_wbgt_max_gt2sd")
-)
+      unnest(nldas_climatology, cols = anomaly_daily_max) %>% 
+        dplyr::select("tmp_f_max_anomaly_mean":"wbgt_f_max_anomaly_mean"),
+        
+      unnest(nldas_climatology, cols = anomaly_days_mean) %>% 
+        dplyr::select("days_tmp_gt85pct":"days_wbgt_gt95pct"),
+      
+      unnest(nldas_climatology, cols = anomaly_days_max) %>% 
+        dplyr::select("days_tmp_max_gt85pct":"days_wbgt_max_gt90pct"),
+      
+      unnest(nldas_climatology, cols = sd_days_max) %>% 
+          dplyr::select("days_tmp_max_gt1sd":"days_wbgt_max_gt2sd"),
+  
+      unnest(nldas_climatology_summer, cols = anomaly_daily_mean_may_sep) %>% 
+        dplyr::select("tmp_f_mean_anomaly_mean":"wbgt_f_mean_anomaly_mean") %>% 
+        setNames(paste0(names(.), "_may_sep")),
+      
+      unnest(nldas_climatology_summer, cols = anomaly_daily_max_may_sep) %>% 
+        dplyr::select("tmp_f_max_anomaly_mean":"wbgt_f_max_anomaly_mean") %>% 
+        setNames(paste0(names(.), "_may_sep")),  
+        
+      unnest(nldas_climatology_summer, cols = anomaly_days_mean_may_sep) %>% 
+        dplyr::select("days_tmp_gt85pct":"days_wbgt_gt95pct") %>% 
+        setNames(paste0(names(.), "_may_sep")),
+      
+      unnest(nldas_climatology_summer, cols = anomaly_days_max_may_sep) %>% 
+        dplyr::select("days_tmp_max_gt85pct":"days_wbgt_max_gt90pct") %>% 
+        setNames(paste0(names(.), "_may_sep"))  ,
+      
+      unnest(nldas_climatology_summer, cols = sd_days_max_may_sep) %>% 
+          dplyr::select("days_tmp_max_gt1sd":"days_wbgt_max_gt2sd") %>% 
+          setNames(paste0(names(.), "_may_sep"))  
+  )
+  
+nldas_annual_index 
+
+```
+
+### Installation tables by year (list) 
+```{r tables_by_year}
+
+annual_tables_list <-
+  nldas_annual_index %>% 
+    group_by(installation) %>%
+    pivot_longer(cols = tmp_f_mean:days_wbgt_max_gt2sd_may_sep, names_to = "index", values_to = "value") %>% 
+    pivot_wider(names_from = year, values_from = value) %>% 
+    nest(data = -installation)
+
+annual_tables_list 
 
 
+```
 
+### Example Table: eglin_afb  
+```{r}
+annual_tables_list$data[[1]] %>%
+  knitr::kable(digits = 2) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  pack_rows("Absolute Metric", 1, 28) %>%
+  pack_rows("Relative Metric", 29, 86) %>% 
+  scroll_box(width = "700px", height = "700px") 
+  
 ```
 
   
