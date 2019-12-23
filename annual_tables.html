@@ -435,6 +435,9 @@ div.tocify {
     <li>
       <a href="dmed_summary.html">Annual cases</a>
     </li>
+    <li>
+      <a href="dmed_models.html">Annual models</a>
+    </li>
     <li class="dropdown-header">Daily cases</li>
   </ul>
 </li>
@@ -482,8 +485,9 @@ div.tocify {
 </div>
 <div id="relative-indices" class="section level3">
 <h3>“Relative” indices</h3>
-<p><strong>Annual mean daily anomaly</strong> (full-year): temperature, heat index, WBGT<br />
-<strong>Annual maximum daily anomaly</strong> (full-year): temperature, heat index, WBGT<br />
+<p><em>Assessed over full-year and “heat season”(May-Sept)</em></p>
+<p><strong>Annual mean daily anomaly</strong> : temperature, heat index, WBGT<br />
+<strong>Annual maximum daily anomaly</strong> : temperature, heat index, WBGT<br />
 <strong>Days mean temperature index above daily climate normal percentile</strong> (averaged over all hours of day)<br />
 - temperature, heat index, WBGT above 85th / 90th / 95th percentiles<br />
 <strong>Days maximum temperature index above daily climate normal maximum percentile</strong><br />
@@ -723,6 +727,7 @@ annual_tables_list </code></pre>
 ##  9 fort_hood             [86 x 30]
 ## 10 fort_jackson          [86 x 30]
 ## # ... with 15 more rows</code></pre>
+<pre class="r"><code># write_rds(annual_tables_list, &quot;data/annual_tables_list.rds&quot;)</code></pre>
 </div>
 <div id="example-table-eglin_afb" class="section level3">
 <h3>Example Table: eglin_afb</h3>

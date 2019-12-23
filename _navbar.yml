@@ -37,7 +37,9 @@ left:
         - text: "Climatologies / Anomalies"
           href: climatology.html
         - text: "Annual index tables"
-          href: annual_tables.html  
+          href: annual_tables.html
+        - text: "Air Force weather station data"
+          href: af_weather.html  
     - text: "Heat Illness"
       icon: fa-medkit  
       menu: 

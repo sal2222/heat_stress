@@ -1,0 +1,160 @@
+---
+title: "af_weather"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(lubridate)
+library(viridis)
+library(knitr)
+library(kableExtra)
+library(zoo)
+
+```
+
+**Air Force SAR weather**
+
+This code includes reads in and combines separate Excel worksheets into a single dataframe.  
+The hourly data were produced in July 2019 by 14WS and provide WBGT, HI, RH, temperature (F), dew point (F) and UTCI (F).
+
+*Note: For Fort Irwin, Daegu, Hawaii, Yongsan, Red Cloud files, need to insert row prior to line 25 so that header starts on line 26.*
+
+
+
+```{r read_function, message = FALSE, warning = FALSE, eval = FALSE}
+
+# sar_file <- "D:/sar_weather/SAR_9860_Aberdeen Proving Ground.csv"  
+#
+sar_file_list <- list.files(path = "D:/sar_weather", pattern = "^.*\\.(csv)$") %>% 
+                    paste0("D:/sar_weather/", .)
+
+sar_file_list %>% head()
+
+
+read_sar <- function(input_file) {
+
+read_csv((input_file), col_names = TRUE, skip = 25, na = c("", "NA")) %>%
+  janitor::clean_names() %>% 
+  mutate(location = stringr::str_split((input_file), "9860_") %>% .[[1]] %>% .[2] %>% 
+                             str_split(., ".csv") %>% .[[1]] %>% .[1],
+             time = paste0(hour, ":", "00", ":", "00"), 
+             date = paste(year, month, day, sep = "-"),
+             dttm =  paste(date, time, sep = " ") %>% 
+                 flipTime::AsDateTime()) %>% 
+  dplyr::select(-c(year, month, day, hour, time, date)) %>% 
+  dplyr::select(location, dttm, everything()) %>%
+  rename(wbgt = wet_bulb_globe_temp,
+         rh = relitive_humidity)
+}
+
+sar_df <- furrr::future_map_dfr(sar_file_list, read_sar, .progress = TRUE) 
+
+sar_df <- sar_df %>% select(-c(x11, x12, x13))
+
+sar_df
+
+```
+
+## Save file and filter locations
+
+```{r write_csv, eval = FALSE}
+# save dataframe to .csv file
+# save as .rds
+
+# write_csv(sar_df, "D:/sar_df.csv", append = FALSE)
+ 
+# sar_df <- read_csv("D:/sar_weather/sar_df.csv")
+
+sar_df <- sar_df %>% 
+  filter(location %in% c("Fort Benning", "Fort Bragg","Fort Campbell",
+      "Fort Jackson", "Fort Polk", "Fort Hood",
+      "Fort Stewart", "Fort Leonard Wood", "Fort Riley",
+      "Fort Irwin", "Fort Bliss", "Fort Lewis",
+      "Fort Sill", "Fort Carson", "Fort Gordon",
+      "Fort Drum", "JB San Antonio")
+  )
+
+# write_rds(sar_df, path = "data/sar_df.rds")
+
+```
+
+```{r inspect_data}
+
+sar_df <- read_rds("data/sar_df.rds")
+
+sar_df
+
+# Location counts
+sar_df %>% 
+  count(location) %>%
+  head() %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
+```
+
+## Hour of day mean WBGT
+```{r hour_of_day, warning = FALSE, out.width = '175%'}
+
+# Plot July hourly WBGT
+
+sar_df %>%   
+  filter(location %in% c("Fort Jackson", "Fort Benning", "Fort Bliss", "Fort Bragg"),
+         months(dttm) == "July") %>% 
+  group_by(location, lubridate::year(dttm), lubridate::hour(dttm)) %>% 
+  summarise(mean_wbgt = mean(wbgt, na.rm = TRUE)) %>%
+  rename(year = `lubridate::year(dttm)`,
+         hour = `lubridate::hour(dttm)`) %>% 
+  ggplot(aes(x = hour, y = mean_wbgt, color = factor(year))) + 
+    geom_point() +
+    geom_smooth(aes(group = factor(year)),  size = 0.6, se = FALSE) +
+    facet_wrap(~location) +
+    labs(
+      title = "Mean July WBGT (deg F) by Hour of Day (UTC)",
+      x = "Hour of day (UTC)",
+      y = "Mean WBGT (deg F)",
+      caption = "Data from 14WS/CXO, produced 29 July 2019") +
+    theme_bw() +
+  viridis::scale_color_viridis(
+      name = "Year", 
+      discrete = TRUE,
+      direction = -1,
+      option = "inferno") 
+
+
+
+```
+
+## Yearly mean temperature boxplots
+
+```{r yearly_boxplot, out.width = "200%"}
+# Locations 1 - 12
+sar_df %>%   
+  select(location, dttm, temp_f) %>%
+  mutate(location = as_factor(location),
+         year = as.factor(lubridate::year(dttm))) %>%
+  filter(as.numeric(location) > 2) %>%
+  filter(as.numeric(location) <= 11) %>% 
+  group_by(location, lubridate::year(dttm)) %>% 
+  ggplot(aes(x = year, 
+             y = temp_f)) +
+    geom_boxplot() +
+    facet_wrap(~location, ncol = 3) +
+    labs(
+      title = "Yearly mean temperatures (deg F)",
+      x = "Year",
+      y = "Temperature (deg F)",
+      caption = "Data from 14WS/CXO, produced 29 July 2019") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, size = 6, hjust = 1))
+```
+
+
+
+

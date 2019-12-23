@@ -415,7 +415,10 @@ div.tocify {
       <a href="nldas_averaged.html">Aggregate over calendar periods</a>
     </li>
     <li>
-      <a href="climatology.html">Climatologies/Normals</a>
+      <a href="climatology.html">Climatologies / Anomalies</a>
+    </li>
+    <li>
+      <a href="annual_tables.html">Annual index tables</a>
     </li>
   </ul>
 </li>
@@ -430,6 +433,9 @@ div.tocify {
   <ul class="dropdown-menu" role="menu">
     <li>
       <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li>
+      <a href="dmed_models.html">Annual models</a>
     </li>
     <li class="dropdown-header">Daily cases</li>
   </ul>
@@ -986,6 +992,66 @@ dmed_tidy %&gt;%
 
 dmed_tidy %&gt;%
   count(year)</code></pre>
+</div>
+<div id="add-on-additional-queries" class="section level2">
+<h2>Add on additional queries</h2>
+<pre class="r"><code>file_id &lt;- dmed_file_list %&gt;%
+  str_sub(start = 21L, end = -6L) %&gt;%  str_split(&quot;_&quot;) %&gt;% 
+  lapply(., `[`, 1) %&gt;% 
+  as.numeric() %&gt;% 
+  as_tibble() 
+
+
+dmed_files_icd9_from1990 &lt;-
+  dmed_file_list %&gt;% as_tibble() %&gt;% rename(file_name = value) %&gt;%  
+  cbind(file_id) %&gt;% 
+  filter(value %in% 132:138) %&gt;% 
+  dplyr::select(file_name) %&gt;% 
+  as_vector()
+
+
+icd9_from1990_df &lt;- furrr::future_map_dfr(dmed_files_icd9_from1990, read_icd9_from1990, .progress = TRUE) 
+
+icd9_from1990_df &lt;-
+  icd9_from1990_df %&gt;% 
+  na.omit() %&gt;% 
+  mutate(type = as_factor(type),
+         category = as_factor(category),
+         location = as_factor(location),
+         year = as.integer(year),
+         strata = as_factor(strata),
+         hsi = as_factor(hsi))
+
+
+#ICD 10
+
+dmed_files_icd10_from2016 &lt;-
+  dmed_file_list %&gt;% as_tibble() %&gt;% rename(file_name = value) %&gt;%  
+  cbind(file_id) %&gt;% 
+  filter(value %in% 139:145) %&gt;% 
+  dplyr::select(file_name) %&gt;% 
+  as_vector()
+
+
+icd10_from2016_df &lt;- furrr::future_map_dfr(dmed_files_icd10_from2016, read_icd10_from2016, .progress = TRUE) 
+
+icd10_from2016_df &lt;-
+  icd10_from2016_df %&gt;% 
+  na.omit() %&gt;% 
+  mutate(type = as_factor(type),
+         category = as_factor(category),
+         location = as_factor(location),
+         year = as.integer(year),
+         strata = as_factor(strata),
+         hsi = as_factor(hsi))
+
+
+dmed_tidy &lt;-
+  dmed_tidy %&gt;% 
+  rbind(icd9_from1990_df, icd10_from2016_df) %&gt;% 
+  na.omit()
+
+# write_rds(dmed_tidy, path = &quot;data/dmed_tidy.rds&quot;)</code></pre>
 </div>
 
 

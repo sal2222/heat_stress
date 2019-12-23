@@ -45,6 +45,8 @@ Environmental Health Sciences
 
 - Annual temperature and heat indices [[here]](annual_tables.html)
 
+- Air Force weather station data (U.S. Army installations, 2008-2018) - sensitivity analysis [[here]](af_weather.html)
+
 ## Heat Stress Outcomes
 
 - DMED Summary (annual) [[here]](dmed_summary.html)  

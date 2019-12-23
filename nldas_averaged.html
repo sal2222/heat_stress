@@ -415,7 +415,10 @@ div.tocify {
       <a href="nldas_averaged.html">Aggregate over calendar periods</a>
     </li>
     <li>
-      <a href="climatology.html">Climatologies/Normals</a>
+      <a href="climatology.html">Climatologies / Anomalies</a>
+    </li>
+    <li>
+      <a href="annual_tables.html">Annual index tables</a>
     </li>
   </ul>
 </li>
@@ -430,6 +433,9 @@ div.tocify {
   <ul class="dropdown-menu" role="menu">
     <li>
       <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li>
+      <a href="dmed_models.html">Annual models</a>
     </li>
     <li class="dropdown-header">Daily cases</li>
   </ul>
@@ -616,7 +622,9 @@ nldas_annual</code></pre>
 ## # ... with 740 more rows, and 8 more variables: heat_index_max &lt;dbl&gt;,
 ## #   wbgt_f_max &lt;dbl&gt;, tmp_f_min &lt;dbl&gt;, heat_index_min &lt;dbl&gt;, wbgt_f_min &lt;dbl&gt;,
 ## #   tmp_f_sd &lt;dbl&gt;, heat_index_sd &lt;dbl&gt;, wbgt_f_sd &lt;dbl&gt;</code></pre>
-<pre class="r"><code>nldas_annual %&gt;% 
+<pre class="r"><code># write_rds(nldas_annual, &quot;data/nldas_annual.rds&quot;)
+
+nldas_annual %&gt;% 
     autoplot(wbgt_f_mean)</code></pre>
 <p><img src="nldas_averaged_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
 </div>
@@ -658,6 +666,7 @@ heat_risk_days</code></pre>
 ## 10 eglin_afb     1999          189           96             8             0
 ## # ... with 740 more rows, and 4 more variables: days_wbgt_gt82 &lt;int&gt;,
 ## #   days_wbgt_gt85 &lt;int&gt;, days_wbgt_gt88 &lt;int&gt;, days_wbgt_gt90 &lt;int&gt;</code></pre>
+<pre class="r"><code># write_rds(heat_risk_days, &quot;data/heat_risk_days.rds&quot;)</code></pre>
 <div id="boxplots-of-heat-risk-day-counts-per-year" class="section level3">
 <h3>Boxplots of heat risk day counts per year</h3>
 <pre class="r"><code>heat_risk_days %&gt;% 
@@ -755,6 +764,7 @@ heat_risk_hours</code></pre>
 ## 10 eglin_afb     1998          3114          1523             57              0
 ## # ... with 765 more rows, and 4 more variables: hours_wbgt_gt82 &lt;int&gt;,
 ## #   hours_wbgt_gt85 &lt;int&gt;, hours_wbgt_gt88 &lt;int&gt;, hours_wbgt_gt90 &lt;int&gt;</code></pre>
+<pre class="r"><code># write_rds(heat_risk_hours, &quot;data/heat_risk_hours.rds&quot;)</code></pre>
 <div id="boxplots-of-heat-risk-hour-counts-per-year" class="section level3">
 <h3>Boxplots of heat risk hour counts per year</h3>
 <pre class="r"><code>heat_risk_hours %&gt;%
