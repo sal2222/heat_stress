@@ -39,7 +39,6 @@ Scope:
     Fort Benning, GA    
     Fort Bragg, NC  
     Fort Campbell, KY  
-    
     Fort Polk, LA  
     Fort Hood, TX  
     Fort Stewart, GA  
@@ -48,13 +47,29 @@ Scope:
     Fort Irwin, CA  
     Fort Bliss, TX  
       
-Active-duty service members  
+Population: Active-duty Army service members  
 
-Outcome: 
-  Ambulatory(Out-patient)  
-  Rate of Heat Stress Illness (any type)  
+**Outcome**:
+  Ambulatory (Out-patient)  
+  Annual Rate of Heat Stress Illness (any type, primary diagnosis)  
   1997 - 2018
-
+  
+**Exposure indices**:  
+*“Absolute” indices*  
+  Annual mean (full-year): temperature, heat index, WBGT  
+  Annual heat risk days / hours - Heat index above 80 / 90 / 103 / 125 °F - WBGT above 82 / 85 / 88 / 90 °F  
+  
+*“Relative” indices* (averaged over full-year and heat season months) 
+Annual mean daily anomaly: temperature, heat index, WBGT  
+Annual maximum daily anomaly: temperature, heat index, WBGT  
+Days mean temperature index above daily climate normal percentile (averaged over all hours of day)  
+  - temperature, heat index, WBGT above 85th / 90th / 95th percentiles  
+Days maximum temperature index above daily climate normal maximum percentile  
+  - temperature, heat index, WBGT above 85th / 90th / 95th percentiles  
+Days mean temperature index above Standard Deviation(s) of mean daily temperature climate normal  
+  - temperature, heat index, WBGT above 1 or 2 standard deviations of daily normal  
+Days maximum temperature index above Standard Deviation(s) of max daily temperature climate normal  
+  - temperature, heat index, WBGT above 1 or 2 standard deviations of maximum daily normal  
 
 ```{r read_data}
 
@@ -73,7 +88,7 @@ annual_tables_list
 ```
 
 ## Table of HSI Ambulatory Rates
-Ambulatory rates of any heat stress illness type (active-duty)
+Ambulatory rates (per 1,000 persons per year) of any heat stress illness type (Army personnel)
 ```{r rates_table}
 
 dmed_tidy <- 
@@ -94,21 +109,25 @@ dmed_tidy %>%
 
 ```
 
-(Jackson, Bragg, Campbell, Benning complete at present)
+
 
 ```{r join_tables}
 
-index_long <-
+index_long <- 
   annual_tables_list %>% 
-    filter(installation %in% c("fort_benning_ga", "fort_bragg", "fort_campbell", "fort_jackson")) %>% 
+    filter(installation %in% c("fort_benning_ga", "fort_bragg", "fort_campbell", "fort_jackson",
+                               "fort_polk", "fort_hood", "fort_stewart", "fort_leonard_wood", "fort_riley",
+                               "ntc_and_fort_irwin", "fort_bliss")) %>% 
     unnest(data) %>% 
     pivot_longer(., cols = `1990`:`2018`, names_to = "year", values_to = "value") %>% 
-    mutate(year = as.integer(year))
+    mutate(year = as.integer(year)) 
 
 
 hsi_rates <-
   dmed_tidy %>% 
-    filter(location %in% c("benning", "bragg", "campbell", "jackson"),
+    filter(location %in% c("benning", "bragg", "campbell", "jackson",
+                           "polk", "hood", "stewart", "leonardwood", 
+                           "riley", "irwin", "bliss"),
            type == "Ambulatory Data",
            hsi == "all",
            strata == "gender",
@@ -118,8 +137,16 @@ hsi_rates <-
            location = recode(location, benning = "fort_benning_ga"),                 
            location = recode(location, bragg = "fort_bragg"),
            location = recode(location, campbell = "fort_campbell"),
+           location = recode(location, polk = "fort_polk"),
+           location = recode(location, hood = "fort_hood"),
+           location = recode(location, stewart = "fort_stewart"),
+           location = recode(location, leonardwood = "fort_leonard_wood"),
+           location = recode(location, riley = "fort_riley"),
+           location = recode(location, irwin = "ntc_and_fort_irwin"),
+           location = recode(location, bliss = "fort_bliss"),
            location = as.character(location))
 
+hsi_rates
 
 # Join table
 
@@ -240,17 +267,91 @@ annual_hsi_nest <-
 
 annual_hsi_nest
 
+
+
+```
+
+
+## Linear Models Summary Table
+All models, sorted by R^2^
+
+```{r lm_models_sort}
 # Model summaries
 
 annual_hsi_nest %>%
   unnest(glance) %>% 
   unnest(tidy, names_repair = "universal") %>% 
-  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>% 
+  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>%
+  rename(statistic = statistic...8,
+         r_squared = r.squared...5,
+         p_value = p.value...9,
+         log_lik = logLik...11) %>%
+  arrange(desc(r_squared), .by_group = FALSE) %>% 
   knitr::kable(digits = 4) %>% 
   kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
   scroll_box(height = "700px")
-
-
-
 ```
+
+**Discussion**  
+Best fit linear models: the annual "temperature/heat" index describes much of the variability in heat stress illness rates.  
+
+The installations with the best fit models are **Fort Campbell, KY**, **Fort Benning, GA**, and **Fort Jackson, SC**. These are all sites with high rates of HSIs. Fort Bragg, NC is an exception that has high HSI rates, but is not listed high among best fit linear models.  
+
+Best fit indices (R^2^ above 40%):  
+
+- days_wbgt_max_gt85pct (relative)
+- days_wbgt_max_gt1sd (relative)  
+- days_tmp_gt85pct (relative)  
+- days_wbgt_gt82  
+- hours_wbgt_gt82   
+- days_wbgt_gt85  
+- days_hi_gt80  
+- days_wbgt_max_gt85pct (relative)  
+- days_heat_index_gt85pct (relative)  
+- days_heat_index_max_gt1sd (relative)  
+- days_wbgt_max_gt90pct (relative)    
+- days_wbgt_max_gt2sd_may_sep (relative)    
+- days_heat_index_max_gt90pct (relative)    
+- wbgt_f_max_anomaly_mean_may_sep (relative)    
+- days_tmp_gt90pct_may_sep (relative)  
+- days_heat_index_gt90pct_may_sep (relative)  
+- days_wbgt_max_gt1sd_may_sep (relative)  
+  
+The top models are relative indices (based on 1990-2018 climatology), aggregated over the entire calendar year.  
+
+WBGT models generally fit better than Heat Index or temperature.  
+
+
+
+## Linear Models Summary, by Installation
+```{r lm_models_grouped_sort}
+# Model Summary Tables by Installation
+
+annual_hsi_nest %>%
+  unnest(glance) %>% 
+  unnest(tidy, names_repair = "universal") %>% 
+  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>%
+  rename(statistic = statistic...8,
+         r_squared = r.squared...5,
+         p_value = p.value...9,
+         log_lik = logLik...11) %>%
+  group_by(installation, add = TRUE) %>% 
+  arrange(desc(r_squared), .by_group = TRUE) %>% 
+  group_split() %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "300px")
+```
+
+Note: NA's are present for models where the conditions were not met (e.g. no days with HI above 125°F, no days with mean temp above 95th percentile). 
+
+
+**Discussion**  
+
+Installations with poorly fitting models (all R^2^ below 25%) are:  
+**Fort Riley, KS** (highest R^2^ = 11.8%), **Fort Bragg, NC** (17.0%), **Fort Leonard Wood, MO** (19.0%), and **Fort Hood, TX** (22.8%).  
+
+A WBGT-based model fit best for 6 installations, and a Heat Index-based model fit best for 5 (Hood, Jackson, Leonard Wood, Stewart).  
+
+
 

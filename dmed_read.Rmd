@@ -563,6 +563,7 @@ icd10_from2016_df <-
 
 ```
 
+
 ## Combine ICD9 and ICD 10 dataframes
 ```{r combine_dataframes, eval = FALSE}
 
@@ -602,4 +603,65 @@ dmed_tidy %>%
 
 ```
 
+## Add on additional queries
+```{r add_on_queries, eval = FALSE}
+
+file_id <- dmed_file_list %>%
+  str_sub(start = 21L, end = -6L) %>%  str_split("_") %>% 
+  lapply(., `[`, 1) %>% 
+  as.numeric() %>% 
+  as_tibble() 
+
+
+dmed_files_icd9_from1990 <-
+  dmed_file_list %>% as_tibble() %>% rename(file_name = value) %>%  
+  cbind(file_id) %>% 
+  filter(value %in% 132:138) %>% 
+  dplyr::select(file_name) %>% 
+  as_vector()
+
+
+icd9_from1990_df <- furrr::future_map_dfr(dmed_files_icd9_from1990, read_icd9_from1990, .progress = TRUE) 
+
+icd9_from1990_df <-
+  icd9_from1990_df %>% 
+  na.omit() %>% 
+  mutate(type = as_factor(type),
+         category = as_factor(category),
+         location = as_factor(location),
+         year = as.integer(year),
+         strata = as_factor(strata),
+         hsi = as_factor(hsi))
+
+
+#ICD 10
+
+dmed_files_icd10_from2016 <-
+  dmed_file_list %>% as_tibble() %>% rename(file_name = value) %>%  
+  cbind(file_id) %>% 
+  filter(value %in% 139:145) %>% 
+  dplyr::select(file_name) %>% 
+  as_vector()
+
+
+icd10_from2016_df <- furrr::future_map_dfr(dmed_files_icd10_from2016, read_icd10_from2016, .progress = TRUE) 
+
+icd10_from2016_df <-
+  icd10_from2016_df %>% 
+  na.omit() %>% 
+  mutate(type = as_factor(type),
+         category = as_factor(category),
+         location = as_factor(location),
+         year = as.integer(year),
+         strata = as_factor(strata),
+         hsi = as_factor(hsi))
+
+
+dmed_tidy <-
+  dmed_tidy %>% 
+  rbind(icd9_from1990_df, icd10_from2016_df) %>% 
+  na.omit()
+
+# write_rds(dmed_tidy, path = "data/dmed_tidy.rds")
+```
 
