@@ -416,7 +416,10 @@ div.tocify {
       <a href="nldas_averaged.html">Aggregate over calendar periods</a>
     </li>
     <li>
-      <a href="climatology.html">Climatologies/Normals</a>
+      <a href="climatology.html">Climatologies / Anomalies</a>
+    </li>
+    <li>
+      <a href="annual_tables.html">Annual index tables</a>
     </li>
   </ul>
 </li>
@@ -431,6 +434,9 @@ div.tocify {
   <ul class="dropdown-menu" role="menu">
     <li>
       <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li>
+      <a href="dmed_models.html">Annual models</a>
     </li>
     <li class="dropdown-header">Daily cases</li>
   </ul>
@@ -465,24 +471,8 @@ div.tocify {
 
 <p>Summary of data from DMED queries.</p>
 <p>Data preparation code is available at: <a href="dmed_read.html">(link)</a></p>
-<pre class="r"><code>dmed_tidy &lt;- 
-  read_rds(&quot;data/dmed_tidy.rds&quot;)
-
-dmed_tidy</code></pre>
-<pre><code>## # A tibble: 11,010 x 9
-##    type            category  year count population  rate location strata hsi    
-##    &lt;fct&gt;           &lt;fct&gt;    &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;  &lt;fct&gt;  
-##  1 Ambulatory Data Male      1997     0      6057.     0 jackson  gender hexhsa~
-##  2 Ambulatory Data Female    1997     0      2749.     0 jackson  gender hexhsa~
-##  3 Ambulatory Data Total     1997     0      8806.     0 jackson  gender hexhsa~
-##  4 Hospitalizatio~ Male      1997     0      6057.     0 jackson  gender hexhsa~
-##  5 Hospitalizatio~ Female    1997     0      2749.     0 jackson  gender hexhsa~
-##  6 Hospitalizatio~ Total     1997     0      8806.     0 jackson  gender hexhsa~
-##  7 Reportable Eve~ Male      1997     0      6057.     0 jackson  gender hexhsa~
-##  8 Reportable Eve~ Female    1997     0      2749.     0 jackson  gender hexhsa~
-##  9 Reportable Eve~ Total     1997     0      8806.     0 jackson  gender hexhsa~
-## 10 Ambulatory Data Male      1998     0      6456.     0 jackson  gender hexhsa~
-## # ... with 11,000 more rows</code></pre>
+<pre class="r"><code>dmed_tidy &lt;-
+  read_rds(&quot;data/dmed_tidy.rds&quot;)</code></pre>
 <div id="example-plots" class="section level2">
 <h2>Example Plots</h2>
 <pre class="r"><code>dmed_tidy %&gt;%
@@ -1306,6 +1296,14 @@ campbell
 </tr>
 <tr>
 <td style="text-align:left;">
+hood
+</td>
+<td style="text-align:right;">
+2368
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 overseas
 </td>
 <td style="text-align:right;">
@@ -1314,10 +1312,10 @@ overseas
 </tr>
 <tr>
 <td style="text-align:left;">
-hood
+polk
 </td>
 <td style="text-align:right;">
-1131
+1637
 </td>
 </tr>
 <tr>
@@ -1325,23 +1323,7 @@ hood
 stewart
 </td>
 <td style="text-align:right;">
-869
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-polk
-</td>
-<td style="text-align:right;">
-746
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-riley
-</td>
-<td style="text-align:right;">
-602
+1466
 </td>
 </tr>
 <tr>
@@ -1349,7 +1331,15 @@ riley
 leonardwood
 </td>
 <td style="text-align:right;">
-562
+1272
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+riley
+</td>
+<td style="text-align:right;">
+906
 </td>
 </tr>
 <tr>
@@ -1357,7 +1347,7 @@ leonardwood
 bliss
 </td>
 <td style="text-align:right;">
-349
+596
 </td>
 </tr>
 <tr>
@@ -1365,7 +1355,7 @@ bliss
 irwin
 </td>
 <td style="text-align:right;">
-141
+268
 </td>
 </tr>
 </tbody>
@@ -1421,7 +1411,7 @@ bragg
 polk
 </td>
 <td style="text-align:right;">
-9.086281
+9.194516
 </td>
 </tr>
 <tr>
@@ -1434,6 +1424,14 @@ campbell
 </tr>
 <tr>
 <td style="text-align:left;">
+leonardwood
+</td>
+<td style="text-align:right;">
+6.043352
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
 us
 </td>
 <td style="text-align:right;">
@@ -1442,26 +1440,10 @@ us
 </tr>
 <tr>
 <td style="text-align:left;">
-leonardwood
-</td>
-<td style="text-align:right;">
-5.363434
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
 stewart
 </td>
 <td style="text-align:right;">
-5.034761
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-riley
-</td>
-<td style="text-align:right;">
-3.660548
+4.038331
 </td>
 </tr>
 <tr>
@@ -1469,7 +1451,15 @@ riley
 irwin
 </td>
 <td style="text-align:right;">
-3.376948
+2.898949
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+riley
+</td>
+<td style="text-align:right;">
+2.807131
 </td>
 </tr>
 <tr>
@@ -1477,7 +1467,7 @@ irwin
 hood
 </td>
 <td style="text-align:right;">
-2.505038
+2.601249
 </td>
 </tr>
 <tr>
@@ -1485,7 +1475,7 @@ hood
 bliss
 </td>
 <td style="text-align:right;">
-1.644338
+1.504162
 </td>
 </tr>
 <tr>

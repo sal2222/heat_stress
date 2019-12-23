@@ -31,18 +31,11 @@ Summary of data from DMED queries.
 
 Data preparation code is available at: [(link)](dmed_read.html)
 
-
-
-```{r view_dmed}
-
-dmed_tidy <- 
+```{r read_dmed}
+dmed_tidy <-
   read_rds("data/dmed_tidy.rds")
-
-dmed_tidy
-
+  
 ```
-
-
 
 
 ## Example Plots
