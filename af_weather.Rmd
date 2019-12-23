@@ -16,6 +16,8 @@ library(viridis)
 library(knitr)
 library(kableExtra)
 library(zoo)
+library(PairedData)
+library(broom)
 
 ```
 
@@ -156,5 +158,82 @@ sar_df %>%
 ```
 
 
+## Compare with NLDAS-2 temperature and heat indices
+
+```{r}
+
+nldas_wide <- read_rds("data/nldas_wide.rds") 
+
+nldas_wide
+
+af_nldas_compare <-
+  sar_df %>% 
+    mutate(location = 
+             str_to_lower(location, locale = "en"),
+             location = str_replace_all(location, " ", "_"),
+             location = recode(location, fort_benning = "fort_benning_ga", fort_irwin = "ntc_and_fort_irwin")) %>% 
+    left_join(nldas_wide, by = c("location" = "installation", "dttm" = "utc_dttm")) %>% 
+    dplyr::select(location, dttm, wbgt.x, heat_index.x, temp_f, wbgt_f, heat_index.y, tmp_f) %>% 
+    rename(installation = location,
+           utc_dttm = dttm,
+           wbgt_af = wbgt.x,
+           heat_index_af = heat_index.x,
+           temp_af = temp_f,
+           wbgt_nldas = wbgt_f,
+           heat_index_nldas = heat_index.y,
+           tmp_nldas = tmp_f)
+
+
+af_nldas_compare 
+
+wbgt_compare <-
+  af_nldas_compare %>%
+    dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %>% 
+    na.omit()
+
+wbgt_compare    
+
+ 
+wbgt_compare %>% 
+  ggplot(aes(x = wbgt_af, y = wbgt_nldas, color = installation)) + 
+      geom_point(alpha = 0.8) +
+      geom_smooth(method = lm, se = FALSE, size = 0.5) +
+      labs(
+        title = "WBGT Comparison",
+        x = "Air Force Station",
+        y = "NLDAS") +
+      theme_bw() 
+      
+wbgt_compare %>% filter(installation == c("fort_benning_ga", "fort_bragg")) %>% 
+  ggplot(aes(x = wbgt_af, y = wbgt_nldas)) + 
+      geom_point(alpha = 0.2) +
+      geom_smooth(method = lm, se = FALSE) +
+      facet_wrap(~installation, ncol = 3) +
+      labs(
+        title = "WBGT Comparison",
+        x = "Air Force Station",
+        y = "NLDAS") +
+      theme_bw() 
+
+# https://cran.r-project.org/web/packages/BlandAltmanLeh/vignettes/Intro.html
+
+
+
+
+wbgt_compare %>% 
+  group_by(installation) %>% 
+  do(tidy(t.test(.$wbgt_af, 
+                 .$wbgt_nldas, 
+                 mu = 0, 
+                 alt = "two.sided", 
+                 paired = TRUE, 
+                 conf.level = 0.99)))
+
+
+
+
+
+
+```
 
 
