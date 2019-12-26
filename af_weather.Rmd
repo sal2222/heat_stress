@@ -102,13 +102,12 @@ sar_df %>%
 ```
 
 ## Hour of day mean WBGT
-```{r hour_of_day, warning = FALSE, out.width = '175%'}
+```{r hour_of_day, warning = FALSE, fig.height = 12}
 
 # Plot July hourly WBGT
 
 sar_df %>%   
-  filter(location %in% c("Fort Jackson", "Fort Benning", "Fort Bliss", "Fort Bragg"),
-         months(dttm) == "July") %>% 
+  filter(months(dttm) == "July") %>% 
   group_by(location, lubridate::year(dttm), lubridate::hour(dttm)) %>% 
   summarise(mean_wbgt = mean(wbgt, na.rm = TRUE)) %>%
   rename(year = `lubridate::year(dttm)`,
@@ -135,10 +134,10 @@ sar_df %>%
 
 ## Yearly mean temperature boxplots
 
-```{r yearly_boxplot, out.width = "200%"}
+```{r yearly_boxplot, fig.height = 10}
 # Locations 1 - 12
 sar_df %>%   
-  select(location, dttm, temp_f) %>%
+  dplyr::select(location, dttm, temp_f) %>%
   mutate(location = as_factor(location),
          year = as.factor(lubridate::year(dttm))) %>%
   filter(as.numeric(location) > 2) %>%
@@ -160,7 +159,7 @@ sar_df %>%
 
 ## Compare with NLDAS-2 temperature and heat indices
 
-```{r}
+```{r join_nldas}
 
 nldas_wide <- read_rds("data/nldas_wide.rds") 
 
@@ -186,25 +185,32 @@ af_nldas_compare <-
 
 af_nldas_compare 
 
-wbgt_compare <-
-  af_nldas_compare %>%
-    dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %>% 
-    na.omit()
 
-wbgt_compare    
+```
 
- 
-wbgt_compare %>% 
-  ggplot(aes(x = wbgt_af, y = wbgt_nldas, color = installation)) + 
-      geom_point(alpha = 0.8) +
-      geom_smooth(method = lm, se = FALSE, size = 0.5) +
+##  Plots
+```{r plots, fig.height = 20}
+
+
+af_nldas_compare %>%
+    dplyr::select(installation, utc_dttm, temp_af, tmp_nldas) %>% 
+    na.omit() %>% 
+  ggplot(aes(x = temp_af, y = tmp_nldas)) + 
+      geom_point(alpha = 0.2) +
+      geom_smooth(method = lm, se = FALSE) +
+      facet_wrap(~installation, ncol = 3) +
       labs(
-        title = "WBGT Comparison",
+        title = "Temperature Comparison",
         x = "Air Force Station",
         y = "NLDAS") +
-      theme_bw() 
-      
-wbgt_compare %>% filter(installation == c("fort_benning_ga", "fort_bragg")) %>% 
+      theme_bw()
+
+
+
+
+af_nldas_compare %>%
+    dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %>% 
+    na.omit() %>% 
   ggplot(aes(x = wbgt_af, y = wbgt_nldas)) + 
       geom_point(alpha = 0.2) +
       geom_smooth(method = lm, se = FALSE) +
@@ -213,27 +219,44 @@ wbgt_compare %>% filter(installation == c("fort_benning_ga", "fort_bragg")) %>%
         title = "WBGT Comparison",
         x = "Air Force Station",
         y = "NLDAS") +
-      theme_bw() 
+      theme_bw()
 
+
+```
+
+## Statistical comparison: t-tests
+```{r t_tests}
 # https://cran.r-project.org/web/packages/BlandAltmanLeh/vignettes/Intro.html
 
+# WBGT
 
-
-
-wbgt_compare %>% 
+af_nldas_compare %>%
+    dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %>% 
+    na.omit() %>% 
   group_by(installation) %>% 
   do(tidy(t.test(.$wbgt_af, 
                  .$wbgt_nldas, 
                  mu = 0, 
                  alt = "two.sided", 
                  paired = TRUE, 
-                 conf.level = 0.99)))
+                 conf.level = 0.99))) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
+  
 
+# Temperature
 
-
-
-
-
+af_nldas_compare %>%
+    dplyr::select(installation, utc_dttm, temp_af, tmp_nldas) %>% 
+    na.omit() %>% 
+  group_by(installation) %>% 
+  do(tidy(t.test(.$temp_af, 
+                 .$tmp_nldas, 
+                 mu = 0, 
+                 alt = "two.sided", 
+                 paired = TRUE, 
+                 conf.level = 0.99))) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
 ```
-
 
