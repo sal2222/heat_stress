@@ -1,0 +1,32 @@
+---
+title: "case_crossover"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(viridis)
+library(knitr)
+library(kableExtra)
+library(zoo)
+library(purrr)
+library(furrr)
+library(table1)
+library(furniture)
+library(kableExtra)
+library(visdat)
+library(naniar)
+library(modelr)
+
+```
+
+Here we will prepare the code for case-crossover analysis of daily outcomes.
+

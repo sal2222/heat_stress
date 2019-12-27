@@ -43,11 +43,20 @@ left:
     - text: "Heat Illness"
       icon: fa-medkit  
       menu: 
+        - text: "Annual"
         - text: "Annual cases"
           href: dmed_summary.html
+        - text: "Daily"
+        - text: "Daily cases"
+    - text: "Models"
+      icon: fa-line-chart  
+      menu: 
+        - text: "Annual"
         - text: "Annual models"
           href: dmed_models.html
-        - text: "Daily cases"
+        - text: "Daily"
+        - text: "Case-crossover models"
+          href: case_crossover.html
 right:
     - icon: fa-envelope fa-lg
       href: mailto:sal2222@cumc.columbia.edu

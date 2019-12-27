@@ -11,7 +11,7 @@
 
 
 
-<title>Heat Stress Research</title>
+<title>case_crossover</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -434,31 +434,13 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_summary.html">Annual cases</a>
     </li>
-    <li class="dropdown-header">Daily</li>
-    <li class="dropdown-header">Daily cases</li>
-  </ul>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    <span class="fa fa-line-chart"></span>
-     
-    Models
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_models.html">Annual models</a>
     </li>
-    <li class="dropdown-header">Daily</li>
-    <li>
-      <a href="case_crossover.html">Case-crossover models</a>
-    </li>
+    <li class="dropdown-header">Daily cases</li>
   </ul>
 </li>
       </ul>
@@ -484,60 +466,12 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Heat Stress Research</h1>
+<h1 class="title toc-ignore">case_crossover</h1>
 
 </div>
 
 
-<p>Welcome to our heat stress research website!</p>
-<p><strong>Stephen Lewandowski</strong><br />
-<strong>Advisor: Jeffrey Shaman</strong></p>
-<p>Columbia University Mailman School of Public Health<br />
-Environmental Health Sciences<br />
-<a href="https://www.mailman.columbia.edu/research/climate-and-health-program">Climate and Health Program</a></p>
-<div id="data-preparation" class="section level2">
-<h2>Data Preparation</h2>
-<div id="nldas-2-weather-data-preparation" class="section level3">
-<h3>NLDAS-2 Weather Data Preparation</h3>
-<ul>
-<li><p>Examine location shapefiles and NLDAS-2 grid overlays <a href="shapefiles.html">[here]</a></p></li>
-<li><p>Instructions to download NLDAS-2 files using <code>wget</code> command <a href="nldas_wget.html">[here]</a></p></li>
-<li><p>Extract locations (cells) and variables from NLDAS-2 .nc4 files with conversion to raster brick <a href="extract_cells.html">[here]</a></p></li>
-<li><p>Link NLDAS estimates assembled in <code>extract_cells</code>to specific locations and summarizes the data <a href="installation_nldas.html">[here]</a></p></li>
-<li><p>Add unit conversions, calculate new variables, and add Heat Index and WBGT indices <a href="nldas_indices.html">[here]</a></p></li>
-</ul>
-</div>
-<div id="heat-stress-illness-data-preparation" class="section level3">
-<h3>Heat Stress Illness Data Preparation</h3>
-<ul>
-<li>Functions to read and compile Defense Medical Epidemiology Database (DMED) queries <a href="dmed_read.html">[here]</a></li>
-</ul>
-</div>
-</div>
-<div id="climate" class="section level2">
-<h2>Climate</h2>
-<ul>
-<li><p>Time series formats for NLDAS-2 data (zoo, xts, ts) <a href="nldas_timeseries.html">[here]</a></p></li>
-<li><p>Fable/tsibble time series format for NLDAS-2 data <a href="nldas_fable.html">[here]</a></p></li>
-<li><p>Aggregate over calendar periods <a href="nldas_averaged.html">[here]</a></p></li>
-<li><p>Climatologies (1990-2018) <a href="climatology.html">[here]</a></p></li>
-<li><p>Annual temperature and heat indices <a href="annual_tables.html">[here]</a></p></li>
-<li><p>Air Force weather station data (U.S. Army installations, 2008-2018) - sensitivity analysis <a href="af_weather.html">[here]</a></p></li>
-</ul>
-</div>
-<div id="heat-stress-outcomes" class="section level2">
-<h2>Heat Stress Outcomes</h2>
-<ul>
-<li>DMED Summary (annual) <a href="dmed_summary.html">[here]</a></li>
-</ul>
-</div>
-<div id="models" class="section level2">
-<h2>Models</h2>
-<ul>
-<li><p>DMED Models (annual) <a href="dmed_models.html">[here]</a></p></li>
-<li><p>Case-crossover Models (daily) <a href="case_crossover.html">[here]</a></p></li>
-</ul>
-</div>
+<p>Here we will prepare the code for case-crossover analysis of daily outcomes.</p>
 
 
 
