@@ -475,7 +475,7 @@ div.tocify {
 <p><strong>Air Force SAR weather</strong></p>
 <p>This code includes reads in and combines separate Excel worksheets into a single dataframe.<br />
 The hourly data were produced in July 2019 by 14WS and provide WBGT, HI, RH, temperature (F), dew point (F) and UTCI (F).</p>
-<p><em>Note: For Fort Irwin, Daegu, Hawaii, Yongsan, Red Cloud files, need to insert row prior to line 25 so that header starts on line 26.</em></p>
+<p><em>Note: For Fort Irwin, Daegu, Hawaii, Yongsan, Red Cloud files, need to insert row on spreadsheet prior to line 25 so that header starts on line 26.</em></p>
 <pre class="r"><code># sar_file &lt;- &quot;D:/sar_weather/SAR_9860_Aberdeen Proving Ground.csv&quot;  
 #
 sar_file_list &lt;- list.files(path = &quot;D:/sar_weather&quot;, pattern = &quot;^.*\\.(csv)$&quot;) %&gt;% 
@@ -610,8 +610,10 @@ Fort Drum
 </tbody>
 </table>
 </div>
-<div id="hour-of-day-mean-wbgt" class="section level2">
-<h2>Hour of day mean WBGT</h2>
+<div id="exploratory-plots" class="section level2">
+<h2>Exploratory Plots</h2>
+<div id="hour-of-day-mean-wbgt" class="section level3">
+<h3>Hour of day mean WBGT</h3>
 <pre class="r"><code># Plot July hourly WBGT
 
 sar_df %&gt;%   
@@ -638,8 +640,8 @@ sar_df %&gt;%
 <pre><code>## `geom_smooth()` using method = &#39;loess&#39; and formula &#39;y ~ x&#39;</code></pre>
 <p><img src="af_weather_files/figure-html/hour_of_day-1.png" width="672" /></p>
 </div>
-<div id="yearly-mean-temperature-boxplots" class="section level2">
-<h2>Yearly mean temperature boxplots</h2>
+<div id="yearly-mean-temperature-boxplots" class="section level3">
+<h3>Yearly mean temperature boxplots</h3>
 <pre class="r"><code># Locations 1 - 12
 sar_df %&gt;%   
   dplyr::select(location, dttm, temp_f) %&gt;%
@@ -662,11 +664,12 @@ sar_df %&gt;%
 <pre><code>## Warning: Removed 882 rows containing non-finite values (stat_boxplot).</code></pre>
 <p><img src="af_weather_files/figure-html/yearly_boxplot-1.png" width="672" /></p>
 </div>
+</div>
 <div id="compare-with-nldas-2-temperature-and-heat-indices" class="section level2">
 <h2>Compare with NLDAS-2 temperature and heat indices</h2>
 <pre class="r"><code>nldas_wide &lt;- read_rds(&quot;data/nldas_wide.rds&quot;) 
 
-nldas_wide</code></pre>
+nldas_wide </code></pre>
 <pre><code>## # A tibble: 6,472,525 x 19
 ##    utc_dttm            local_dttm          installation longitude latitude   TMP
 ##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;            &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
@@ -689,7 +692,9 @@ nldas_wide</code></pre>
     mutate(location = 
              str_to_lower(location, locale = &quot;en&quot;),
              location = str_replace_all(location, &quot; &quot;, &quot;_&quot;),
-             location = recode(location, fort_benning = &quot;fort_benning_ga&quot;, fort_irwin = &quot;ntc_and_fort_irwin&quot;)) %&gt;% 
+             location = recode(location, fort_benning = &quot;fort_benning_ga&quot;, 
+                                         fort_irwin = &quot;ntc_and_fort_irwin&quot;,
+                                         jb_san_antonio = &quot;fort_sam_houston&quot;)) %&gt;% 
     left_join(nldas_wide, by = c(&quot;location&quot; = &quot;installation&quot;, &quot;dttm&quot; = &quot;utc_dttm&quot;)) %&gt;% 
     dplyr::select(location, dttm, wbgt.x, heat_index.x, temp_f, wbgt_f, heat_index.y, tmp_f) %&gt;% 
     rename(installation = location,
@@ -701,8 +706,7 @@ nldas_wide</code></pre>
            heat_index_nldas = heat_index.y,
            tmp_nldas = tmp_f)
 
-
-af_nldas_compare </code></pre>
+af_nldas_compare</code></pre>
 <pre><code>## # A tibble: 1,506,584 x 8
 ##    installation utc_dttm            wbgt_af heat_index_af temp_af wbgt_nldas
 ##    &lt;chr&gt;        &lt;dttm&gt;                &lt;dbl&gt;         &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;
@@ -719,8 +723,10 @@ af_nldas_compare </code></pre>
 ## # ... with 1,506,574 more rows, and 2 more variables: heat_index_nldas &lt;dbl&gt;,
 ## #   tmp_nldas &lt;dbl&gt;</code></pre>
 </div>
-<div id="plots" class="section level2">
-<h2>Plots</h2>
+<div id="station---nldas-comparison-plots-2008-2018" class="section level2">
+<h2>Station - NLDAS Comparison Plots (2008-2018)</h2>
+<div id="temperature-comparison" class="section level3">
+<h3>Temperature Comparison</h3>
 <pre class="r"><code>af_nldas_compare %&gt;%
     dplyr::select(installation, utc_dttm, temp_af, tmp_nldas) %&gt;% 
     na.omit() %&gt;% 
@@ -733,7 +739,26 @@ af_nldas_compare </code></pre>
         x = &quot;Air Force Station&quot;,
         y = &quot;NLDAS&quot;) +
       theme_bw()</code></pre>
-<p><img src="af_weather_files/figure-html/plots-1.png" width="672" /></p>
+<p><img src="af_weather_files/figure-html/plots_temp_compare-1.png" width="672" /></p>
+</div>
+<div id="heat-index-comparison" class="section level3">
+<h3>Heat Index Comparison</h3>
+<pre class="r"><code>af_nldas_compare %&gt;%
+    dplyr::select(installation, utc_dttm, heat_index_af, heat_index_nldas) %&gt;% 
+    na.omit() %&gt;% 
+  ggplot(aes(x = heat_index_af, y = heat_index_nldas)) + 
+      geom_point(alpha = 0.2) +
+      geom_smooth(method = lm, se = FALSE) +
+      facet_wrap(~installation, ncol = 3) +
+      labs(
+        title = &quot;Heat Index Comparison&quot;,
+        x = &quot;Air Force Station&quot;,
+        y = &quot;NLDAS&quot;) +
+      theme_bw()</code></pre>
+<p><img src="af_weather_files/figure-html/hi_compare-1.png" width="672" /></p>
+</div>
+<div id="wbgt-comparison" class="section level3">
+<h3>WBGT Comparison</h3>
 <pre class="r"><code>af_nldas_compare %&gt;%
     dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %&gt;% 
     na.omit() %&gt;% 
@@ -746,27 +771,364 @@ af_nldas_compare </code></pre>
         x = &quot;Air Force Station&quot;,
         y = &quot;NLDAS&quot;) +
       theme_bw()</code></pre>
-<p><img src="af_weather_files/figure-html/plots-2.png" width="672" /></p>
+<p><img src="af_weather_files/figure-html/wbgt_compare-1.png" width="672" /></p>
 </div>
-<div id="statistical-comparison-t-tests" class="section level2">
-<h2>Statistical comparison: t-tests</h2>
-<pre class="r"><code># https://cran.r-project.org/web/packages/BlandAltmanLeh/vignettes/Intro.html
+</div>
+<div id="statistical-comparison" class="section level2">
+<h2>Statistical comparison</h2>
+<pre class="r"><code># Nest by each installation
 
-# WBGT
+af_nldas_nest &lt;-
+  af_nldas_compare %&gt;% 
+    nest(data = utc_dttm:tmp_nldas)
 
-af_nldas_compare %&gt;%
-    dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %&gt;% 
-    na.omit() %&gt;% 
-  group_by(installation) %&gt;% 
-  do(tidy(t.test(.$wbgt_af, 
-                 .$wbgt_nldas, 
-                 mu = 0, 
-                 alt = &quot;two.sided&quot;, 
-                 paired = TRUE, 
-                 conf.level = 0.99))) %&gt;% 
-  knitr::kable() %&gt;% 
-  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;, full_width = FALSE))</code></pre>
-<table class="table table-striped table-condensed" style="margin-left: auto; margin-right: auto;">
+af_nldas_nest</code></pre>
+<pre><code>## # A tibble: 16 x 2
+##    installation                 data
+##    &lt;chr&gt;              &lt;list&lt;df[,7]&gt;&gt;
+##  1 fort_benning_ga      [95,702 x 7]
+##  2 fort_bliss           [96,087 x 7]
+##  3 fort_bragg           [94,556 x 7]
+##  4 fort_campbell        [95,912 x 7]
+##  5 fort_carson          [95,281 x 7]
+##  6 fort_drum            [95,643 x 7]
+##  7 fort_gordon          [95,970 x 7]
+##  8 fort_hood            [95,801 x 7]
+##  9 ntc_and_fort_irwin   [75,650 x 7]
+## 10 fort_jackson         [96,005 x 7]
+## 11 fort_leonard_wood    [94,699 x 7]
+## 12 fort_polk            [95,476 x 7]
+## 13 fort_riley           [95,023 x 7]
+## 14 fort_sill            [94,511 x 7]
+## 15 fort_stewart         [94,201 x 7]
+## 16 fort_sam_houston     [96,067 x 7]</code></pre>
+<div id="correlation" class="section level3">
+<h3>Correlation</h3>
+<pre class="r"><code># Correlation function
+
+cor_fun = function(df) {
+  df %&gt;% 
+    dplyr::select(2:7) %&gt;% 
+    cor(use = &quot;pairwise.complete.obs&quot;)
+}
+
+# Map function over each installation
+cor_nest &lt;-
+  map(af_nldas_nest$data, cor_fun)
+
+# Add installation names to list elements 
+names(cor_nest) &lt;- af_nldas_nest$installation 
+
+
+# Map corrplots
+
+map2(.x = cor_nest, .y = names(cor_nest), ~ corrplot(.x, method = &quot;number&quot;, order = &quot;hclust&quot;, addrect = 2, title = .y, mar = c(0, 0, 1, 0)))</code></pre>
+<p><img src="af_weather_files/figure-html/correlation-1.png" width="672" /><img src="af_weather_files/figure-html/correlation-2.png" width="672" /><img src="af_weather_files/figure-html/correlation-3.png" width="672" /><img src="af_weather_files/figure-html/correlation-4.png" width="672" /><img src="af_weather_files/figure-html/correlation-5.png" width="672" /><img src="af_weather_files/figure-html/correlation-6.png" width="672" /><img src="af_weather_files/figure-html/correlation-7.png" width="672" /><img src="af_weather_files/figure-html/correlation-8.png" width="672" /><img src="af_weather_files/figure-html/correlation-9.png" width="672" /><img src="af_weather_files/figure-html/correlation-10.png" width="672" /><img src="af_weather_files/figure-html/correlation-11.png" width="672" /><img src="af_weather_files/figure-html/correlation-12.png" width="672" /><img src="af_weather_files/figure-html/correlation-13.png" width="672" /><img src="af_weather_files/figure-html/correlation-14.png" width="672" /><img src="af_weather_files/figure-html/correlation-15.png" width="672" /><img src="af_weather_files/figure-html/correlation-16.png" width="672" /></p>
+<pre><code>## $fort_benning_ga
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9834040 0.9825707  0.9820797        0.9624705
+## heat_index_af    0.9834040     1.0000000 0.9930620  0.9539140        0.9577692
+## temp_af          0.9825707     0.9930620 1.0000000  0.9543030        0.9501707
+## wbgt_nldas       0.9820797     0.9539140 0.9543030  1.0000000        0.9800206
+## heat_index_nldas 0.9624705     0.9577692 0.9501707  0.9800206        1.0000000
+## tmp_nldas        0.9662831     0.9576572 0.9583627  0.9832904        0.9940767
+##                  tmp_nldas
+## wbgt_af          0.9662831
+## heat_index_af    0.9576572
+## temp_af          0.9583627
+## wbgt_nldas       0.9832904
+## heat_index_nldas 0.9940767
+## tmp_nldas        1.0000000
+## 
+## $fort_bliss
+##                  wbgt_nldas heat_index_nldas tmp_nldas   wbgt_af heat_index_af
+## wbgt_nldas        1.0000000        0.9895652 0.9914806 0.7763626     0.7297962
+## heat_index_nldas  0.9895652        1.0000000 0.9973810 0.7886121     0.7502955
+## tmp_nldas         0.9914806        0.9973810 1.0000000 0.7904365     0.7529498
+## wbgt_af           0.7763626        0.7886121 0.7904365 1.0000000     0.9656590
+## heat_index_af     0.7297962        0.7502955 0.7529498 0.9656590     1.0000000
+## temp_af           0.7114986        0.7327696 0.7356572 0.9473655     0.9917228
+##                    temp_af
+## wbgt_nldas       0.7114986
+## heat_index_nldas 0.7327696
+## tmp_nldas        0.7356572
+## wbgt_af          0.9473655
+## heat_index_af    0.9917228
+## temp_af          1.0000000
+## 
+## $fort_bragg
+##                  wbgt_nldas heat_index_nldas tmp_nldas   wbgt_af heat_index_af
+## wbgt_nldas        1.0000000        0.9865720 0.9908035 0.9027882     0.8892861
+## heat_index_nldas  0.9865720        1.0000000 0.9940969 0.8872969     0.8882969
+## tmp_nldas         0.9908035        0.9940969 1.0000000 0.8908050     0.8870892
+## wbgt_af           0.9027882        0.8872969 0.8908050 1.0000000     0.9833214
+## heat_index_af     0.8892861        0.8882969 0.8870892 0.9833214     1.0000000
+## temp_af           0.8873353        0.8821196 0.8849170 0.9824168     0.9953955
+##                    temp_af
+## wbgt_nldas       0.8873353
+## heat_index_nldas 0.8821196
+## tmp_nldas        0.8849170
+## wbgt_af          0.9824168
+## heat_index_af    0.9953955
+## temp_af          1.0000000
+## 
+## $fort_campbell
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9879411 0.9875604  0.7580489        0.7478947
+## heat_index_af    0.9879411     1.0000000 0.9960290  0.7482642        0.7503827
+## temp_af          0.9875604     0.9960290 1.0000000  0.7422721        0.7449986
+## wbgt_nldas       0.7580489     0.7482642 0.7422721  1.0000000        0.9584095
+## heat_index_nldas 0.7478947     0.7503827 0.7449986  0.9584095        1.0000000
+## tmp_nldas        0.7336172     0.7365455 0.7317365  0.9485461        0.9958633
+##                  tmp_nldas
+## wbgt_af          0.7336172
+## heat_index_af    0.7365455
+## temp_af          0.7317365
+## wbgt_nldas       0.9485461
+## heat_index_nldas 0.9958633
+## tmp_nldas        1.0000000
+## 
+## $fort_carson
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9780460 0.9738596  0.9128302        0.8971852
+## heat_index_af    0.9780460     1.0000000 0.9976830  0.8706556        0.8784742
+## temp_af          0.9738596     0.9976830 1.0000000  0.8683189        0.8760786
+## wbgt_nldas       0.9128302     0.8706556 0.8683189  1.0000000        0.9564151
+## heat_index_nldas 0.8971852     0.8784742 0.8760786  0.9564151        1.0000000
+## tmp_nldas        0.8932246     0.8775928 0.8763795  0.9506569        0.9965843
+##                  tmp_nldas
+## wbgt_af          0.8932246
+## heat_index_af    0.8775928
+## temp_af          0.8763795
+## wbgt_nldas       0.9506569
+## heat_index_nldas 0.9965843
+## tmp_nldas        1.0000000
+## 
+## $fort_drum
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9928388 0.9934133  0.8247883        0.8351915
+## heat_index_af    0.9928388     1.0000000 0.9987695  0.8010680        0.8187309
+## temp_af          0.9934133     0.9987695 1.0000000  0.8023513        0.8184507
+## wbgt_nldas       0.8247883     0.8010680 0.8023513  1.0000000        0.9811662
+## heat_index_nldas 0.8351915     0.8187309 0.8184507  0.9811662        1.0000000
+## tmp_nldas        0.8247640     0.8067373 0.8077562  0.9860395        0.9929356
+##                  tmp_nldas
+## wbgt_af          0.8247640
+## heat_index_af    0.8067373
+## temp_af          0.8077562
+## wbgt_nldas       0.9860395
+## heat_index_nldas 0.9929356
+## tmp_nldas        1.0000000
+## 
+## $fort_gordon
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9825710 0.9806068  0.8050837        0.7989776
+## heat_index_af    0.9825710     1.0000000 0.9944190  0.8025202        0.8124422
+## temp_af          0.9806068     0.9944190 1.0000000  0.7982817        0.8042375
+## wbgt_nldas       0.8050837     0.8025202 0.7982817  1.0000000        0.9775387
+## heat_index_nldas 0.7989776     0.8124422 0.8042375  0.9775387        1.0000000
+## tmp_nldas        0.7918254     0.8072097 0.8012221  0.9711642        0.9955499
+##                  tmp_nldas
+## wbgt_af          0.7918254
+## heat_index_af    0.8072097
+## temp_af          0.8012221
+## wbgt_nldas       0.9711642
+## heat_index_nldas 0.9955499
+## tmp_nldas        1.0000000
+## 
+## $fort_hood
+##                  wbgt_nldas heat_index_nldas tmp_nldas   wbgt_af heat_index_af
+## wbgt_nldas        1.0000000        0.9809332 0.9837475 0.7804747     0.7634902
+## heat_index_nldas  0.9809332        1.0000000 0.9952536 0.7971959     0.7994831
+## tmp_nldas         0.9837475        0.9952536 1.0000000 0.7995704     0.7984041
+## wbgt_af           0.7804747        0.7971959 0.7995704 1.0000000     0.9784228
+## heat_index_af     0.7634902        0.7994831 0.7984041 0.9784228     1.0000000
+## temp_af           0.7503761        0.7871348 0.7882601 0.9714961     0.9946496
+##                    temp_af
+## wbgt_nldas       0.7503761
+## heat_index_nldas 0.7871348
+## tmp_nldas        0.7882601
+## wbgt_af          0.9714961
+## heat_index_af    0.9946496
+## temp_af          1.0000000
+## 
+## $ntc_and_fort_irwin
+##                  wbgt_nldas heat_index_nldas tmp_nldas   wbgt_af heat_index_af
+## wbgt_nldas        1.0000000        0.9836065 0.9870577 0.6979008     0.6768565
+## heat_index_nldas  0.9836065        1.0000000 0.9950599 0.7413162     0.7273852
+## tmp_nldas         0.9870577        0.9950599 1.0000000 0.7351440     0.7183684
+## wbgt_af           0.6979008        0.7413162 0.7351440 1.0000000     0.9683445
+## heat_index_af     0.6768565        0.7273852 0.7183684 0.9683445     1.0000000
+## temp_af           0.6772163        0.7306334 0.7206142 0.9620363     0.9946375
+##                    temp_af
+## wbgt_nldas       0.6772163
+## heat_index_nldas 0.7306334
+## tmp_nldas        0.7206142
+## wbgt_af          0.9620363
+## heat_index_af    0.9946375
+## temp_af          1.0000000
+## 
+## $fort_jackson
+##                  wbgt_nldas heat_index_nldas tmp_nldas   wbgt_af heat_index_af
+## wbgt_nldas        1.0000000        0.9861300 0.9860350 0.8055805     0.8138331
+## heat_index_nldas  0.9861300        1.0000000 0.9968925 0.7885890     0.8082088
+## tmp_nldas         0.9860350        0.9968925 1.0000000 0.7867152     0.8056704
+## wbgt_af           0.8055805        0.7885890 0.7867152 1.0000000     0.9827883
+## heat_index_af     0.8138331        0.8082088 0.8056704 0.9827883     1.0000000
+## temp_af           0.8070318        0.7988324 0.7981269 0.9799866     0.9946775
+##                    temp_af
+## wbgt_nldas       0.8070318
+## heat_index_nldas 0.7988324
+## tmp_nldas        0.7981269
+## wbgt_af          0.9799866
+## heat_index_af    0.9946775
+## temp_af          1.0000000
+## 
+## $fort_leonard_wood
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9882921 0.9879350  0.8647647        0.8543280
+## heat_index_af    0.9882921     1.0000000 0.9966871  0.8480951        0.8538908
+## temp_af          0.9879350     0.9966871 1.0000000  0.8455665        0.8500911
+## wbgt_nldas       0.8647647     0.8480951 0.8455665  1.0000000        0.9662278
+## heat_index_nldas 0.8543280     0.8538908 0.8500911  0.9662278        1.0000000
+## tmp_nldas        0.8506349     0.8512813 0.8485027  0.9649527        0.9967298
+##                  tmp_nldas
+## wbgt_af          0.8506349
+## heat_index_af    0.8512813
+## temp_af          0.8485027
+## wbgt_nldas       0.9649527
+## heat_index_nldas 0.9967298
+## tmp_nldas        1.0000000
+## 
+## $fort_polk
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9827996 0.9811375  0.7225645        0.7049658
+## heat_index_af    0.9827996     1.0000000 0.9936098  0.7505370        0.7440206
+## temp_af          0.9811375     0.9936098 1.0000000  0.7442236        0.7315476
+## wbgt_nldas       0.7225645     0.7505370 0.7442236  1.0000000        0.9534184
+## heat_index_nldas 0.7049658     0.7440206 0.7315476  0.9534184        1.0000000
+## tmp_nldas        0.7001213     0.7409770 0.7283940  0.9522402        0.9971298
+##                  tmp_nldas
+## wbgt_af          0.7001213
+## heat_index_af    0.7409770
+## temp_af          0.7283940
+## wbgt_nldas       0.9522402
+## heat_index_nldas 0.9971298
+## tmp_nldas        1.0000000
+## 
+## $fort_riley
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9887196 0.9880474  0.7514029        0.7242227
+## heat_index_af    0.9887196     1.0000000 0.9973415  0.7445115        0.7242057
+## temp_af          0.9880474     0.9973415 1.0000000  0.7442317        0.7230097
+## wbgt_nldas       0.7514029     0.7445115 0.7442317  1.0000000        0.9783105
+## heat_index_nldas 0.7242227     0.7242057 0.7230097  0.9783105        1.0000000
+## tmp_nldas        0.7292411     0.7285480 0.7280226  0.9814164        0.9973682
+##                  tmp_nldas
+## wbgt_af          0.7292411
+## heat_index_af    0.7285480
+## temp_af          0.7280226
+## wbgt_nldas       0.9814164
+## heat_index_nldas 0.9973682
+## tmp_nldas        1.0000000
+## 
+## $fort_sill
+##                  wbgt_nldas heat_index_nldas tmp_nldas   wbgt_af heat_index_af
+## wbgt_nldas        1.0000000        0.9810833 0.9841709 0.7809733     0.7532541
+## heat_index_nldas  0.9810833        1.0000000 0.9953773 0.8039849     0.7920707
+## tmp_nldas         0.9841709        0.9953773 1.0000000 0.8037776     0.7889194
+## wbgt_af           0.7809733        0.8039849 0.8037776 1.0000000     0.9849734
+## heat_index_af     0.7532541        0.7920707 0.7889194 0.9849734     1.0000000
+## temp_af           0.7442110        0.7817647 0.7810580 0.9810180     0.9957021
+##                    temp_af
+## wbgt_nldas       0.7442110
+## heat_index_nldas 0.7817647
+## tmp_nldas        0.7810580
+## wbgt_af          0.9810180
+## heat_index_af    0.9957021
+## temp_af          1.0000000
+## 
+## $fort_stewart
+##                    wbgt_af heat_index_af   temp_af wbgt_nldas heat_index_nldas
+## wbgt_af          1.0000000     0.9828353 0.9823206  0.7931280        0.7708381
+## heat_index_af    0.9828353     1.0000000 0.9928480  0.7965257        0.7903917
+## temp_af          0.9823206     0.9928480 1.0000000  0.7850296        0.7744475
+## wbgt_nldas       0.7931280     0.7965257 0.7850296  1.0000000        0.9813752
+## heat_index_nldas 0.7708381     0.7903917 0.7744475  0.9813752        1.0000000
+## tmp_nldas        0.7645525     0.7845275 0.7706630  0.9777115        0.9967269
+##                  tmp_nldas
+## wbgt_af          0.7645525
+## heat_index_af    0.7845275
+## temp_af          0.7706630
+## wbgt_nldas       0.9777115
+## heat_index_nldas 0.9967269
+## tmp_nldas        1.0000000
+## 
+## $fort_sam_houston
+##                    wbgt_af wbgt_nldas heat_index_nldas tmp_nldas heat_index_af
+## wbgt_af          1.0000000  0.9710813        0.9505221 0.9408577     0.9757757
+## wbgt_nldas       0.9710813  1.0000000        0.9738592 0.9647768     0.9412858
+## heat_index_nldas 0.9505221  0.9738592        1.0000000 0.9941902     0.9594756
+## tmp_nldas        0.9408577  0.9647768        0.9941902 1.0000000     0.9554562
+## heat_index_af    0.9757757  0.9412858        0.9594756 0.9554562     1.0000000
+## temp_af          0.9669947  0.9352015        0.9562482 0.9601100     0.9930760
+##                    temp_af
+## wbgt_af          0.9669947
+## wbgt_nldas       0.9352015
+## heat_index_nldas 0.9562482
+## tmp_nldas        0.9601100
+## heat_index_af    0.9930760
+## temp_af          1.0000000</code></pre>
+</div>
+<div id="regression" class="section level3">
+<h3>Regression</h3>
+<pre class="r"><code># Nest by each installation, linear models for Temp, Heat Index, WBGT
+
+af_nldas_lm &lt;-
+  af_nldas_nest %&gt;% 
+      mutate(temp_lm = map(data, ~ lm(tmp_nldas ~ temp_af, data = .)),
+             heat_index_lm = map(data, ~ lm(heat_index_nldas ~ heat_index_af, data = .)),
+             wbgt_lm = map(data, ~ lm(wbgt_nldas ~ wbgt_af, data = .)),
+             temp_glance = map(temp_lm, broom::glance),
+             temp_tidy =   map(temp_lm, broom::tidy),
+             heat_index_glance = map(heat_index_lm, broom::glance),
+             heat_index_tidy =   map(heat_index_lm, broom::tidy),
+             wbgt_glance = map(wbgt_lm, broom::glance),
+             wbgt_tidy =   map(wbgt_lm, broom::tidy))
+           
+af_nldas_lm</code></pre>
+<pre><code>## # A tibble: 16 x 11
+##    installation         data temp_lm heat_index_lm wbgt_lm temp_glance temp_tidy
+##    &lt;chr&gt;        &lt;list&lt;df[,7&gt; &lt;list&gt;  &lt;list&gt;        &lt;list&gt;  &lt;list&gt;      &lt;list&gt;   
+##  1 fort_bennin~ [95,702 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+##  2 fort_bliss   [96,087 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+##  3 fort_bragg   [94,556 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+##  4 fort_campbe~ [95,912 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+##  5 fort_carson  [95,281 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+##  6 fort_drum    [95,643 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+##  7 fort_gordon  [95,970 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+##  8 fort_hood    [95,801 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+##  9 ntc_and_for~ [75,650 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+## 10 fort_jackson [96,005 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+## 11 fort_leonar~ [94,699 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+## 12 fort_polk    [95,476 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+## 13 fort_riley   [95,023 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+## 14 fort_sill    [94,511 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+## 15 fort_stewart [94,201 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+## 16 fort_sam_ho~ [96,067 x 7] &lt;lm&gt;    &lt;lm&gt;          &lt;lm&gt;    &lt;tibble [1~ &lt;tibble ~
+## # ... with 4 more variables: heat_index_glance &lt;list&gt;, heat_index_tidy &lt;list&gt;,
+## #   wbgt_glance &lt;list&gt;, wbgt_tidy &lt;list&gt;</code></pre>
+<pre class="r"><code># Linear Models Summary Table
+
+# Temperature
+
+af_nldas_lm %&gt;%
+  unnest(temp_tidy) %&gt;%
+  filter(term == &quot;temp_af&quot;) %&gt;% 
+  dplyr::select(installation, estimate:p.value) %&gt;% 
+  knitr::kable(digits = 4) %&gt;% 
+  kable_styling(bootstrap_options = &quot;striped&quot;)</code></pre>
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
 <th style="text-align:left;">
@@ -776,25 +1138,13 @@ installation
 estimate
 </th>
 <th style="text-align:right;">
+std.error
+</th>
+<th style="text-align:right;">
 statistic
 </th>
 <th style="text-align:right;">
 p.value
-</th>
-<th style="text-align:right;">
-parameter
-</th>
-<th style="text-align:right;">
-conf.low
-</th>
-<th style="text-align:right;">
-conf.high
-</th>
-<th style="text-align:left;">
-method
-</th>
-<th style="text-align:left;">
-alternative
 </th>
 </tr>
 </thead>
@@ -804,28 +1154,16 @@ alternative
 fort_benning_ga
 </td>
 <td style="text-align:right;">
--0.6702483
+0.9427
 </td>
 <td style="text-align:right;">
--58.96990
+0.0009
+</td>
+<td style="text-align:right;">
+1038.0075
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-78899
-</td>
-<td style="text-align:right;">
--0.6995257
-</td>
-<td style="text-align:right;">
--0.6409709
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
 </td>
 </tr>
 <tr>
@@ -833,28 +1171,16 @@ two.sided
 fort_bliss
 </td>
 <td style="text-align:right;">
-8.0954079
+0.7836
 </td>
 <td style="text-align:right;">
-214.48241
+0.0023
+</td>
+<td style="text-align:right;">
+336.6411
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-95921
-</td>
-<td style="text-align:right;">
-7.9981841
-</td>
-<td style="text-align:right;">
-8.1926318
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
 </td>
 </tr>
 <tr>
@@ -862,28 +1188,16 @@ two.sided
 fort_bragg
 </td>
 <td style="text-align:right;">
-3.4376121
+0.9806
 </td>
 <td style="text-align:right;">
-128.29688
+0.0017
+</td>
+<td style="text-align:right;">
+583.8715
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-89697
-</td>
-<td style="text-align:right;">
-3.3685933
-</td>
-<td style="text-align:right;">
-3.5066308
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
 </td>
 </tr>
 <tr>
@@ -891,28 +1205,16 @@ two.sided
 fort_campbell
 </td>
 <td style="text-align:right;">
-2.0341558
+0.5938
 </td>
 <td style="text-align:right;">
-48.41562
+0.0018
+</td>
+<td style="text-align:right;">
+332.4484
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-84390
-</td>
-<td style="text-align:right;">
-1.9259313
-</td>
-<td style="text-align:right;">
-2.1423803
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
 </td>
 </tr>
 <tr>
@@ -920,28 +1222,16 @@ two.sided
 fort_carson
 </td>
 <td style="text-align:right;">
--10.2892864
+0.7624
 </td>
 <td style="text-align:right;">
--459.56059
+0.0014
+</td>
+<td style="text-align:right;">
+561.4599
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-93593
-</td>
-<td style="text-align:right;">
--10.3469588
-</td>
-<td style="text-align:right;">
--10.2316139
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
 </td>
 </tr>
 <tr>
@@ -949,28 +1239,16 @@ two.sided
 fort_drum
 </td>
 <td style="text-align:right;">
--20.6642521
+0.5962
 </td>
 <td style="text-align:right;">
--507.98556
+0.0014
+</td>
+<td style="text-align:right;">
+423.4541
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-85549
-</td>
-<td style="text-align:right;">
--20.7690362
-</td>
-<td style="text-align:right;">
--20.5594681
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
 </td>
 </tr>
 <tr>
@@ -978,28 +1256,16 @@ two.sided
 fort_gordon
 </td>
 <td style="text-align:right;">
--2.1268538
+0.8646
 </td>
 <td style="text-align:right;">
--64.49253
+0.0021
+</td>
+<td style="text-align:right;">
+414.4503
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-90730
-</td>
-<td style="text-align:right;">
--2.2118020
-</td>
-<td style="text-align:right;">
--2.0419055
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
 </td>
 </tr>
 <tr>
@@ -1007,202 +1273,16 @@ two.sided
 fort_hood
 </td>
 <td style="text-align:right;">
-1.1571740
+0.8124
 </td>
 <td style="text-align:right;">
-33.42653
+0.0020
 </td>
 <td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-91415
-</td>
-<td style="text-align:right;">
-1.0680010
-</td>
-<td style="text-align:right;">
-1.2463470
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-fort_jackson
-</td>
-<td style="text-align:right;">
-9.1797385
-</td>
-<td style="text-align:right;">
-235.66439
+396.3400
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-93674
-</td>
-<td style="text-align:right;">
-9.0794012
-</td>
-<td style="text-align:right;">
-9.2800757
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-fort_leonard_wood
-</td>
-<td style="text-align:right;">
-6.0787829
-</td>
-<td style="text-align:right;">
-176.20692
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-80948
-</td>
-<td style="text-align:right;">
-5.9899199
-</td>
-<td style="text-align:right;">
-6.1676459
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-fort_polk
-</td>
-<td style="text-align:right;">
-9.3001094
-</td>
-<td style="text-align:right;">
-264.68089
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-92896
-</td>
-<td style="text-align:right;">
-9.2096004
-</td>
-<td style="text-align:right;">
-9.3906183
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-fort_riley
-</td>
-<td style="text-align:right;">
-2.6965890
-</td>
-<td style="text-align:right;">
-57.52345
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-85294
-</td>
-<td style="text-align:right;">
-2.5758364
-</td>
-<td style="text-align:right;">
-2.8173417
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-fort_sill
-</td>
-<td style="text-align:right;">
--2.6378249
-</td>
-<td style="text-align:right;">
--67.74694
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-88171
-</td>
-<td style="text-align:right;">
--2.7381207
-</td>
-<td style="text-align:right;">
--2.5375291
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-fort_stewart
-</td>
-<td style="text-align:right;">
-6.0299376
-</td>
-<td style="text-align:right;">
-161.11832
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-83751
-</td>
-<td style="text-align:right;">
-5.9335336
-</td>
-<td style="text-align:right;">
-6.1263415
-</td>
-<td style="text-align:left;">
-Paired t-test
-</td>
-<td style="text-align:left;">
-two.sided
 </td>
 </tr>
 <tr>
@@ -1210,33 +1290,496 @@ two.sided
 ntc_and_fort_irwin
 </td>
 <td style="text-align:right;">
--3.8770869
+0.7375
 </td>
 <td style="text-align:right;">
--87.75927
+0.0026
+</td>
+<td style="text-align:right;">
+285.7664
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_jackson
+</td>
+<td style="text-align:right;">
+1.0656
+</td>
+<td style="text-align:right;">
+0.0026
+</td>
+<td style="text-align:right;">
+410.3111
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_leonard_wood
+</td>
+<td style="text-align:right;">
+0.8282
+</td>
+<td style="text-align:right;">
+0.0017
+</td>
+<td style="text-align:right;">
+492.9340
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_polk
+</td>
+<td style="text-align:right;">
+0.8488
+</td>
+<td style="text-align:right;">
+0.0026
+</td>
+<td style="text-align:right;">
+328.3783
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_riley
+</td>
+<td style="text-align:right;">
+0.4229
+</td>
+<td style="text-align:right;">
+0.0013
+</td>
+<td style="text-align:right;">
+327.0631
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sill
+</td>
+<td style="text-align:right;">
+0.7068
+</td>
+<td style="text-align:right;">
+0.0018
+</td>
+<td style="text-align:right;">
+384.2633
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_stewart
+</td>
+<td style="text-align:right;">
+1.0565
+</td>
+<td style="text-align:right;">
+0.0029
+</td>
+<td style="text-align:right;">
+370.4822
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sam_houston
+</td>
+<td style="text-align:right;">
+1.0148
+</td>
+<td style="text-align:right;">
+0.0010
+</td>
+<td style="text-align:right;">
+1064.1750
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>af_nldas_lm %&gt;%
+  unnest(temp_glance) %&gt;%
+  dplyr::select(installation, r.squared, sigma, statistic, p.value, logLik) %&gt;% 
+  knitr::kable(digits = 4) %&gt;% 
+  kable_styling(bootstrap_options = &quot;striped&quot;)</code></pre>
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+installation
+</th>
+<th style="text-align:right;">
+r.squared
+</th>
+<th style="text-align:right;">
+sigma
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:right;">
+logLik
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+fort_benning_ga
+</td>
+<td style="text-align:right;">
+0.9185
+</td>
+<td style="text-align:right;">
+4.6890
+</td>
+<td style="text-align:right;">
+1077459.63
 </td>
 <td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-75401
+-283547.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_bliss
 </td>
 <td style="text-align:right;">
--3.9908865
+0.5412
 </td>
 <td style="text-align:right;">
--3.7632874
+12.5081
 </td>
-<td style="text-align:left;">
-Paired t-test
+<td style="text-align:right;">
+113327.26
 </td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-379057.3
+</td>
+</tr>
+<tr>
 <td style="text-align:left;">
-two.sided
+fort_bragg
+</td>
+<td style="text-align:right;">
+0.7831
+</td>
+<td style="text-align:right;">
+8.8110
+</td>
+<td style="text-align:right;">
+340905.91
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-339494.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_campbell
+</td>
+<td style="text-align:right;">
+0.5354
+</td>
+<td style="text-align:right;">
+10.3361
+</td>
+<td style="text-align:right;">
+110521.92
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-360040.6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_carson
+</td>
+<td style="text-align:right;">
+0.7680
+</td>
+<td style="text-align:right;">
+8.1806
+</td>
+<td style="text-align:right;">
+315237.18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-335197.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_drum
+</td>
+<td style="text-align:right;">
+0.6525
+</td>
+<td style="text-align:right;">
+9.0784
+</td>
+<td style="text-align:right;">
+179313.37
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-346210.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_gordon
+</td>
+<td style="text-align:right;">
+0.6420
+</td>
+<td style="text-align:right;">
+10.7689
+</td>
+<td style="text-align:right;">
+171769.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-363632.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_hood
+</td>
+<td style="text-align:right;">
+0.6214
+</td>
+<td style="text-align:right;">
+10.6198
+</td>
+<td style="text-align:right;">
+157085.37
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-362009.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ntc_and_fort_irwin
+</td>
+<td style="text-align:right;">
+0.5193
+</td>
+<td style="text-align:right;">
+12.2399
+</td>
+<td style="text-align:right;">
+81662.44
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-296622.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_jackson
+</td>
+<td style="text-align:right;">
+0.6370
+</td>
+<td style="text-align:right;">
+13.4590
+</td>
+<td style="text-align:right;">
+168355.22
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-385533.9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_leonard_wood
+</td>
+<td style="text-align:right;">
+0.7200
+</td>
+<td style="text-align:right;">
+10.0512
+</td>
+<td style="text-align:right;">
+242983.95
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-352224.9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_polk
+</td>
+<td style="text-align:right;">
+0.5306
+</td>
+<td style="text-align:right;">
+12.3367
+</td>
+<td style="text-align:right;">
+107832.34
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-375116.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_riley
+</td>
+<td style="text-align:right;">
+0.5300
+</td>
+<td style="text-align:right;">
+8.6046
+</td>
+<td style="text-align:right;">
+106970.29
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-338751.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sill
+</td>
+<td style="text-align:right;">
+0.6101
+</td>
+<td style="text-align:right;">
+11.0384
+</td>
+<td style="text-align:right;">
+147658.31
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-360583.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_stewart
+</td>
+<td style="text-align:right;">
+0.5939
+</td>
+<td style="text-align:right;">
+13.1713
+</td>
+<td style="text-align:right;">
+137257.07
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-375107.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sam_houston
+</td>
+<td style="text-align:right;">
+0.9218
+</td>
+<td style="text-align:right;">
+4.5103
+</td>
+<td style="text-align:right;">
+1132468.36
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-280999.6
 </td>
 </tr>
 </tbody>
 </table>
-<pre class="r"><code># Temperature
+</div>
+<div id="paired-t-tests" class="section level3">
+<h3>Paired t-tests</h3>
+<pre class="r"><code># https://cran.r-project.org/web/packages/BlandAltmanLeh/vignettes/Intro.html
+
+# Temperature
 
 af_nldas_compare %&gt;%
     dplyr::select(installation, utc_dttm, temp_af, tmp_nldas) %&gt;% 
@@ -1247,7 +1790,7 @@ af_nldas_compare %&gt;%
                  mu = 0, 
                  alt = &quot;two.sided&quot;, 
                  paired = TRUE, 
-                 conf.level = 0.99))) %&gt;% 
+                 conf.level = 0.95))) %&gt;% 
   knitr::kable() %&gt;% 
   kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;, full_width = FALSE))</code></pre>
 <table class="table table-striped table-condensed" style="margin-left: auto; margin-right: auto;">
@@ -1300,10 +1843,10 @@ fort_benning_ga
 95658
 </td>
 <td style="text-align:right;">
--2.8431055
+-2.8335758
 </td>
 <td style="text-align:right;">
--2.7633922
+-2.7729219
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1329,10 +1872,10 @@ fort_bliss
 96077
 </td>
 <td style="text-align:right;">
-16.4217005
+16.4476473
 </td>
 <td style="text-align:right;">
-16.6387379
+16.6127911
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1358,10 +1901,10 @@ fort_bragg
 94436
 </td>
 <td style="text-align:right;">
-3.3415392
+3.3592103
 </td>
 <td style="text-align:right;">
-3.4893529
+3.4716818
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1387,10 +1930,10 @@ fort_campbell
 95893
 </td>
 <td style="text-align:right;">
--4.5797973
+-4.5542926
 </td>
 <td style="text-align:right;">
--4.3664571
+-4.3919618
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1416,10 +1959,10 @@ fort_carson
 95207
 </td>
 <td style="text-align:right;">
--15.2514959
+-15.2327237
 </td>
 <td style="text-align:right;">
--15.0944712
+-15.1132435
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1445,10 +1988,10 @@ fort_drum
 95510
 </td>
 <td style="text-align:right;">
--21.7149324
+-21.6902483
 </td>
 <td style="text-align:right;">
--21.5084565
+-21.5331406
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1474,10 +2017,10 @@ fort_gordon
 95803
 </td>
 <td style="text-align:right;">
--5.8565469
+-5.8346529
 </td>
 <td style="text-align:right;">
--5.6734101
+-5.6953041
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1503,10 +2046,10 @@ fort_hood
 95727
 </td>
 <td style="text-align:right;">
-2.1266555
+2.1487013
 </td>
 <td style="text-align:right;">
-2.3110617
+2.2890160
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1532,10 +2075,10 @@ fort_jackson
 95937
 </td>
 <td style="text-align:right;">
-8.2895748
+8.3164257
 </td>
 <td style="text-align:right;">
-8.5141749
+8.4873240
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1561,10 +2104,10 @@ fort_leonard_wood
 94515
 </td>
 <td style="text-align:right;">
-1.0912953
+1.1125154
 </td>
 <td style="text-align:right;">
-1.2687953
+1.2475752
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1590,10 +2133,10 @@ fort_polk
 95412
 </td>
 <td style="text-align:right;">
--0.2009083
+-0.1758733
 </td>
 <td style="text-align:right;">
-0.0085027
+-0.0165324
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1619,10 +2162,39 @@ fort_riley
 94855
 </td>
 <td style="text-align:right;">
-4.6463079
+4.6766043
 </td>
 <td style="text-align:right;">
-4.8997282
+4.8694318
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sam_houston
+</td>
+<td style="text-align:right;">
+-1.6863402
+</td>
+<td style="text-align:right;">
+-115.737072
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+96058
+</td>
+<td style="text-align:right;">
+-1.7148981
+</td>
+<td style="text-align:right;">
+-1.6577823
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1648,10 +2220,10 @@ fort_sill
 94385
 </td>
 <td style="text-align:right;">
--1.4920593
+-1.4671304
 </td>
 <td style="text-align:right;">
--1.2835364
+-1.3084653
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1677,10 +2249,10 @@ fort_stewart
 93847
 </td>
 <td style="text-align:right;">
-2.1517742
+2.1783096
 </td>
 <td style="text-align:right;">
-2.3737354
+2.3472000
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1706,10 +2278,10 @@ ntc_and_fort_irwin
 75598
 </td>
 <td style="text-align:right;">
-4.2706365
+4.2998703
 </td>
 <td style="text-align:right;">
-4.5151673
+4.4859335
 </td>
 <td style="text-align:left;">
 Paired t-test
@@ -1720,6 +2292,1726 @@ two.sided
 </tr>
 </tbody>
 </table>
+<pre class="r"><code># Heat Index
+
+af_nldas_compare %&gt;%
+    dplyr::select(installation, utc_dttm, heat_index_af, heat_index_nldas) %&gt;% 
+    na.omit() %&gt;% 
+  group_by(installation) %&gt;% 
+  do(tidy(t.test(.$heat_index_af, 
+                 .$heat_index_nldas, 
+                 mu = 0, 
+                 alt = &quot;two.sided&quot;, 
+                 paired = TRUE, 
+                 conf.level = 0.95))) %&gt;% 
+  knitr::kable() %&gt;% 
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;, full_width = FALSE))</code></pre>
+<table class="table table-striped table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+installation
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:right;">
+parameter
+</th>
+<th style="text-align:right;">
+conf.low
+</th>
+<th style="text-align:right;">
+conf.high
+</th>
+<th style="text-align:left;">
+method
+</th>
+<th style="text-align:left;">
+alternative
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+fort_benning_ga
+</td>
+<td style="text-align:right;">
+-1.7342671
+</td>
+<td style="text-align:right;">
+-98.30110
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+94485
+</td>
+<td style="text-align:right;">
+-1.7688460
+</td>
+<td style="text-align:right;">
+-1.6996882
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_bliss
+</td>
+<td style="text-align:right;">
+15.9111298
+</td>
+<td style="text-align:right;">
+388.60298
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+96003
+</td>
+<td style="text-align:right;">
+15.8308792
+</td>
+<td style="text-align:right;">
+15.9913805
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_bragg
+</td>
+<td style="text-align:right;">
+4.4833416
+</td>
+<td style="text-align:right;">
+144.96751
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+93975
+</td>
+<td style="text-align:right;">
+4.4227259
+</td>
+<td style="text-align:right;">
+4.5439573
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_campbell
+</td>
+<td style="text-align:right;">
+-0.9383854
+</td>
+<td style="text-align:right;">
+-21.65333
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+95166
+</td>
+<td style="text-align:right;">
+-1.0233250
+</td>
+<td style="text-align:right;">
+-0.8534458
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_carson
+</td>
+<td style="text-align:right;">
+-12.9774245
+</td>
+<td style="text-align:right;">
+-438.47112
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+95056
+</td>
+<td style="text-align:right;">
+-13.0354343
+</td>
+<td style="text-align:right;">
+-12.9194147
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_drum
+</td>
+<td style="text-align:right;">
+-22.4904299
+</td>
+<td style="text-align:right;">
+-561.68546
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+94904
+</td>
+<td style="text-align:right;">
+-22.5689098
+</td>
+<td style="text-align:right;">
+-22.4119500
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_gordon
+</td>
+<td style="text-align:right;">
+-4.2748664
+</td>
+<td style="text-align:right;">
+-113.97355
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+95424
+</td>
+<td style="text-align:right;">
+-4.3483808
+</td>
+<td style="text-align:right;">
+-4.2013521
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_hood
+</td>
+<td style="text-align:right;">
+3.1676290
+</td>
+<td style="text-align:right;">
+83.24509
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+95384
+</td>
+<td style="text-align:right;">
+3.0930478
+</td>
+<td style="text-align:right;">
+3.2422102
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_jackson
+</td>
+<td style="text-align:right;">
+10.3823047
+</td>
+<td style="text-align:right;">
+237.33922
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+95811
+</td>
+<td style="text-align:right;">
+10.2965658
+</td>
+<td style="text-align:right;">
+10.4680436
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_leonard_wood
+</td>
+<td style="text-align:right;">
+4.1604680
+</td>
+<td style="text-align:right;">
+117.25283
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+93196
+</td>
+<td style="text-align:right;">
+4.0909220
+</td>
+<td style="text-align:right;">
+4.2300141
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_polk
+</td>
+<td style="text-align:right;">
+5.0203915
+</td>
+<td style="text-align:right;">
+123.69578
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+95187
+</td>
+<td style="text-align:right;">
+4.9408422
+</td>
+<td style="text-align:right;">
+5.0999408
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_riley
+</td>
+<td style="text-align:right;">
+6.5238709
+</td>
+<td style="text-align:right;">
+124.27857
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+94184
+</td>
+<td style="text-align:right;">
+6.4209833
+</td>
+<td style="text-align:right;">
+6.6267584
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sam_houston
+</td>
+<td style="text-align:right;">
+-0.3225051
+</td>
+<td style="text-align:right;">
+-19.86515
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+95968
+</td>
+<td style="text-align:right;">
+-0.3543249
+</td>
+<td style="text-align:right;">
+-0.2906852
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sill
+</td>
+<td style="text-align:right;">
+-0.6772487
+</td>
+<td style="text-align:right;">
+-15.92836
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+93846
+</td>
+<td style="text-align:right;">
+-0.7605844
+</td>
+<td style="text-align:right;">
+-0.5939130
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_stewart
+</td>
+<td style="text-align:right;">
+5.0594457
+</td>
+<td style="text-align:right;">
+117.89900
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+92902
+</td>
+<td style="text-align:right;">
+4.9753359
+</td>
+<td style="text-align:right;">
+5.1435555
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ntc_and_fort_irwin
+</td>
+<td style="text-align:right;">
+2.3757861
+</td>
+<td style="text-align:right;">
+48.71654
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+75519
+</td>
+<td style="text-align:right;">
+2.2802020
+</td>
+<td style="text-align:right;">
+2.4713703
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># WBGT
+
+af_nldas_compare %&gt;%
+    dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %&gt;% 
+    na.omit() %&gt;% 
+  group_by(installation) %&gt;% 
+  do(tidy(t.test(.$wbgt_af, 
+                 .$wbgt_nldas, 
+                 mu = 0, 
+                 alt = &quot;two.sided&quot;, 
+                 paired = TRUE, 
+                 conf.level = 0.95))) %&gt;% 
+  knitr::kable() %&gt;% 
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;, full_width = FALSE))</code></pre>
+<table class="table table-striped table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+installation
+</th>
+<th style="text-align:right;">
+estimate
+</th>
+<th style="text-align:right;">
+statistic
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:right;">
+parameter
+</th>
+<th style="text-align:right;">
+conf.low
+</th>
+<th style="text-align:right;">
+conf.high
+</th>
+<th style="text-align:left;">
+method
+</th>
+<th style="text-align:left;">
+alternative
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+fort_benning_ga
+</td>
+<td style="text-align:right;">
+-0.6702483
+</td>
+<td style="text-align:right;">
+-58.96990
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+78899
+</td>
+<td style="text-align:right;">
+-0.6925255
+</td>
+<td style="text-align:right;">
+-0.6479711
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_bliss
+</td>
+<td style="text-align:right;">
+8.0954079
+</td>
+<td style="text-align:right;">
+214.48241
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+95921
+</td>
+<td style="text-align:right;">
+8.0214303
+</td>
+<td style="text-align:right;">
+8.1693856
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_bragg
+</td>
+<td style="text-align:right;">
+3.4376121
+</td>
+<td style="text-align:right;">
+128.29688
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+89697
+</td>
+<td style="text-align:right;">
+3.3850957
+</td>
+<td style="text-align:right;">
+3.4901285
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_campbell
+</td>
+<td style="text-align:right;">
+2.0341558
+</td>
+<td style="text-align:right;">
+48.41562
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+84390
+</td>
+<td style="text-align:right;">
+1.9518078
+</td>
+<td style="text-align:right;">
+2.1165038
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_carson
+</td>
+<td style="text-align:right;">
+-10.2892864
+</td>
+<td style="text-align:right;">
+-459.56059
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+93593
+</td>
+<td style="text-align:right;">
+-10.3331694
+</td>
+<td style="text-align:right;">
+-10.2454034
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_drum
+</td>
+<td style="text-align:right;">
+-20.6642521
+</td>
+<td style="text-align:right;">
+-507.98556
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+85549
+</td>
+<td style="text-align:right;">
+-20.7439823
+</td>
+<td style="text-align:right;">
+-20.5845220
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_gordon
+</td>
+<td style="text-align:right;">
+-2.1268538
+</td>
+<td style="text-align:right;">
+-64.49253
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+90730
+</td>
+<td style="text-align:right;">
+-2.1914909
+</td>
+<td style="text-align:right;">
+-2.0622166
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_hood
+</td>
+<td style="text-align:right;">
+1.1571740
+</td>
+<td style="text-align:right;">
+33.42653
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+91415
+</td>
+<td style="text-align:right;">
+1.0893222
+</td>
+<td style="text-align:right;">
+1.2250258
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_jackson
+</td>
+<td style="text-align:right;">
+9.1797385
+</td>
+<td style="text-align:right;">
+235.66439
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+93674
+</td>
+<td style="text-align:right;">
+9.1033918
+</td>
+<td style="text-align:right;">
+9.2560851
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_leonard_wood
+</td>
+<td style="text-align:right;">
+6.0787829
+</td>
+<td style="text-align:right;">
+176.20692
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+80948
+</td>
+<td style="text-align:right;">
+6.0111671
+</td>
+<td style="text-align:right;">
+6.1463987
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_polk
+</td>
+<td style="text-align:right;">
+9.3001094
+</td>
+<td style="text-align:right;">
+264.68089
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+92896
+</td>
+<td style="text-align:right;">
+9.2312411
+</td>
+<td style="text-align:right;">
+9.3689776
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_riley
+</td>
+<td style="text-align:right;">
+2.6965890
+</td>
+<td style="text-align:right;">
+57.52345
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+85294
+</td>
+<td style="text-align:right;">
+2.6047084
+</td>
+<td style="text-align:right;">
+2.7884697
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sam_houston
+</td>
+<td style="text-align:right;">
+-0.4860656
+</td>
+<td style="text-align:right;">
+-43.61926
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+94705
+</td>
+<td style="text-align:right;">
+-0.5079065
+</td>
+<td style="text-align:right;">
+-0.4642247
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_sill
+</td>
+<td style="text-align:right;">
+-2.6378249
+</td>
+<td style="text-align:right;">
+-67.74694
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+88171
+</td>
+<td style="text-align:right;">
+-2.7141400
+</td>
+<td style="text-align:right;">
+-2.5615099
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+fort_stewart
+</td>
+<td style="text-align:right;">
+6.0299376
+</td>
+<td style="text-align:right;">
+161.11832
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+83751
+</td>
+<td style="text-align:right;">
+5.9565838
+</td>
+<td style="text-align:right;">
+6.1032913
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ntc_and_fort_irwin
+</td>
+<td style="text-align:right;">
+-3.8770869
+</td>
+<td style="text-align:right;">
+-87.75927
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+75401
+</td>
+<td style="text-align:right;">
+-3.9636769
+</td>
+<td style="text-align:right;">
+-3.7904970
+</td>
+<td style="text-align:left;">
+Paired t-test
+</td>
+<td style="text-align:left;">
+two.sided
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="station-locations" class="section level2">
+<h2>Station Locations</h2>
+<pre class="r"><code>select_bases &lt;-
+  read_rds(&quot;data/select_bases.rds&quot;) %&gt;% 
+  filter(site_name %in% c(&quot;Fort Benning GA&quot;, &quot;Fort Bragg&quot;,&quot;Fort Campbell&quot;,
+      &quot;Fort Jackson&quot;, &quot;Fort Polk&quot;, &quot;Fort Hood&quot;,
+      &quot;Fort Stewart&quot;, &quot;Fort Leonard Wood&quot;, &quot;Fort Riley&quot;,
+      &quot;NTC and Fort Irwin&quot;, &quot;Fort Bliss&quot;, &quot;Fort Lewis&quot;,
+      &quot;Fort Sill&quot;, &quot;Fort Carson&quot;, &quot;Fort Gordon&quot;,
+      &quot;Fort Drum&quot;, &quot;Fort Sam Houston&quot;)) %&gt;% 
+  arrange(site_name)
+
+select_bases </code></pre>
+<pre><code>## Simple feature collection with 17 features and 3 fields
+## Active geometry column: geometry
+## geometry type:  GEOMETRY
+## dimension:      XY
+## bbox:           xmin: -122.8021 ymin: 29.43991 xmax: -75.38405 ymax: 47.15951
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## First 10 features:
+##      component         site_name     state_terr                       geometry
+## 1  Army Active   Fort Benning GA        Georgia POLYGON ((-84.8882 32.25929...
+## 2  Army Active        Fort Bliss          Texas MULTIPOLYGON (((-106.4558 3...
+## 3  Army Active        Fort Bragg North Carolina MULTIPOLYGON (((-78.96197 3...
+## 4  Army Active     Fort Campbell       Kentucky MULTIPOLYGON (((-87.65135 3...
+## 5  Army Active       Fort Carson       Colorado MULTIPOLYGON (((-104.7321 3...
+## 6  Army Active         Fort Drum       New York MULTIPOLYGON (((-75.52669 4...
+## 7  Army Active       Fort Gordon        Georgia MULTIPOLYGON (((-82.11816 3...
+## 8  Army Active         Fort Hood          Texas MULTIPOLYGON (((-97.75504 3...
+## 9  Army Active      Fort Jackson South Carolina MULTIPOLYGON (((-80.80913 3...
+## 10 Army Active Fort Leonard Wood       Missouri MULTIPOLYGON (((-92.05957 3...
+##                      centroid
+## 1   POINT (-84.81164 32.3917)
+## 2   POINT (-106.0806 32.2548)
+## 3  POINT (-79.14397 35.13624)
+## 4   POINT (-87.62461 36.6222)
+## 5   POINT (-104.853 38.47304)
+## 6  POINT (-75.59273 44.12466)
+## 7  POINT (-82.23727 33.35667)
+## 8  POINT (-97.74244 31.21746)
+## 9  POINT (-80.82734 34.03994)
+## 10    POINT (-92.1493 37.712)</code></pre>
+<pre class="r"><code># af_station_coords &lt;- read_csv(&quot;D:sar_weather/Lat_Long Coords for Army Garrisons.csv&quot;) 
+
+# write_rds(af_station_coords, path = &quot;data/af_station_coords.rds&quot;)
+
+af_station_coords &lt;-
+  read_rds(&quot;data/af_station_coords.rds&quot;) %&gt;% 
+  janitor::clean_names() %&gt;%
+  mutate(name = recode(name, `Fort Benning` = &quot;Fort Benning GA&quot;, 
+                             `Fort Irwin` = &quot;NTC and Fort Irwin&quot;,
+                             `JB San Antonio` = &quot;Fort Sam Houston&quot;,
+                              `JB Lewis McChord` = &quot;Fort Lewis&quot;))
+
+af_station_sf &lt;-         
+  st_as_sf(af_station_coords, coords = c(&quot;lon&quot;, &quot;lat&quot;), crs = 4326) %&gt;% 
+  rename(site_name = name) %&gt;% 
+   filter(site_name %in% c(&quot;Fort Benning GA&quot;, &quot;Fort Bragg&quot;,&quot;Fort Campbell&quot;,
+      &quot;Fort Jackson&quot;, &quot;Fort Polk&quot;, &quot;Fort Hood&quot;,
+      &quot;Fort Stewart&quot;, &quot;Fort Leonard Wood&quot;, &quot;Fort Riley&quot;,
+      &quot;NTC and Fort Irwin&quot;, &quot;Fort Bliss&quot;, &quot;Fort Lewis&quot;,
+      &quot;Fort Sill&quot;, &quot;Fort Carson&quot;, &quot;Fort Gordon&quot;,
+      &quot;Fort Drum&quot;, &quot;Fort Sam Houston&quot;)) %&gt;% 
+  arrange(site_name)
+         
+af_station_sf</code></pre>
+<pre><code>## Simple feature collection with 17 features and 5 fields
+## geometry type:  POINT
+## dimension:      XY
+## bbox:           xmin: -122.5747 ymin: 29.45243 xmax: -75.76357 ymax: 47.10505
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## # A tibble: 17 x 6
+##    site_name          state country net   plat              geometry
+##    &lt;chr&gt;              &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;          &lt;POINT [°]&gt;
+##  1 Fort Benning GA    GA    US      ICAO  KLSF  (-84.94314 32.37588)
+##  2 Fort Bliss         TX    US      ICAO  KELP  (-106.4343 31.82024)
+##  3 Fort Bragg         NC    US      ICAO  KFBG  (-79.00145 35.14322)
+##  4 Fort Campbell      KY/TN US      ICAO  KHOP  (-87.45664 36.63822)
+##  5 Fort Carson        CO    US      ICAO  KFCS  (-104.7923 38.74047)
+##  6 Fort Drum          NY    US      ICAO  KGTB  (-75.76357 44.03707)
+##  7 Fort Gordon        GA    US      ICAO  KAGS  (-82.14771 33.41799)
+##  8 Fort Hood          TX    US      ICAO  KGRK  (-97.78449 31.13427)
+##  9 Fort Jackson       SC    US      ICAO  KCAE    (-80.9355 34.0097)
+## 10 Fort Leonard Wood  MO    US      ICAO  KTBN  (-92.11718 37.76081)
+## 11 Fort Lewis         WA    US      ICAO  KGRF  (-122.5747 47.10505)
+## 12 Fort Polk          LA    US      ICAO  KPOE  (-93.21209 31.05348)
+## 13 Fort Riley         KS    US      ICAO  KFRI  (-96.79456 39.08421)
+## 14 Fort Sam Houston   TX    US      ICAO  KSAT  (-98.45031 29.45243)
+## 15 Fort Sill          OK    US      ICAO  KFSI  (-98.40337 34.66247)
+## 16 Fort Stewart       GA    US      ICAO  KLHW  (-81.60937 31.87549)
+## 17 NTC and Fort Irwin CA    US      ICAO  KBYS  (-116.6896 35.26151)</code></pre>
+<div id="distance-between-station-and-centroid" class="section level3">
+<h3>Distance between Station and Centroid</h3>
+<pre class="r"><code>dist_from_centroid &lt;- 
+  sf::st_distance(select_bases$centroid, af_station_sf, by_element = TRUE)
+
+af_station_distance &lt;-
+  af_station_sf %&gt;% 
+    mutate(distance = dist_from_centroid, 
+           dist_km = as.numeric(distance / 1000)) %&gt;%
+  dplyr::select(-country, -distance) %&gt;% 
+  arrange(dist_km)
+
+af_station_distance %&gt;% 
+  knitr::kable() %&gt;% 
+  kable_styling(bootstrap_options = c(&quot;striped&quot;, &quot;condensed&quot;, full_width = FALSE))</code></pre>
+<table class="table table-striped table-condensed" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+site_name
+</th>
+<th style="text-align:left;">
+state
+</th>
+<th style="text-align:left;">
+net
+</th>
+<th style="text-align:left;">
+plat
+</th>
+<th style="text-align:left;">
+geometry
+</th>
+<th style="text-align:right;">
+dist_km
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Fort Sam Houston
+</td>
+<td style="text-align:left;">
+TX
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KSAT
+</td>
+<td style="text-align:left;">
+c(-98.45031087, 29.4524345)
+</td>
+<td style="text-align:right;">
+1.219009
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Leonard Wood
+</td>
+<td style="text-align:left;">
+MO
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KTBN
+</td>
+<td style="text-align:left;">
+c(-92.11717514, 37.76080849)
+</td>
+<td style="text-align:right;">
+6.112475
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Lewis
+</td>
+<td style="text-align:left;">
+WA
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KGRF
+</td>
+<td style="text-align:left;">
+c(-122.5746533, 47.1050464)
+</td>
+<td style="text-align:right;">
+8.044299
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Hood
+</td>
+<td style="text-align:left;">
+TX
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KGRK
+</td>
+<td style="text-align:left;">
+c(-97.78448879, 31.1342705)
+</td>
+<td style="text-align:right;">
+10.056951
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Jackson
+</td>
+<td style="text-align:left;">
+SC
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KCAE
+</td>
+<td style="text-align:left;">
+c(-80.93550132, 34.00969986)
+</td>
+<td style="text-align:right;">
+10.537809
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Gordon
+</td>
+<td style="text-align:left;">
+GA
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KAGS
+</td>
+<td style="text-align:left;">
+c(-82.14771469, 33.41798907)
+</td>
+<td style="text-align:right;">
+10.755596
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Sill
+</td>
+<td style="text-align:left;">
+OK
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KFSI
+</td>
+<td style="text-align:left;">
+c(-98.40337283, 34.66246543)
+</td>
+<td style="text-align:right;">
+11.948668
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Benning GA
+</td>
+<td style="text-align:left;">
+GA
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KLSF
+</td>
+<td style="text-align:left;">
+c(-84.94314223, 32.37587502)
+</td>
+<td style="text-align:right;">
+12.497659
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Bragg
+</td>
+<td style="text-align:left;">
+NC
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KFBG
+</td>
+<td style="text-align:left;">
+c(-79.00145094, 35.14321639)
+</td>
+<td style="text-align:right;">
+13.010786
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Stewart
+</td>
+<td style="text-align:left;">
+GA
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KLHW
+</td>
+<td style="text-align:left;">
+c(-81.6093672, 31.87549094)
+</td>
+<td style="text-align:right;">
+13.119632
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NTC and Fort Irwin
+</td>
+<td style="text-align:left;">
+CA
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KBYS
+</td>
+<td style="text-align:left;">
+c(-116.6896485, 35.26151266)
+</td>
+<td style="text-align:right;">
+13.523870
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Riley
+</td>
+<td style="text-align:left;">
+KS
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KFRI
+</td>
+<td style="text-align:left;">
+c(-96.79455543, 39.08420988)
+</td>
+<td style="text-align:right;">
+13.852926
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Polk
+</td>
+<td style="text-align:left;">
+LA
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KPOE
+</td>
+<td style="text-align:left;">
+c(-93.21209002, 31.05348415)
+</td>
+<td style="text-align:right;">
+14.483760
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Campbell
+</td>
+<td style="text-align:left;">
+KY/TN
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KHOP
+</td>
+<td style="text-align:left;">
+c(-87.45664096, 36.63822422)
+</td>
+<td style="text-align:right;">
+15.127873
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Drum
+</td>
+<td style="text-align:left;">
+NY
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KGTB
+</td>
+<td style="text-align:left;">
+c(-75.7635747, 44.03706573)
+</td>
+<td style="text-align:right;">
+16.792308
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Carson
+</td>
+<td style="text-align:left;">
+CO
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KFCS
+</td>
+<td style="text-align:left;">
+c(-104.792321, 38.7404744)
+</td>
+<td style="text-align:right;">
+30.153990
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fort Bliss
+</td>
+<td style="text-align:left;">
+TX
+</td>
+<td style="text-align:left;">
+ICAO
+</td>
+<td style="text-align:left;">
+KELP
+</td>
+<td style="text-align:left;">
+c(-106.4342925, 31.82023655)
+</td>
+<td style="text-align:right;">
+58.635301
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Summary of distances (km) from weather station to installation centroid
+
+af_station_distance$dist_km %&gt;% 
+  summary() </code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   1.219  10.538  13.011  15.287  14.484  58.635</code></pre>
+</div>
+<div id="plots-of-air-force-weather-station-base-centroid-and-nldas-grid-squares" class="section level3">
+<h3>Plots of Air Force weather station, base centroid, and NLDAS grid squares</h3>
+<pre class="r"><code>## Load NLDAS grids
+
+nldas_grid &lt;- 
+  here::here(&quot;data/nldas_grids&quot;, &quot;NLDAS_Grid_Reference.shp&quot;) %&gt;%
+  sf::st_read(stringsAsFactors = FALSE) %&gt;% 
+  janitor::clean_names()</code></pre>
+<pre><code>## Reading layer `NLDAS_Grid_Reference&#39; from data source `C:\Users\slewa\Projects\heat_stress\data\nldas_grids\NLDAS_Grid_Reference.shp&#39; using driver `ESRI Shapefile&#39;
+## Simple feature collection with 103936 features and 5 fields
+## geometry type:  POLYGON
+## dimension:      XY
+## bbox:           xmin: -125 ymin: 25 xmax: -67 ymax: 53
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs</code></pre>
+<pre class="r"><code>nldas_grid</code></pre>
+<pre><code>## Simple feature collection with 103936 features and 5 fields
+## geometry type:  POLYGON
+## dimension:      XY
+## bbox:           xmin: -125 ymin: 25 xmax: -67 ymax: 53
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## First 10 features:
+##      centerx centery nldas_x nldas_y nldas_id                       geometry
+## 1  -124.9375 25.0625       1       1     x1y1 POLYGON ((-124.875 25, -125...
+## 2  -124.8125 25.0625       2       1     x2y1 POLYGON ((-124.75 25, -124....
+## 3  -124.6875 25.0625       3       1     x3y1 POLYGON ((-124.625 25, -124...
+## 4  -124.5625 25.0625       4       1     x4y1 POLYGON ((-124.5 25, -124.6...
+## 5  -124.4375 25.0625       5       1     x5y1 POLYGON ((-124.375 25, -124...
+## 6  -124.3125 25.0625       6       1     x6y1 POLYGON ((-124.25 25, -124....
+## 7  -124.1875 25.0625       7       1     x7y1 POLYGON ((-124.125 25, -124...
+## 8  -124.0625 25.0625       8       1     x8y1 POLYGON ((-124 25, -124.125...
+## 9  -123.9375 25.0625       9       1     x9y1 POLYGON ((-123.875 25, -124...
+## 10 -123.8125 25.0625      10       1    x10y1 POLYGON ((-123.75 25, -123....</code></pre>
+<pre class="r"><code>## NLDAS and Installation Grid Overlap 
+
+# Identify all NLDAS grids intersected by installation shapefiles
+
+bases_nldas = NULL
+
+  for (i in 1:nrow(select_bases)) {
+    i_base = select_bases[i,] 
+    base_nldas = st_intersection(i_base, nldas_grid) 
+    bases_nldas = rbind(bases_nldas, base_nldas)
+  }
+
+bases_nldas</code></pre>
+<pre><code>## Simple feature collection with 219 features and 8 fields
+## Active geometry column: centroid
+## geometry type:  POINT
+## dimension:      XY
+## bbox:           xmin: -122.8021 ymin: 29.43991 xmax: -75.38405 ymax: 47.15951
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## First 10 features:
+##       component       site_name state_terr  centerx centery nldas_x nldas_y
+## 1   Army Active Fort Benning GA    Georgia -84.9375 32.1875     321      58
+## 1.1 Army Active Fort Benning GA    Georgia -84.8125 32.1875     322      58
+## 1.2 Army Active Fort Benning GA    Georgia -85.0625 32.3125     320      59
+## 1.3 Army Active Fort Benning GA    Georgia -84.9375 32.3125     321      59
+## 1.4 Army Active Fort Benning GA    Georgia -84.8125 32.3125     322      59
+## 1.5 Army Active Fort Benning GA    Georgia -84.6875 32.3125     323      59
+## 1.6 Army Active Fort Benning GA    Georgia -84.9375 32.4375     321      60
+## 1.7 Army Active Fort Benning GA    Georgia -84.8125 32.4375     322      60
+## 1.8 Army Active Fort Benning GA    Georgia -84.6875 32.4375     323      60
+## 1.9 Army Active Fort Benning GA    Georgia -84.8125 32.5625     322      61
+##     nldas_id                       geometry                  centroid
+## 1    x321y58 MULTIPOLYGON (((-84.90602 3... POINT (-84.81164 32.3917)
+## 1.1  x322y58 POLYGON ((-84.81997 32.25, ... POINT (-84.81164 32.3917)
+## 1.2  x320y59 POLYGON ((-85 32.29875, -85... POINT (-84.81164 32.3917)
+## 1.3  x321y59 POLYGON ((-84.8882 32.25929... POINT (-84.81164 32.3917)
+## 1.4  x322y59 POLYGON ((-84.75 32.33047, ... POINT (-84.81164 32.3917)
+## 1.5  x323y59 POLYGON ((-84.65872 32.375,... POINT (-84.81164 32.3917)
+## 1.6  x321y60 MULTIPOLYGON (((-84.97334 3... POINT (-84.81164 32.3917)
+## 1.7  x322y60 POLYGON ((-84.875 32.45522,... POINT (-84.81164 32.3917)
+## 1.8  x323y60 POLYGON ((-84.63749 32.5, -... POINT (-84.81164 32.3917)
+## 1.9  x322y61 POLYGON ((-84.84992 32.5, -... POINT (-84.81164 32.3917)</code></pre>
+<pre class="r"><code>rm(i_base, base_nldas)
+
+# Calculate area of installation in each NLDAS grid and weight for spatial weighted average
+nldas_weights &lt;- bases_nldas %&gt;% 
+    mutate(area = sf::st_area(.$geometry)) %&gt;% 
+  group_by(site_name) %&gt;% 
+    mutate(sum_area = sum(area),
+           weight = (area / sum_area)) %&gt;% 
+    dplyr::select(-c(nldas_x, nldas_y, area, centroid, sum_area))
+
+
+# NLDAS grids that intersect with bases (to map full grid squares)
+intersects = NULL
+
+  for (i in 1:nrow(select_bases)) {
+    i_base = select_bases[i,] 
+    base_intersect = nldas_grid %&gt;% filter(lengths(st_intersects(., i_base)) &gt; 0)
+    intersects = rbind(intersects, base_intersect)
+  }
+
+rm(i_base, base_intersect)
+
+# Join `site_name` to selected NLDAS grid geometries
+
+intersects &lt;- intersects %&gt;% left_join(dplyr::select(as_tibble(nldas_weights), c(nldas_id, site_name)), by = &quot;nldas_id&quot;)
+
+intersects  </code></pre>
+<pre><code>## Simple feature collection with 219 features and 6 fields
+## geometry type:  POLYGON
+## dimension:      XY
+## bbox:           xmin: -122.875 ymin: 29.375 xmax: -75.375 ymax: 47.25
+## epsg (SRID):    4326
+## proj4string:    +proj=longlat +datum=WGS84 +no_defs
+## First 10 features:
+##     centerx centery nldas_x nldas_y nldas_id       site_name
+## 1  -84.9375 32.1875     321      58  x321y58 Fort Benning GA
+## 2  -84.8125 32.1875     322      58  x322y58 Fort Benning GA
+## 3  -85.0625 32.3125     320      59  x320y59 Fort Benning GA
+## 4  -84.9375 32.3125     321      59  x321y59 Fort Benning GA
+## 5  -84.8125 32.3125     322      59  x322y59 Fort Benning GA
+## 6  -84.6875 32.3125     323      59  x323y59 Fort Benning GA
+## 7  -84.9375 32.4375     321      60  x321y60 Fort Benning GA
+## 8  -84.8125 32.4375     322      60  x322y60 Fort Benning GA
+## 9  -84.6875 32.4375     323      60  x323y60 Fort Benning GA
+## 10 -84.8125 32.5625     322      61  x322y61 Fort Benning GA
+##                          geometry
+## 1  POLYGON ((-84.875 32.125, -...
+## 2  POLYGON ((-84.75 32.125, -8...
+## 3  POLYGON ((-85 32.25, -85.12...
+## 4  POLYGON ((-84.875 32.25, -8...
+## 5  POLYGON ((-84.75 32.25, -84...
+## 6  POLYGON ((-84.625 32.25, -8...
+## 7  POLYGON ((-84.875 32.375, -...
+## 8  POLYGON ((-84.75 32.375, -8...
+## 9  POLYGON ((-84.625 32.375, -...
+## 10 POLYGON ((-84.75 32.5, -84....</code></pre>
+<pre class="r"><code>## Plots with intersecting NLDAS grids
+
+select_bases$site_name &lt;- purrr::set_names(select_bases$site_name)
+
+
+base_grid_plot_function &lt;- function(x) {
+      ggplot() +
+                 geom_sf(data = filter(select_bases, site_name == x)) +
+                 geom_sf(data = filter(intersects, site_name == x), fill = NA) +
+                 geom_sf(data = st_centroid(filter(select_bases, site_name == x)), shape = 3, size = 3, stroke = 1.5) +
+                 geom_sf(data = filter(af_station_sf, site_name == x), shape = 4, size = 3, stroke = 1.5, color = &quot;blue&quot;) +
+                 geom_label(data = filter(intersects, site_name == x), aes(x = centerx, y = centery, label = nldas_id), size = 2) +
+                  ggtitle(x) +
+                  theme_bw() +
+                  theme(axis.text.x = element_text(size = rel(1)),
+                        axis.text.y = element_text(size = rel(1)),
+                        axis.title.x = element_blank(),
+                        axis.title.y = element_blank()) 
+}
+
+# base_grid_plot_function(select_bases$site_name[1])
+
+
+af_station_grid_plots &lt;-
+  map(select_bases$site_name, ~base_grid_plot_function(.x))
+
+af_station_grid_plots</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-2.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-3.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-4.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-5.png" width="672" /></p>
+<pre><code>## 
+## [[6]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-6.png" width="672" /></p>
+<pre><code>## 
+## [[7]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-7.png" width="672" /></p>
+<pre><code>## 
+## [[8]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-8.png" width="672" /></p>
+<pre><code>## 
+## [[9]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-9.png" width="672" /></p>
+<pre><code>## 
+## [[10]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-10.png" width="672" /></p>
+<pre><code>## 
+## [[11]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-11.png" width="672" /></p>
+<pre><code>## 
+## [[12]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-12.png" width="672" /></p>
+<pre><code>## 
+## [[13]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-13.png" width="672" /></p>
+<pre><code>## 
+## [[14]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-14.png" width="672" /></p>
+<pre><code>## 
+## [[15]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-15.png" width="672" /></p>
+<pre><code>## 
+## [[16]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-16.png" width="672" /></p>
+<pre><code>## 
+## [[17]]</code></pre>
+<p><img src="af_weather_files/figure-html/join_sfs-17.png" width="672" /></p>
+</div>
 </div>
 
 

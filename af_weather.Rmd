@@ -18,7 +18,10 @@ library(kableExtra)
 library(zoo)
 library(PairedData)
 library(broom)
-
+library(sf)
+library(here)
+library(skimr)
+library(corrplot)
 ```
 
 **Air Force SAR weather**
@@ -26,7 +29,7 @@ library(broom)
 This code includes reads in and combines separate Excel worksheets into a single dataframe.  
 The hourly data were produced in July 2019 by 14WS and provide WBGT, HI, RH, temperature (F), dew point (F) and UTCI (F).
 
-*Note: For Fort Irwin, Daegu, Hawaii, Yongsan, Red Cloud files, need to insert row prior to line 25 so that header starts on line 26.*
+*Note: For Fort Irwin, Daegu, Hawaii, Yongsan, Red Cloud files, need to insert row on spreadsheet prior to line 25 so that header starts on line 26.*
 
 
 
@@ -64,7 +67,7 @@ sar_df
 
 ```
 
-## Save file and filter locations
+Save file and filter locations
 
 ```{r write_csv, eval = FALSE}
 # save dataframe to .csv file
@@ -101,8 +104,10 @@ sar_df %>%
   kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
 ```
 
-## Hour of day mean WBGT
-```{r hour_of_day, warning = FALSE, fig.height = 12}
+## Exploratory Plots
+
+### Hour of day mean WBGT
+```{r hour_of_day, warning = FALSE, fig.height = 12, cache = TRUE}
 
 # Plot July hourly WBGT
 
@@ -132,9 +137,9 @@ sar_df %>%
 
 ```
 
-## Yearly mean temperature boxplots
+### Yearly mean temperature boxplots
 
-```{r yearly_boxplot, fig.height = 10}
+```{r yearly_boxplot, fig.height = 10, cache = TRUE}
 # Locations 1 - 12
 sar_df %>%   
   dplyr::select(location, dttm, temp_f) %>%
@@ -163,14 +168,17 @@ sar_df %>%
 
 nldas_wide <- read_rds("data/nldas_wide.rds") 
 
-nldas_wide
+nldas_wide 
+
 
 af_nldas_compare <-
   sar_df %>% 
     mutate(location = 
              str_to_lower(location, locale = "en"),
              location = str_replace_all(location, " ", "_"),
-             location = recode(location, fort_benning = "fort_benning_ga", fort_irwin = "ntc_and_fort_irwin")) %>% 
+             location = recode(location, fort_benning = "fort_benning_ga", 
+                                         fort_irwin = "ntc_and_fort_irwin",
+                                         jb_san_antonio = "fort_sam_houston")) %>% 
     left_join(nldas_wide, by = c("location" = "installation", "dttm" = "utc_dttm")) %>% 
     dplyr::select(location, dttm, wbgt.x, heat_index.x, temp_f, wbgt_f, heat_index.y, tmp_f) %>% 
     rename(installation = location,
@@ -182,14 +190,15 @@ af_nldas_compare <-
            heat_index_nldas = heat_index.y,
            tmp_nldas = tmp_f)
 
-
-af_nldas_compare 
-
+af_nldas_compare
 
 ```
 
-##  Plots
-```{r plots, fig.height = 20}
+##  Station - NLDAS Comparison Plots (2008-2018)
+
+### Temperature Comparison
+
+```{r plots_temp_compare, fig.height = 20, cache = TRUE}
 
 
 af_nldas_compare %>%
@@ -206,6 +215,30 @@ af_nldas_compare %>%
       theme_bw()
 
 
+```
+
+### Heat Index Comparison
+
+```{r hi_compare, fig.height = 20, cache = TRUE}
+
+af_nldas_compare %>%
+    dplyr::select(installation, utc_dttm, heat_index_af, heat_index_nldas) %>% 
+    na.omit() %>% 
+  ggplot(aes(x = heat_index_af, y = heat_index_nldas)) + 
+      geom_point(alpha = 0.2) +
+      geom_smooth(method = lm, se = FALSE) +
+      facet_wrap(~installation, ncol = 3) +
+      labs(
+        title = "Heat Index Comparison",
+        x = "Air Force Station",
+        y = "NLDAS") +
+      theme_bw()
+
+```
+
+### WBGT Comparison
+
+```{r wbgt_compare, fig.height = 20, cache = TRUE}
 
 
 af_nldas_compare %>%
@@ -220,29 +253,95 @@ af_nldas_compare %>%
         x = "Air Force Station",
         y = "NLDAS") +
       theme_bw()
+```
+
+
+## Statistical comparison
+
+```{r nest_nldas}
+
+# Nest by each installation
+
+af_nldas_nest <-
+  af_nldas_compare %>% 
+    nest(data = utc_dttm:tmp_nldas)
+
+af_nldas_nest
+
+```
+
+### Correlation
+
+```{r correlation}
+
+# Correlation function
+
+cor_fun = function(df) {
+  df %>% 
+    dplyr::select(2:7) %>% 
+    cor(use = "pairwise.complete.obs")
+}
+
+# Map function over each installation
+cor_nest <-
+  map(af_nldas_nest$data, cor_fun)
+
+# Add installation names to list elements 
+names(cor_nest) <- af_nldas_nest$installation 
+
+
+# Map corrplots
+
+map2(.x = cor_nest, .y = names(cor_nest), ~ corrplot(.x, method = "number", order = "hclust", addrect = 2, title = .y, mar = c(0, 0, 1, 0)))
+
+```
+
+
+### Regression
+```{r regression}
+
+# Nest by each installation, linear models for Temp, Heat Index, WBGT
+
+af_nldas_lm <-
+  af_nldas_nest %>% 
+      mutate(temp_lm = map(data, ~ lm(tmp_nldas ~ temp_af, data = .)),
+             heat_index_lm = map(data, ~ lm(heat_index_nldas ~ heat_index_af, data = .)),
+             wbgt_lm = map(data, ~ lm(wbgt_nldas ~ wbgt_af, data = .)),
+             temp_glance = map(temp_lm, broom::glance),
+             temp_tidy =   map(temp_lm, broom::tidy),
+             heat_index_glance = map(heat_index_lm, broom::glance),
+             heat_index_tidy =   map(heat_index_lm, broom::tidy),
+             wbgt_glance = map(wbgt_lm, broom::glance),
+             wbgt_tidy =   map(wbgt_lm, broom::tidy))
+           
+af_nldas_lm
+
+# Linear Models Summary Table
+
+# Temperature
+
+af_nldas_lm %>%
+  unnest(temp_tidy) %>%
+  filter(term == "temp_af") %>% 
+  dplyr::select(installation, estimate:p.value) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped")
+
+
+af_nldas_lm %>%
+  unnest(temp_glance) %>%
+  dplyr::select(installation, r.squared, sigma, statistic, p.value, logLik) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped")
+
 
 
 ```
 
-## Statistical comparison: t-tests
+
+### Paired t-tests
 ```{r t_tests}
 # https://cran.r-project.org/web/packages/BlandAltmanLeh/vignettes/Intro.html
-
-# WBGT
-
-af_nldas_compare %>%
-    dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %>% 
-    na.omit() %>% 
-  group_by(installation) %>% 
-  do(tidy(t.test(.$wbgt_af, 
-                 .$wbgt_nldas, 
-                 mu = 0, 
-                 alt = "two.sided", 
-                 paired = TRUE, 
-                 conf.level = 0.99))) %>% 
-  knitr::kable() %>% 
-  kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
-  
 
 # Temperature
 
@@ -255,8 +354,202 @@ af_nldas_compare %>%
                  mu = 0, 
                  alt = "two.sided", 
                  paired = TRUE, 
-                 conf.level = 0.99))) %>% 
+                 conf.level = 0.95))) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
+
+# Heat Index
+
+af_nldas_compare %>%
+    dplyr::select(installation, utc_dttm, heat_index_af, heat_index_nldas) %>% 
+    na.omit() %>% 
+  group_by(installation) %>% 
+  do(tidy(t.test(.$heat_index_af, 
+                 .$heat_index_nldas, 
+                 mu = 0, 
+                 alt = "two.sided", 
+                 paired = TRUE, 
+                 conf.level = 0.95))) %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
+
+
+# WBGT
+
+af_nldas_compare %>%
+    dplyr::select(installation, utc_dttm, wbgt_af, wbgt_nldas) %>% 
+    na.omit() %>% 
+  group_by(installation) %>% 
+  do(tidy(t.test(.$wbgt_af, 
+                 .$wbgt_nldas, 
+                 mu = 0, 
+                 alt = "two.sided", 
+                 paired = TRUE, 
+                 conf.level = 0.95))) %>% 
   knitr::kable() %>% 
   kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
 ```
+
+
+## Station Locations
+
+```{r}
+
+select_bases <-
+  read_rds("data/select_bases.rds") %>% 
+  filter(site_name %in% c("Fort Benning GA", "Fort Bragg","Fort Campbell",
+      "Fort Jackson", "Fort Polk", "Fort Hood",
+      "Fort Stewart", "Fort Leonard Wood", "Fort Riley",
+      "NTC and Fort Irwin", "Fort Bliss", "Fort Lewis",
+      "Fort Sill", "Fort Carson", "Fort Gordon",
+      "Fort Drum", "Fort Sam Houston")) %>% 
+  arrange(site_name)
+
+select_bases 
+
+# af_station_coords <- read_csv("D:sar_weather/Lat_Long Coords for Army Garrisons.csv") 
+
+# write_rds(af_station_coords, path = "data/af_station_coords.rds")
+
+af_station_coords <-
+  read_rds("data/af_station_coords.rds") %>% 
+  janitor::clean_names() %>%
+  mutate(name = recode(name, `Fort Benning` = "Fort Benning GA", 
+                             `Fort Irwin` = "NTC and Fort Irwin",
+                             `JB San Antonio` = "Fort Sam Houston",
+                              `JB Lewis McChord` = "Fort Lewis"))
+
+af_station_sf <-         
+  st_as_sf(af_station_coords, coords = c("lon", "lat"), crs = 4326) %>% 
+  rename(site_name = name) %>% 
+   filter(site_name %in% c("Fort Benning GA", "Fort Bragg","Fort Campbell",
+      "Fort Jackson", "Fort Polk", "Fort Hood",
+      "Fort Stewart", "Fort Leonard Wood", "Fort Riley",
+      "NTC and Fort Irwin", "Fort Bliss", "Fort Lewis",
+      "Fort Sill", "Fort Carson", "Fort Gordon",
+      "Fort Drum", "Fort Sam Houston")) %>% 
+  arrange(site_name)
+         
+af_station_sf
+
+
+```
+
+
+### Distance between Station and Centroid
+
+```{r distance}
+
+dist_from_centroid <- 
+  sf::st_distance(select_bases$centroid, af_station_sf, by_element = TRUE)
+
+af_station_distance <-
+  af_station_sf %>% 
+    mutate(distance = dist_from_centroid, 
+           dist_km = as.numeric(distance / 1000)) %>%
+  dplyr::select(-country, -distance) %>% 
+  arrange(dist_km)
+
+af_station_distance %>% 
+  knitr::kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed", full_width = FALSE))
+
+# Summary of distances (km) from weather station to installation centroid
+
+af_station_distance$dist_km %>% 
+  summary() 
+
+```
+
+
+### Plots of Air Force weather station, base centroid, and NLDAS grid squares 
+
+```{r join_sfs, message = FALSE, warning = FALSE, cache = TRUE}
+
+## Load NLDAS grids
+
+nldas_grid <- 
+  here::here("data/nldas_grids", "NLDAS_Grid_Reference.shp") %>%
+  sf::st_read(stringsAsFactors = FALSE) %>% 
+  janitor::clean_names()
+
+nldas_grid
+
+## NLDAS and Installation Grid Overlap 
+
+# Identify all NLDAS grids intersected by installation shapefiles
+
+bases_nldas = NULL
+
+  for (i in 1:nrow(select_bases)) {
+    i_base = select_bases[i,] 
+    base_nldas = st_intersection(i_base, nldas_grid) 
+    bases_nldas = rbind(bases_nldas, base_nldas)
+  }
+
+bases_nldas
+
+rm(i_base, base_nldas)
+
+# Calculate area of installation in each NLDAS grid and weight for spatial weighted average
+nldas_weights <- bases_nldas %>% 
+    mutate(area = sf::st_area(.$geometry)) %>% 
+  group_by(site_name) %>% 
+    mutate(sum_area = sum(area),
+           weight = (area / sum_area)) %>% 
+    dplyr::select(-c(nldas_x, nldas_y, area, centroid, sum_area))
+
+
+# NLDAS grids that intersect with bases (to map full grid squares)
+intersects = NULL
+
+  for (i in 1:nrow(select_bases)) {
+    i_base = select_bases[i,] 
+    base_intersect = nldas_grid %>% filter(lengths(st_intersects(., i_base)) > 0)
+    intersects = rbind(intersects, base_intersect)
+  }
+
+rm(i_base, base_intersect)
+
+# Join `site_name` to selected NLDAS grid geometries
+
+intersects <- intersects %>% left_join(dplyr::select(as_tibble(nldas_weights), c(nldas_id, site_name)), by = "nldas_id")
+
+intersects  
+
+
+## Plots with intersecting NLDAS grids
+
+select_bases$site_name <- purrr::set_names(select_bases$site_name)
+
+
+base_grid_plot_function <- function(x) {
+      ggplot() +
+                 geom_sf(data = filter(select_bases, site_name == x)) +
+                 geom_sf(data = filter(intersects, site_name == x), fill = NA) +
+                 geom_sf(data = st_centroid(filter(select_bases, site_name == x)), shape = 3, size = 3, stroke = 1.5) +
+                 geom_sf(data = filter(af_station_sf, site_name == x), shape = 4, size = 3, stroke = 1.5, color = "blue") +
+                 geom_label(data = filter(intersects, site_name == x), aes(x = centerx, y = centery, label = nldas_id), size = 2) +
+                  ggtitle(x) +
+                  theme_bw() +
+                  theme(axis.text.x = element_text(size = rel(1)),
+                        axis.text.y = element_text(size = rel(1)),
+                        axis.title.x = element_blank(),
+                        axis.title.y = element_blank()) 
+}
+
+# base_grid_plot_function(select_bases$site_name[1])
+
+
+af_station_grid_plots <-
+  map(select_bases$site_name, ~base_grid_plot_function(.x))
+
+af_station_grid_plots
+
+```
+
+
+
+
+
 
