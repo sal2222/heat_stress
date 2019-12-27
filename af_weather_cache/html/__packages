@@ -26,3 +26,6 @@ units
 measurements
 skimr
 corrplot
+survival
+pspline
+dlnm

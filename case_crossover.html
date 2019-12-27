@@ -434,13 +434,31 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_summary.html">Annual cases</a>
     </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_models.html">Annual models</a>
     </li>
-    <li class="dropdown-header">Daily cases</li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="case_crossover.html">Case-crossover models</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -472,6 +490,212 @@ div.tocify {
 
 
 <p>Here we will prepare the code for case-crossover analysis of daily outcomes.</p>
+<p><strong>Outcome</strong>: HSI case (1 or 0)<br />
+<em>Variations</em>:<br />
+Type: hospitalization; ambulatory; reportable events<br />
+Diagnosis code: heat stroke + heat exhaustion; any HSI</p>
+<p><strong>Exposure</strong>: Daily Temperature/Heat Index<br />
+<em>Variations</em>:<br />
+Averaging: max; mean; min<br />
+Index: temperature, heat index, WBGT</p>
+<p><strong>Effect modifiers</strong><br />
+Age group<br />
+Sex<br />
+Race/Ethnicity<br />
+Branch of Service<br />
+Grade/Rank group<br />
+BMI upon entry<br />
+Home of record state (region)</p>
+<p>** Decision points**:</p>
+<p>Type of spline - penalized /natural Number of lag days Degrees of freedom (exposure, lag): Approach to evaluating</p>
+<div id="case-crossover" class="section level2">
+<h2>Case-crossover</h2>
+</div>
+<div id="distributed-lag-non-linear-models-dlmn" class="section level2">
+<h2>Distributed lag non-linear models (DLMN)</h2>
+<pre class="r"><code># vignette(&quot;dlnmOverview&quot;)
+
+# Construct crossbasis for index of heat (exposure)
+
+cb_heat &lt;- df %&gt;% 
+  dlnm::crossbasis(
+  daily_index,         
+  lag = 7,    
+  argvar = list(fun = &quot;ns&quot;, df = 2), #  functional form of the dose-response curve 
+  arglag = list(fun = &quot;ns&quot;, df = 4))   # functional form of the lags  
+
+
+
+summary(cb_heat)</code></pre>
+</div>
+<div id="dlnm-time-series-model" class="section level2">
+<h2>DLNM Time series model</h2>
+<pre class="r"><code>model_ts &lt;- glm(daily_hsi ~   
+                  cb_heat +    # lagged, nonlinear term for heat exposure
+                  day_of_week + 
+                  ns(date, df = 4 * number_years) +
+                  age + sex + race + brance + grade + bmi + hor,   # same-day nonlinear term for secular trend
+              family = &quot;quasipoisson&quot;,   # distribution family
+              data = df)
+
+# Extract predictions 
+
+predictions &lt;- dlnm::crosspred(
+    cb_heat, model_ts, 
+    at = 60:125, 
+    bylag = 0.2,  
+    cen = 0,
+    cumul = TRUE)</code></pre>
+</div>
+<div id="dlnm-conditional-logistic-model" class="section level2">
+<h2>DLNM Conditional logistic model</h2>
+<pre class="r"><code># 4a Model
+
+survival::clogit(Case ~ dailyPM + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
+               strata(DayID), # each case day is a strata
+               weights = dailyCVDin, #number of events in each day
+               method = &quot;efron&quot;, # the method tells the model how to deal with ties
+               df) 
+
+# 4b Model Summary 
+
+summary(mod.clogit.lin)
+
+# 4c Extract odds ratio 
+
+# 4c.i Create coefficient matrix
+
+coeff.mat &lt;- summary(mod.clogit.lin)$coef
+
+# 4c.ii Extract the coefficient and standard error 
+
+coeff_pm &lt;- coeff.mat[1,1]
+se_pm &lt;- coeff.mat[1,3]
+
+# 4c.iii Exponentiate coefficient &amp; CI
+# since the conditional logistic model involves taking the log of the odds
+# we can compute the odds ratio by exponentiating the coefficients 
+# in R exp(a) is the same as &#39;e to the power of a&#39;
+
+beta.pm &lt;- exp(coeff_pm)
+lci     &lt;- exp(coeff_pm - 1.96*se_pm)
+uci     &lt;- exp(coeff_pm + 1.96*se_pm)
+
+# 4c.iv Present results 
+
+OR_pm &lt;- paste(round(beta.pm, 4),&quot; (95%CI: &quot;, round(lci,4), &quot;, &quot;, round(uci,4),&quot;)&quot;, sep=&quot;&quot;)
+OR_pm
+
+# 4d Compute Odds Ratio for 10-unit increase
+# we might also be interested in how the odds vary 
+# for larger increments of pm2.5 
+
+# 4d.i compute beta and CI 
+
+beta.pm.10 &lt;- exp(10 * coeff_pm)
+lci.10     &lt;- exp(10 * (coeff_pm - 1.96*se_pm))
+uci.10     &lt;- exp(10 * (coeff_pm + 1.96*se_pm))
+
+# 4c.iv Present results 
+
+OR_pm.10 &lt;- paste(round(beta.pm.10, 4),&quot; (95%CI: &quot;, round(lci.10,4), &quot;, &quot;, round(uci.10,4),&quot;)&quot;, sep=&quot;&quot;)
+OR_pm.10
+
+
+# 4d Plot model 
+# 4d.i Predict odds and standard error
+
+ptemp &lt;- predict(mod.clogit.lin, type = &quot;terms&quot;, se = TRUE)
+ptemp &lt;- as.data.frame(ptemp) 
+
+colnames(ptemp) &lt;- c(&quot;term.PM&quot;,&quot;termTemp.ns.3&quot;, &quot;termRH.ns.3&quot;, &quot;se.PM&quot;,&quot;seTemp.ns.3&quot;, &quot;seRH.ns.3&quot;)
+df.pred         &lt;- df %&gt;% bind_cols(ptemp)
+
+# 4d.ii Compute confidence intervals 
+
+df.pred &lt;- df.pred %&gt;%
+           mutate(lci = term.PM - 1.96 * se.PM , 
+                  uci = term.PM + 1.96 * se.PM )
+
+# 4d.iii Exponentiate 
+df.pred &lt;- df.pred %&gt;%
+           mutate(termPM = exp(term.PM),
+           lci = exp(lci), 
+           uci = exp(uci) )
+
+# 4d.iv Plot
+
+ggplot(df.pred, aes(dailyPM)) + 
+  geom_line(aes(y = termPM), color = &quot;lightsalmon2&quot;, size = 1) +
+  geom_line(aes(y = lci), color = &quot;grey&quot;, linetype = &quot;dashed&quot;) + 
+  geom_line(aes(y = uci), color = &quot;grey&quot;, linetype = &quot;dashed&quot;) +  
+  geom_rug(col = &quot;gray60&quot;) +
+  xlab(expression(&quot;Daily PM&quot;[2.5]))+
+  ylab(&quot;Odds of CVD admission&quot;)
+
+
+
+###################################
+#### Footnote: coxph vs clogit ####
+###################################
+# create the two models
+mod.coxph &lt;- coxph(Surv(TimetoEvent, Case) ~ dailyPM + 
+                     ns(dailyTemp, 3) + ns(dailyRH, 3)+
+                     strata(DayID), 
+                   weights = dailyCVDin,
+                   df)
+
+mod.clogit &lt;- clogit(Case ~ dailyPM + ns(dailyTemp, 3) + ns(dailyRH, 3) + strata(DayID), 
+                     weights = dailyCVDin,
+                     method = &quot;efron&quot;,
+                     df)
+# compare their coefficients 
+summary(mod.coxph)
+summary(mod.clogit)
+
+#############################################
+#### Footnote: Plotting Natural Splines  ####
+#############################################
+# 1A Create the models
+
+mod.ns.2 &lt;- clogit(Case ~  ns(dailyPM, df = 2) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
+                     strata(DayID), weights = dailyCVDin, method = &quot;efron&quot;, df)  
+mod.ns.3 &lt;- clogit(Case ~  ns(dailyPM, df = 3) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
+                     strata(DayID), weights = dailyCVDin, method = &quot;efron&quot;, df) 
+mod.ns.4 &lt;- clogit(Case ~  ns(dailyPM, df = 4) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
+                     strata(DayID), weights = dailyCVDin, method = &quot;efron&quot;, df)  
+
+# 1B create predictions for each model
+df.pred &lt;- df
+
+ptemp &lt;- predict(mod.ns.2, type = &quot;terms&quot;)
+ptemp &lt;- as.data.frame(ptemp) 
+colnames(ptemp) &lt;- c(c(&quot;termPM.ns.2&quot;), colnames(ptemp)[2:ncol(ptemp)])
+df.pred &lt;- df.pred %&gt;% bind_cols(ptemp)
+
+ptemp &lt;- predict(mod.ns.3, type = &quot;terms&quot;)
+ptemp &lt;- as.data.frame(ptemp) 
+colnames(ptemp) &lt;- c(c(&quot;termPM.ns.3&quot;), colnames(ptemp)[2:ncol(ptemp)])
+df.pred &lt;- df.pred %&gt;% bind_cols(ptemp)
+
+ptemp &lt;- predict(mod.ns.4, type = &quot;terms&quot;)
+ptemp &lt;- as.data.frame(ptemp) 
+colnames(ptemp) &lt;- c(c(&quot;termPM.ns.4&quot;), colnames(ptemp)[2:ncol(ptemp)])
+df.pred &lt;- df.pred %&gt;% bind_cols(ptemp)
+
+# 1C Plot 
+pdf(paste0(output.folder, &quot;NaturalSplines_for_PM.pdf&quot;))
+ggplot(df.pred, aes(dailyPM)) + 
+  geom_line(aes(y = exp(termPM.ns.2)), color = &quot;Lightsalmon&quot;, size = 1) +
+  geom_line(aes(y = exp(termPM.ns.3)), color = &quot;lightsalmon2&quot;, size = 1) +
+  geom_line(aes(y = exp(termPM.ns.4)), color = &quot;lightsalmon4&quot;, size = 1) +
+  xlab(&quot;dailyPm&quot;)+
+  ylab(&quot;Odds of CVD admission&quot;)
+dev.off()</code></pre>
+</div>
+<div id="cox-proportional-hazards-model" class="section level2">
+<h2>Cox Proportional-Hazards Model</h2>
+</div>
 
 
 
