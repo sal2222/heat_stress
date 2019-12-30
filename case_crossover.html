@@ -457,6 +457,9 @@ div.tocify {
     </li>
     <li class="dropdown-header">Daily</li>
     <li>
+      <a href="daily_models.html">Overview of daily models</a>
+    </li>
+    <li>
       <a href="case_crossover.html">Case-crossover models</a>
     </li>
   </ul>
@@ -489,7 +492,8 @@ div.tocify {
 </div>
 
 
-<p>Here we will prepare the code for case-crossover analysis of daily outcomes.</p>
+<p>Here we will prepare the code for case-crossover models of daily HSI outcomes based on indices of heat.<br />
+Note: Many comments and code on this page are based on P8332 course materials.</p>
 <p><strong>Outcome</strong>: HSI case (1 or 0)<br />
 <em>Variations</em>:<br />
 Type: hospitalization; ambulatory; reportable events<br />
@@ -506,20 +510,13 @@ Branch of Service<br />
 Grade/Rank group<br />
 BMI upon entry<br />
 Home of record state (region)</p>
-<p>** Decision points**:</p>
-<p>Type of spline - penalized /natural Number of lag days Degrees of freedom (exposure, lag): Approach to evaluating</p>
-<div id="case-crossover" class="section level2">
-<h2>Case-crossover</h2>
-</div>
-<div id="distributed-lag-non-linear-models-dlmn" class="section level2">
-<h2>Distributed lag non-linear models (DLMN)</h2>
-<pre class="r"><code># vignette(&quot;dlnmOverview&quot;)
-
-# Construct crossbasis for index of heat (exposure)
+<div id="construct-cross-basis" class="section level3">
+<h3>Construct cross-basis</h3>
+<pre class="r"><code># Construct crossbasis for index of heat (exposure)
 
 cb_heat &lt;- df %&gt;% 
   dlnm::crossbasis(
-  daily_index,         
+  daily_index_heat,         
   lag = 7,    
   argvar = list(fun = &quot;ns&quot;, df = 2), #  functional form of the dose-response curve 
   arglag = list(fun = &quot;ns&quot;, df = 4))   # functional form of the lags  
@@ -528,173 +525,136 @@ cb_heat &lt;- df %&gt;%
 
 summary(cb_heat)</code></pre>
 </div>
-<div id="dlnm-time-series-model" class="section level2">
-<h2>DLNM Time series model</h2>
-<pre class="r"><code>model_ts &lt;- glm(daily_hsi ~   
-                  cb_heat +    # lagged, nonlinear term for heat exposure
-                  day_of_week + 
-                  ns(date, df = 4 * number_years) +
-                  age + sex + race + brance + grade + bmi + hor,   # same-day nonlinear term for secular trend
-              family = &quot;quasipoisson&quot;,   # distribution family
-              data = df)
+<div id="case-crossover-dlnm-conditional-logistic-model" class="section level2">
+<h2>Case-crossover: DLNM Conditional logistic model</h2>
+<p>Appropriateness: - very high exposure prevelance to environmental heat (near universal) - primarily concerned as a short-term exposure with acute effects (same day/week)</p>
+<p>Process:<br />
+Identify case days; select control days from days the case did not have an event; compare the exposure distribution between case and control days.</p>
+<p>Unit of analysis is the <em>individual</em>. Each person acts as their own control.</p>
+<p>Control for confounding:<br />
+Long term trends, seasonality, day of week: controlled by matching; Weather (characterized as our exposure index); No confounding by time invarient variables</p>
+<p>Assess for effect modification with interaction terms</p>
+<div id="create-strata-for-case-crossover" class="section level3">
+<h3>Create strata for case-crossover</h3>
+<p>Identify the control days for each case day and assign exposures for each day.</p>
+<pre class="r"><code># Option 1: function to ID control days; reference dates have the same month and wday as event 
+# https://stackoverflow.com/questions/20676779/create-a-case-control-pair-for-time-stratified-case-crossover-design
 
-# Extract predictions 
+control_dates_fun &lt;- function(event_date) {
+    possible_refs &lt;- as.Date((event_date - 30) : (event_date + 30), 
+                             origin = &quot;1970-01-01&quot;)
+    
+    possible_refs[month(possible_refs) == lubridate::month(event_date)
+                        &amp; lubridate::wday(possible_refs) == lubridate::wday(event_date)
+                        &amp; event_date != possible_refs]
+}
 
-predictions &lt;- dlnm::crosspred(
-    cb_heat, model_ts, 
-    at = 60:125, 
-    bylag = 0.2,  
-    cen = 0,
-    cumul = TRUE)</code></pre>
+some_event_dates &lt;- structure(c(12539, 12544, 12545, 12550, 
+                                12563, 12567,14065), class = &quot;Date&quot;)
+
+some_event_dates
+
+lapply(some_event_dates, control_dates_fun)
+
+
+
+# Option 2: Apply function from RyanGan/case.crossover
+
+# https://rdrr.io/github/RyanGan/case.crossover/man/casecross.html
+# casecross(data, id, date, covariate = F, period = &quot;month&quot;)
+# Function creates a time-stratified case-crossover dataframe from a case-only dataframe 
+# where the outcome on a particular date can be compared to referent periods on the same day of the week.
+# 
+
+#https://github.com/RyanGan/case.crossover/blob/master/R/casecross.R
+
+casecross &lt;- function(data, id, date, covariate=F, period = &quot;month&quot;){
+  # if id value is given
+  if(is.character(id)){
+    # vector of ids
+    id_vec &lt;- data[,id]
+  } else { # else if no value provided, create an id variable
+    id_vec &lt;- seq(1, nrow(data), by=1)
+  }
+  # vector of admit dates joined to the id vector
+  event_date &lt;- data[,date]
+  id_date &lt;- data.frame(id_vec, event_date)
+
+  # find ref dates
+  date_list &lt;- apply(id_date, 1, function(x) {
+    # output event date
+    event_date &lt;- as.Date(x[2])
+    # day of week
+    day_week &lt;- wday(event_date)
+    # create sequence of dates based on ref period
+    date_seq &lt;- seq.Date(floor_date(event_date, unit = period),
+                         ceiling_date(event_date, unit = period), &quot;days&quot;)
+    # find dates on the same day of event date
+    ref_dates &lt;- as.character(date_seq[wday(date_seq)==day_week])
+
+    # identifier
+    identifier &lt;- rep(x[1], length(ref_dates))
+    # outcome
+    outcome &lt;- ifelse(as.Date(ref_dates) == x[2],1,0)
+    id_date_vec &lt;- cbind(identifier, ref_dates, outcome)
+  })
+  # bind lists together
+  strat_data &lt;- do.call(rbind, date_list)
+  # remove row names
+  rownames(strat_data) &lt;- NULL
+  colnames(strat_data) &lt;- c(&quot;id&quot;, date, &quot;outcome&quot;)
+  # convert to dataframe
+  strat_data &lt;- data.frame(strat_data)
+  # if covariates provided, join to the dataframe
+  if(is.character(covariate)){
+    cov_data &lt;- as.data.frame(cbind(id_vec, data[,covariate]))
+    # names of cov data
+    colnames(cov_data) &lt;- c(&quot;id&quot;, covariate)
+    # conver identifier to character to merge
+    cov_data$id &lt;- as.character(cov_data$id)
+    # merge with ts_data
+    strat_data &lt;- merge(strat_data, cov_data, by = &quot;id&quot;)
+  }
+  # return dataframe
+  return(strat_data)
+} # end function</code></pre>
 </div>
-<div id="dlnm-conditional-logistic-model" class="section level2">
-<h2>DLNM Conditional logistic model</h2>
-<pre class="r"><code># 4a Model
-
-survival::clogit(Case ~ dailyPM + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
-               strata(DayID), # each case day is a strata
-               weights = dailyCVDin, #number of events in each day
-               method = &quot;efron&quot;, # the method tells the model how to deal with ties
+<div id="conditional-logistic-models" class="section level3">
+<h3>Conditional logistic models</h3>
+<pre class="r"><code># Model (without lag)
+survival::clogit(case ~ ns(daily_index_heat, df = 3) +  
+               strata(id), 
+               method = &quot;efron&quot;, 
                df) 
 
-# 4b Model Summary 
-
-summary(mod.clogit.lin)
-
-# 4c Extract odds ratio 
-
-# 4c.i Create coefficient matrix
-
-coeff.mat &lt;- summary(mod.clogit.lin)$coef
-
-# 4c.ii Extract the coefficient and standard error 
-
-coeff_pm &lt;- coeff.mat[1,1]
-se_pm &lt;- coeff.mat[1,3]
-
-# 4c.iii Exponentiate coefficient &amp; CI
-# since the conditional logistic model involves taking the log of the odds
-# we can compute the odds ratio by exponentiating the coefficients 
-# in R exp(a) is the same as &#39;e to the power of a&#39;
-
-beta.pm &lt;- exp(coeff_pm)
-lci     &lt;- exp(coeff_pm - 1.96*se_pm)
-uci     &lt;- exp(coeff_pm + 1.96*se_pm)
-
-# 4c.iv Present results 
-
-OR_pm &lt;- paste(round(beta.pm, 4),&quot; (95%CI: &quot;, round(lci,4), &quot;, &quot;, round(uci,4),&quot;)&quot;, sep=&quot;&quot;)
-OR_pm
-
-# 4d Compute Odds Ratio for 10-unit increase
-# we might also be interested in how the odds vary 
-# for larger increments of pm2.5 
-
-# 4d.i compute beta and CI 
-
-beta.pm.10 &lt;- exp(10 * coeff_pm)
-lci.10     &lt;- exp(10 * (coeff_pm - 1.96*se_pm))
-uci.10     &lt;- exp(10 * (coeff_pm + 1.96*se_pm))
-
-# 4c.iv Present results 
-
-OR_pm.10 &lt;- paste(round(beta.pm.10, 4),&quot; (95%CI: &quot;, round(lci.10,4), &quot;, &quot;, round(uci.10,4),&quot;)&quot;, sep=&quot;&quot;)
-OR_pm.10
+# Model with cross-basis, no interactions
+survival::clogit(case ~ cb_heat +  
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df) 
 
 
-# 4d Plot model 
-# 4d.i Predict odds and standard error
-
-ptemp &lt;- predict(mod.clogit.lin, type = &quot;terms&quot;, se = TRUE)
-ptemp &lt;- as.data.frame(ptemp) 
-
-colnames(ptemp) &lt;- c(&quot;term.PM&quot;,&quot;termTemp.ns.3&quot;, &quot;termRH.ns.3&quot;, &quot;se.PM&quot;,&quot;seTemp.ns.3&quot;, &quot;seRH.ns.3&quot;)
-df.pred         &lt;- df %&gt;% bind_cols(ptemp)
-
-# 4d.ii Compute confidence intervals 
-
-df.pred &lt;- df.pred %&gt;%
-           mutate(lci = term.PM - 1.96 * se.PM , 
-                  uci = term.PM + 1.96 * se.PM )
-
-# 4d.iii Exponentiate 
-df.pred &lt;- df.pred %&gt;%
-           mutate(termPM = exp(term.PM),
-           lci = exp(lci), 
-           uci = exp(uci) )
-
-# 4d.iv Plot
-
-ggplot(df.pred, aes(dailyPM)) + 
-  geom_line(aes(y = termPM), color = &quot;lightsalmon2&quot;, size = 1) +
-  geom_line(aes(y = lci), color = &quot;grey&quot;, linetype = &quot;dashed&quot;) + 
-  geom_line(aes(y = uci), color = &quot;grey&quot;, linetype = &quot;dashed&quot;) +  
-  geom_rug(col = &quot;gray60&quot;) +
-  xlab(expression(&quot;Daily PM&quot;[2.5]))+
-  ylab(&quot;Odds of CVD admission&quot;)
+# Models with cross-basis, interactions
 
 
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * age +      
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df)
 
-###################################
-#### Footnote: coxph vs clogit ####
-###################################
-# create the two models
-mod.coxph &lt;- coxph(Surv(TimetoEvent, Case) ~ dailyPM + 
-                     ns(dailyTemp, 3) + ns(dailyRH, 3)+
-                     strata(DayID), 
-                   weights = dailyCVDin,
-                   df)
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * sex +      
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df)
 
-mod.clogit &lt;- clogit(Case ~ dailyPM + ns(dailyTemp, 3) + ns(dailyRH, 3) + strata(DayID), 
-                     weights = dailyCVDin,
-                     method = &quot;efron&quot;,
-                     df)
-# compare their coefficients 
-summary(mod.coxph)
-summary(mod.clogit)
-
-#############################################
-#### Footnote: Plotting Natural Splines  ####
-#############################################
-# 1A Create the models
-
-mod.ns.2 &lt;- clogit(Case ~  ns(dailyPM, df = 2) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
-                     strata(DayID), weights = dailyCVDin, method = &quot;efron&quot;, df)  
-mod.ns.3 &lt;- clogit(Case ~  ns(dailyPM, df = 3) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
-                     strata(DayID), weights = dailyCVDin, method = &quot;efron&quot;, df) 
-mod.ns.4 &lt;- clogit(Case ~  ns(dailyPM, df = 4) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
-                     strata(DayID), weights = dailyCVDin, method = &quot;efron&quot;, df)  
-
-# 1B create predictions for each model
-df.pred &lt;- df
-
-ptemp &lt;- predict(mod.ns.2, type = &quot;terms&quot;)
-ptemp &lt;- as.data.frame(ptemp) 
-colnames(ptemp) &lt;- c(c(&quot;termPM.ns.2&quot;), colnames(ptemp)[2:ncol(ptemp)])
-df.pred &lt;- df.pred %&gt;% bind_cols(ptemp)
-
-ptemp &lt;- predict(mod.ns.3, type = &quot;terms&quot;)
-ptemp &lt;- as.data.frame(ptemp) 
-colnames(ptemp) &lt;- c(c(&quot;termPM.ns.3&quot;), colnames(ptemp)[2:ncol(ptemp)])
-df.pred &lt;- df.pred %&gt;% bind_cols(ptemp)
-
-ptemp &lt;- predict(mod.ns.4, type = &quot;terms&quot;)
-ptemp &lt;- as.data.frame(ptemp) 
-colnames(ptemp) &lt;- c(c(&quot;termPM.ns.4&quot;), colnames(ptemp)[2:ncol(ptemp)])
-df.pred &lt;- df.pred %&gt;% bind_cols(ptemp)
-
-# 1C Plot 
-pdf(paste0(output.folder, &quot;NaturalSplines_for_PM.pdf&quot;))
-ggplot(df.pred, aes(dailyPM)) + 
-  geom_line(aes(y = exp(termPM.ns.2)), color = &quot;Lightsalmon&quot;, size = 1) +
-  geom_line(aes(y = exp(termPM.ns.3)), color = &quot;lightsalmon2&quot;, size = 1) +
-  geom_line(aes(y = exp(termPM.ns.4)), color = &quot;lightsalmon4&quot;, size = 1) +
-  xlab(&quot;dailyPm&quot;)+
-  ylab(&quot;Odds of CVD admission&quot;)
-dev.off()</code></pre>
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * race +      
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df)</code></pre>
 </div>
-<div id="cox-proportional-hazards-model" class="section level2">
-<h2>Cox Proportional-Hazards Model</h2>
 </div>
 
 

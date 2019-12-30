@@ -55,4 +55,6 @@ Environmental Health Sciences
 
 - DMED Models (annual) [[here]](dmed_models.html)  
 
+- Overview of daily models [[here]](daily_models.html) 
+
 - Case-crossover Models (daily) [[here]](case_crossover.html)

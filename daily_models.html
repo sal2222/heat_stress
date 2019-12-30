@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>daily_models</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<link rel="shortcut icon" href="favicon.ico">
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Heat Stress Research</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
+    <li>
+      <a href="shapefiles.html">Installation Shapefiles</a>
+    </li>
+    <li>
+      <a href="nldas_wget.html">Download NLDAS-2 Data</a>
+    </li>
+    <li>
+      <a href="extract_cells.html">Extract from NLDAS netCDF Files</a>
+    </li>
+    <li>
+      <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
+    </li>
+    <li>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-thermometer"></span>
+     
+    Meteorology
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
+    </li>
+    <li>
+      <a href="nldas_fable.html">Time series (Fable)</a>
+    </li>
+    <li>
+      <a href="nldas_averaged.html">Aggregate over calendar periods</a>
+    </li>
+    <li>
+      <a href="climatology.html">Climatologies / Anomalies</a>
+    </li>
+    <li>
+      <a href="annual_tables.html">Annual index tables</a>
+    </li>
+    <li>
+      <a href="af_weather.html">Air Force weather station data</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_models.html">Annual models</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="daily_models.html">Overview of daily models</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:sal2222@cumc.columbia.edu">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/sal2222/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">daily_models</h1>
+
+</div>
+
+
+<p>Here we will prepare the code for models of daily HSI outcomes based on indices of heat.<br />
+Note: Many comments and code on this page are based on P8332 course materials.</p>
+<p><strong>Outcome</strong>: HSI case (1 or 0)<br />
+<em>Variations</em>:<br />
+Type: hospitalization; ambulatory; reportable events<br />
+Diagnosis code: heat stroke + heat exhaustion; any HSI</p>
+<p><strong>Exposure</strong>: Daily Temperature/Heat Index<br />
+<em>Variations</em>:<br />
+Averaging: max; mean; min<br />
+Index: temperature, heat index, WBGT</p>
+<p><strong>Effect modifiers</strong><br />
+Age group<br />
+Sex<br />
+Race/Ethnicity<br />
+Branch of Service<br />
+Grade/Rank group<br />
+BMI upon entry<br />
+Home of record state (region)</p>
+<p>** Decision points**:</p>
+<p>Type of spline - penalized /natural Number of lag days Degrees of freedom (exposure, lag): Approach to evaluating</p>
+<div id="distributed-lag-non-linear-models-dlmn" class="section level2">
+<h2>Distributed lag non-linear models (DLMN)</h2>
+<p>“The modelling class of DLMs and DLNMs is applied to describe associations in which the dependency between an exposure and an outcome is lagged in time. This lag dimension represents a new space over which the association is defined, by describing a lag-response relationship in addition to the usual exposure-response relationship over the space of the predictor. The dependency, characterized in the bi-dimensional space of predictor and lag, is defined here as exposure-lag-response association” (dlnm version 2.3.9, 2019-03-11)</p>
+<div id="construct-cross-basis" class="section level3">
+<h3>Construct cross-basis</h3>
+<p>“A statistical development of DLMs and DLNMs is based on the application of basis functions for parameterizing the exposure history, namely the set of lagged exposures. Specifically, two set of basis functions are chosen independently for modelling the exposure and lag-response relationships. These are then combined through a special tensor product defined by bi-dimensional cross-basis functions.” (dlnm version 2.3.9, 2019-03-11)</p>
+<pre class="r"><code># vignette(&quot;dlnmOverview&quot;)
+
+citation(&quot;dlnm&quot;)
+
+# Construct crossbasis for index of heat (exposure)
+
+cb_heat &lt;- df %&gt;% 
+  dlnm::crossbasis(
+  daily_index_heat,         
+  lag = 7,    
+  argvar = list(fun = &quot;ns&quot;, df = 2), #  functional form of the dose-response curve 
+  arglag = list(fun = &quot;ns&quot;, df = 4))   # functional form of the lags  
+
+
+
+summary(cb_heat)</code></pre>
+</div>
+<div id="quasi-poisson-time-series-model" class="section level3">
+<h3>Quasi-poisson / Time series model</h3>
+<p>Fit with Generalized linear model (GLM) with count data<br />
+GLM: unified framework; uses link functions <em>g(µ)</em> of the expected outcome<br />
+Quasi-likelihood: relax variance assumption (for ovedispersion)</p>
+<p>GLM assumptions: - the outcomes (Y) are independent<br />
+- linear relationship between the transformed outcome and the prediction</p>
+<p>Unit of analysis is the <em>day</em>.</p>
+<p>Control for confounding:<br />
+Long term trends, seasonality, day of week, weather (characterized as our exposure)<br />
+Adjusted for in model.<br />
+<code>date</code> serves as a proxy for other variables that vary over time and may covary with the index of heat.</p>
+<pre class="r"><code>model_ts &lt;- glm(daily_hsi ~   
+                  cb_heat +    # lagged, nonlinear term for heat exposure
+                  day_of_week + 
+                  ns(date, df = 4 * number_years) +
+                  age + sex + race + branch + grade + bmi + hor,   # same-day nonlinear term for secular trend
+              family = &quot;quasipoisson&quot;,   # distribution family
+              data = df)
+
+# Examine between 4-6 df/yr
+
+
+# Extract predictions 
+
+predictions &lt;- dlnm::crosspred(
+    cb_heat, model_ts, 
+    at = 60:125, 
+    bylag = 0.2,  
+    cen = 0,
+    cumul = TRUE)</code></pre>
+</div>
+<div id="cox-proportional-hazards-model" class="section level3">
+<h3>Cox Proportional-Hazards Model</h3>
+<pre class="r"><code># Without cross-basis
+model_coxph &lt;- survival::coxph(Surv(time_to_event, case_status) ~ 
+                     ns(daily_index_heat, 3) + 
+                     age + sex + race + branch + grade + bmi + hor +   
+                     weights = base_population,
+                  df)
+
+# With cross-basis
+
+model_coxph_cb &lt;- survival::coxph(Surv(time_to_event, case_status) ~ 
+                     cb_heat + 
+                     age + sex + race + branch + grade + bmi + hor +   
+                     weights = base_population, 
+                   df)</code></pre>
+</div>
+</div>
+<div id="case-crossover-dlnm-conditional-logistic-model" class="section level2">
+<h2>Case-crossover: DLNM Conditional logistic model</h2>
+<p>Appropriateness: - very high exposure prevelance to environmental heat (near universal) - primarily concerned as a short-term exposure with acute effects (same day/week)</p>
+<p>Process:<br />
+Identify case days; select control days from days the case did not have an event; compare the exposure distribution between case and control days.</p>
+<p>Unit of analysis is the <em>individual</em>. Each person acts as their own control.</p>
+<p>Control for confounding:<br />
+Long term trends, seasonality, day of week: controlled by matching; Weather (characterized as our exposure index); No confounding by time invarient variables</p>
+<p>Assess for effect modification with interaction terms</p>
+<div id="create-strata-for-case-crossover" class="section level3">
+<h3>Create strata for case-crossover</h3>
+<p>Identify the control days for each case day and assign exposures for each day.</p>
+<pre class="r"><code># Option 1: function to ID control days; reference dates have the same month and wday as event 
+# https://stackoverflow.com/questions/20676779/create-a-case-control-pair-for-time-stratified-case-crossover-design
+
+control_dates_fun &lt;- function(event_date) {
+    possible_refs &lt;- as.Date((event_date - 30) : (event_date + 30), 
+                             origin = &quot;1970-01-01&quot;)
+    
+    possible_refs[month(possible_refs) == lubridate::month(event_date)
+                        &amp; lubridate::wday(possible_refs) == lubridate::wday(event_date)
+                        &amp; event_date != possible_refs]
+}
+
+some_event_dates &lt;- structure(c(12539, 12544, 12545, 12550, 
+                                12563, 12567,14065), class = &quot;Date&quot;)
+
+some_event_dates
+
+lapply(some_event_dates, control_dates_fun)
+
+
+
+# Option 2: Apply function from RyanGan/case.crossover
+
+# https://rdrr.io/github/RyanGan/case.crossover/man/casecross.html
+# casecross(data, id, date, covariate = F, period = &quot;month&quot;)
+# Function creates a time-stratified case-crossover dataframe from a case-only dataframe 
+# where the outcome on a particular date can be compared to referent periods on the same day of the week.
+# 
+
+#https://github.com/RyanGan/case.crossover/blob/master/R/casecross.R
+
+casecross &lt;- function(data, id, date, covariate=F, period = &quot;month&quot;){
+  # if id value is given
+  if(is.character(id)){
+    # vector of ids
+    id_vec &lt;- data[,id]
+  } else { # else if no value provided, create an id variable
+    id_vec &lt;- seq(1, nrow(data), by=1)
+  }
+  # vector of admit dates joined to the id vector
+  event_date &lt;- data[,date]
+  id_date &lt;- data.frame(id_vec, event_date)
+
+  # find ref dates
+  date_list &lt;- apply(id_date, 1, function(x) {
+    # output event date
+    event_date &lt;- as.Date(x[2])
+    # day of week
+    day_week &lt;- wday(event_date)
+    # create sequence of dates based on ref period
+    date_seq &lt;- seq.Date(floor_date(event_date, unit = period),
+                         ceiling_date(event_date, unit = period), &quot;days&quot;)
+    # find dates on the same day of event date
+    ref_dates &lt;- as.character(date_seq[wday(date_seq)==day_week])
+
+    # identifier
+    identifier &lt;- rep(x[1], length(ref_dates))
+    # outcome
+    outcome &lt;- ifelse(as.Date(ref_dates) == x[2],1,0)
+    id_date_vec &lt;- cbind(identifier, ref_dates, outcome)
+  })
+  # bind lists together
+  strat_data &lt;- do.call(rbind, date_list)
+  # remove row names
+  rownames(strat_data) &lt;- NULL
+  colnames(strat_data) &lt;- c(&quot;id&quot;, date, &quot;outcome&quot;)
+  # convert to dataframe
+  strat_data &lt;- data.frame(strat_data)
+  # if covariates provided, join to the dataframe
+  if(is.character(covariate)){
+    cov_data &lt;- as.data.frame(cbind(id_vec, data[,covariate]))
+    # names of cov data
+    colnames(cov_data) &lt;- c(&quot;id&quot;, covariate)
+    # conver identifier to character to merge
+    cov_data$id &lt;- as.character(cov_data$id)
+    # merge with ts_data
+    strat_data &lt;- merge(strat_data, cov_data, by = &quot;id&quot;)
+  }
+  # return dataframe
+  return(strat_data)
+} # end function</code></pre>
+</div>
+<div id="conditional-logistic-models" class="section level3">
+<h3>Conditional logistic models</h3>
+<pre class="r"><code># Model (without lag)
+survival::clogit(case ~ ns(daily_index_heat, df = 3) +  
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df) 
+
+# Model with cross-basis, no interactions
+survival::clogit(case ~ cb_heat +  
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df) 
+
+
+# Models with cross-basis, interactions
+
+
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * age +      
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df)
+
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * sex +      
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df)
+
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * race +      
+               strata(id), 
+               method = &quot;efron&quot;, 
+               df)</code></pre>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

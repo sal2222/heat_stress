@@ -55,6 +55,8 @@ left:
         - text: "Annual models"
           href: dmed_models.html
         - text: "Daily"
+        - text: "Overview of daily models"
+          href: daily_models.html
         - text: "Case-crossover models"
           href: case_crossover.html
 right:

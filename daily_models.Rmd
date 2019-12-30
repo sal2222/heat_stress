@@ -1,0 +1,322 @@
+---
+title: "daily_models"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(viridis)
+library(knitr)
+library(kableExtra)
+library(zoo)
+library(purrr)
+library(furrr)
+library(table1)
+library(furniture)
+library(kableExtra)
+library(visdat)
+library(naniar)
+library(modelr)
+library(survival)
+library(splines)
+library(pspline)
+library(dlnm)
+
+```
+
+Here we will prepare the code for models of daily HSI outcomes based on indices of heat.  
+Note: Many comments and code on this page are based on P8332 course materials. 
+
+
+**Outcome**: HSI case (1 or 0)    
+  *Variations*:     
+    Type: hospitalization; ambulatory; reportable events    
+    Diagnosis code: heat stroke + heat exhaustion; any HSI    
+
+**Exposure**: Daily Temperature/Heat Index    
+  *Variations*:  
+    Averaging: max; mean; min  
+    Index: temperature, heat index, WBGT 
+    
+**Effect modifiers**  
+  Age group  
+  Sex  
+  Race/Ethnicity  
+  Branch of Service  
+  Grade/Rank group  
+  BMI upon entry  
+  Home of record state (region)  
+  
+  
+** Decision points**:
+
+Type of spline - penalized /natural
+Number of lag days
+Degrees of freedom (exposure, lag): Approach to evaluating
+
+ 
+
+
+## Distributed lag non-linear models (DLMN)
+
+"The modelling class of DLMs and DLNMs is applied to describe associations in which the dependency
+between an exposure and an outcome is lagged in time. This lag dimension represents a new space
+over which the association is defined, by describing a lag-response relationship in addition to the
+usual exposure-response relationship over the space of the predictor. The dependency, characterized
+in the bi-dimensional space of predictor and lag, is defined here as exposure-lag-response association" 
+(dlnm version 2.3.9, 2019-03-11)
+
+
+
+### Construct cross-basis  
+
+"A statistical development of DLMs and DLNMs is based on the application of basis functions for
+parameterizing the exposure history, namely the set of lagged exposures. Specifically, two set of basis
+functions are chosen independently for modelling the exposure and lag-response relationships. These
+are then combined through a special tensor product defined by bi-dimensional cross-basis functions." 
+(dlnm version 2.3.9, 2019-03-11)
+
+
+```{r dlnm, eval = FALSE}
+# vignette("dlnmOverview")
+
+citation("dlnm")
+
+# Construct crossbasis for index of heat (exposure)
+
+cb_heat <- df %>% 
+  dlnm::crossbasis(
+  daily_index_heat,         
+  lag = 7,    
+  argvar = list(fun = "ns", df = 2), #  functional form of the dose-response curve 
+  arglag = list(fun = "ns", df = 4))   # functional form of the lags  
+
+
+
+summary(cb_heat)
+
+
+```
+
+
+### Quasi-poisson / Time series model  
+
+Fit with Generalized linear model (GLM) with count data  
+GLM: unified framework; uses link functions *g(µ)* of the expected outcome  
+Quasi-likelihood: relax variance assumption (for ovedispersion)  
+
+GLM assumptions: 
+- the outcomes (Y) are independent  
+- linear relationship between the transformed outcome and the prediction  
+
+Unit of analysis is the *day*.  
+
+Control for confounding:  
+Long term trends, seasonality, day of week, weather (characterized as our exposure)  
+Adjusted for in model.  
+`date` serves as a proxy for other variables that vary over time and may covary with the index of heat.
+
+
+```{r time_series, eval = FALSE}
+
+model_ts <- glm(daily_hsi ~   
+                  cb_heat +    # lagged, nonlinear term for heat exposure
+                  day_of_week + 
+                  ns(date, df = 4 * number_years) +
+                  age + sex + race + branch + grade + bmi + hor,   # same-day nonlinear term for secular trend
+              family = "quasipoisson",   # distribution family
+              data = df)
+
+# Examine between 4-6 df/yr
+
+
+# Extract predictions 
+
+predictions <- dlnm::crosspred(
+    cb_heat, model_ts, 
+    at = 60:125, 
+    bylag = 0.2,  
+    cen = 0,
+    cumul = TRUE)
+
+
+```
+
+### Cox Proportional-Hazards Model
+
+```{r coxph, eval = FALSE}
+
+# Without cross-basis
+model_coxph <- survival::coxph(Surv(time_to_event, case_status) ~ 
+                     ns(daily_index_heat, 3) + 
+                     age + sex + race + branch + grade + bmi + hor +   
+                     weights = base_population,
+                  df)
+
+# With cross-basis
+
+model_coxph_cb <- survival::coxph(Surv(time_to_event, case_status) ~ 
+                     cb_heat + 
+                     age + sex + race + branch + grade + bmi + hor +   
+                     weights = base_population, 
+                   df)
+
+```
+
+
+## Case-crossover: DLNM Conditional logistic model 
+
+Appropriateness: 
+- very high exposure prevelance to environmental heat (near universal)
+- primarily concerned as a short-term exposure with acute effects (same day/week)  
+
+Process:  
+Identify case days; select control days from days the case did not have an event; compare the exposure distribution between case and control days.
+
+Unit of analysis is the *individual*. Each person acts as their own control.  
+
+Control for confounding:  
+Long term trends, seasonality, day of week: controlled by matching;
+Weather (characterized as our exposure index);
+No confounding by time invarient variables  
+
+Assess for effect modification with interaction terms
+
+
+### Create strata for case-crossover
+Identify the control days for each case day and assign exposures for each day.  
+
+```{r cc_strata, eval = FALSE}
+
+# Option 1: function to ID control days; reference dates have the same month and wday as event 
+# https://stackoverflow.com/questions/20676779/create-a-case-control-pair-for-time-stratified-case-crossover-design
+
+control_dates_fun <- function(event_date) {
+    possible_refs <- as.Date((event_date - 30) : (event_date + 30), 
+                             origin = "1970-01-01")
+    
+    possible_refs[month(possible_refs) == lubridate::month(event_date)
+                        & lubridate::wday(possible_refs) == lubridate::wday(event_date)
+                        & event_date != possible_refs]
+}
+
+some_event_dates <- structure(c(12539, 12544, 12545, 12550, 
+                                12563, 12567,14065), class = "Date")
+
+some_event_dates
+
+lapply(some_event_dates, control_dates_fun)
+
+
+
+# Option 2: Apply function from RyanGan/case.crossover
+
+# https://rdrr.io/github/RyanGan/case.crossover/man/casecross.html
+# casecross(data, id, date, covariate = F, period = "month")
+# Function creates a time-stratified case-crossover dataframe from a case-only dataframe 
+# where the outcome on a particular date can be compared to referent periods on the same day of the week.
+# 
+
+#https://github.com/RyanGan/case.crossover/blob/master/R/casecross.R
+
+casecross <- function(data, id, date, covariate=F, period = "month"){
+  # if id value is given
+  if(is.character(id)){
+    # vector of ids
+    id_vec <- data[,id]
+  } else { # else if no value provided, create an id variable
+    id_vec <- seq(1, nrow(data), by=1)
+  }
+  # vector of admit dates joined to the id vector
+  event_date <- data[,date]
+  id_date <- data.frame(id_vec, event_date)
+
+  # find ref dates
+  date_list <- apply(id_date, 1, function(x) {
+    # output event date
+    event_date <- as.Date(x[2])
+    # day of week
+    day_week <- wday(event_date)
+    # create sequence of dates based on ref period
+    date_seq <- seq.Date(floor_date(event_date, unit = period),
+                         ceiling_date(event_date, unit = period), "days")
+    # find dates on the same day of event date
+    ref_dates <- as.character(date_seq[wday(date_seq)==day_week])
+
+    # identifier
+    identifier <- rep(x[1], length(ref_dates))
+    # outcome
+    outcome <- ifelse(as.Date(ref_dates) == x[2],1,0)
+    id_date_vec <- cbind(identifier, ref_dates, outcome)
+  })
+  # bind lists together
+  strat_data <- do.call(rbind, date_list)
+  # remove row names
+  rownames(strat_data) <- NULL
+  colnames(strat_data) <- c("id", date, "outcome")
+  # convert to dataframe
+  strat_data <- data.frame(strat_data)
+  # if covariates provided, join to the dataframe
+  if(is.character(covariate)){
+    cov_data <- as.data.frame(cbind(id_vec, data[,covariate]))
+    # names of cov data
+    colnames(cov_data) <- c("id", covariate)
+    # conver identifier to character to merge
+    cov_data$id <- as.character(cov_data$id)
+    # merge with ts_data
+    strat_data <- merge(strat_data, cov_data, by = "id")
+  }
+  # return dataframe
+  return(strat_data)
+} # end function
+
+```
+
+
+### Conditional logistic models  
+
+```{r cc_models, eval = FALSE}
+
+# Model (without lag)
+survival::clogit(case ~ ns(daily_index_heat, df = 3) +  
+               strata(id), 
+               method = "efron", 
+               df) 
+
+# Model with cross-basis, no interactions
+survival::clogit(case ~ cb_heat +  
+               strata(id), 
+               method = "efron", 
+               df) 
+
+
+# Models with cross-basis, interactions
+
+
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * age +      
+               strata(id), 
+               method = "efron", 
+               df)
+
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * sex +      
+               strata(id), 
+               method = "efron", 
+               df)
+
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * race +      
+               strata(id), 
+               method = "efron", 
+               df)
+```
+

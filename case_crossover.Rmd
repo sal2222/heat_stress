@@ -30,11 +30,11 @@ library(splines)
 library(pspline)
 library(dlnm)
 
-
-
 ```
 
-Here we will prepare the code for case-crossover analysis of daily outcomes.  
+Here we will prepare the code for case-crossover models of daily HSI outcomes based on indices of heat.  
+Note: Many comments and code on this page are based on P8332 course materials. 
+
 
 **Outcome**: HSI case (1 or 0)    
   *Variations*:     
@@ -55,27 +55,18 @@ Here we will prepare the code for case-crossover analysis of daily outcomes.
   BMI upon entry  
   Home of record state (region)  
   
-  
-** Decision points**:
 
-Type of spline - penalized /natural
-Number of lag days
-Degrees of freedom (exposure, lag): Approach to evaluating
 
-    
 
-## Case-crossover
-
-## Distributed lag non-linear models (DLMN)
+### Construct cross-basis  
 
 ```{r dlnm, eval = FALSE}
-# vignette("dlnmOverview")
 
 # Construct crossbasis for index of heat (exposure)
 
 cb_heat <- df %>% 
   dlnm::crossbasis(
-  daily_index,         
+  daily_index_heat,         
   lag = 7,    
   argvar = list(fun = "ns", df = 2), #  functional form of the dose-response curve 
   arglag = list(fun = "ns", df = 4))   # functional form of the lags  
@@ -88,184 +79,150 @@ summary(cb_heat)
 ```
 
 
-## DLNM Time series model
-```{r time_series, eval = FALSE}
+## Case-crossover: DLNM Conditional logistic model 
+
+Appropriateness: 
+- very high exposure prevelance to environmental heat (near universal)
+- primarily concerned as a short-term exposure with acute effects (same day/week)  
+
+Process:  
+Identify case days; select control days from days the case did not have an event; compare the exposure distribution between case and control days.
+
+Unit of analysis is the *individual*. Each person acts as their own control.  
+
+Control for confounding:  
+Long term trends, seasonality, day of week: controlled by matching;
+Weather (characterized as our exposure index);
+No confounding by time invarient variables  
+
+Assess for effect modification with interaction terms
 
 
-model_ts <- glm(daily_hsi ~   
-                  cb_heat +    # lagged, nonlinear term for heat exposure
-                  day_of_week + 
-                  ns(date, df = 4 * number_years) +
-                  age + sex + race + brance + grade + bmi + hor,   # same-day nonlinear term for secular trend
-              family = "quasipoisson",   # distribution family
-              data = df)
+### Create strata for case-crossover
+Identify the control days for each case day and assign exposures for each day.  
 
-# Extract predictions 
+```{r cc_strata, eval = FALSE}
 
-predictions <- dlnm::crosspred(
-    cb_heat, model_ts, 
-    at = 60:125, 
-    bylag = 0.2,  
-    cen = 0,
-    cumul = TRUE)
+# Option 1: function to ID control days; reference dates have the same month and wday as event 
+# https://stackoverflow.com/questions/20676779/create-a-case-control-pair-for-time-stratified-case-crossover-design
 
+control_dates_fun <- function(event_date) {
+    possible_refs <- as.Date((event_date - 30) : (event_date + 30), 
+                             origin = "1970-01-01")
+    
+    possible_refs[month(possible_refs) == lubridate::month(event_date)
+                        & lubridate::wday(possible_refs) == lubridate::wday(event_date)
+                        & event_date != possible_refs]
+}
+
+some_event_dates <- structure(c(12539, 12544, 12545, 12550, 
+                                12563, 12567,14065), class = "Date")
+
+some_event_dates
+
+lapply(some_event_dates, control_dates_fun)
+
+
+
+# Option 2: Apply function from RyanGan/case.crossover
+
+# https://rdrr.io/github/RyanGan/case.crossover/man/casecross.html
+# casecross(data, id, date, covariate = F, period = "month")
+# Function creates a time-stratified case-crossover dataframe from a case-only dataframe 
+# where the outcome on a particular date can be compared to referent periods on the same day of the week.
+# 
+
+#https://github.com/RyanGan/case.crossover/blob/master/R/casecross.R
+
+casecross <- function(data, id, date, covariate=F, period = "month"){
+  # if id value is given
+  if(is.character(id)){
+    # vector of ids
+    id_vec <- data[,id]
+  } else { # else if no value provided, create an id variable
+    id_vec <- seq(1, nrow(data), by=1)
+  }
+  # vector of admit dates joined to the id vector
+  event_date <- data[,date]
+  id_date <- data.frame(id_vec, event_date)
+
+  # find ref dates
+  date_list <- apply(id_date, 1, function(x) {
+    # output event date
+    event_date <- as.Date(x[2])
+    # day of week
+    day_week <- wday(event_date)
+    # create sequence of dates based on ref period
+    date_seq <- seq.Date(floor_date(event_date, unit = period),
+                         ceiling_date(event_date, unit = period), "days")
+    # find dates on the same day of event date
+    ref_dates <- as.character(date_seq[wday(date_seq)==day_week])
+
+    # identifier
+    identifier <- rep(x[1], length(ref_dates))
+    # outcome
+    outcome <- ifelse(as.Date(ref_dates) == x[2],1,0)
+    id_date_vec <- cbind(identifier, ref_dates, outcome)
+  })
+  # bind lists together
+  strat_data <- do.call(rbind, date_list)
+  # remove row names
+  rownames(strat_data) <- NULL
+  colnames(strat_data) <- c("id", date, "outcome")
+  # convert to dataframe
+  strat_data <- data.frame(strat_data)
+  # if covariates provided, join to the dataframe
+  if(is.character(covariate)){
+    cov_data <- as.data.frame(cbind(id_vec, data[,covariate]))
+    # names of cov data
+    colnames(cov_data) <- c("id", covariate)
+    # conver identifier to character to merge
+    cov_data$id <- as.character(cov_data$id)
+    # merge with ts_data
+    strat_data <- merge(strat_data, cov_data, by = "id")
+  }
+  # return dataframe
+  return(strat_data)
+} # end function
 
 ```
 
+### Conditional logistic models  
 
+```{r cc_models, eval = FALSE}
 
-## DLNM Conditional logistic model 
-
-```{r prep_code, eval = FALSE}
-
-
-
-
-# 4a Model
-
-survival::clogit(Case ~ dailyPM + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
-               strata(DayID), # each case day is a strata
-               weights = dailyCVDin, #number of events in each day
-               method = "efron", # the method tells the model how to deal with ties
+# Model (without lag)
+survival::clogit(case ~ ns(daily_index_heat, df = 3) +  
+               strata(id), 
+               method = "efron", 
                df) 
 
-# 4b Model Summary 
-
-summary(mod.clogit.lin)
-
-# 4c Extract odds ratio 
-
-# 4c.i Create coefficient matrix
-
-coeff.mat <- summary(mod.clogit.lin)$coef
-
-# 4c.ii Extract the coefficient and standard error 
-
-coeff_pm <- coeff.mat[1,1]
-se_pm <- coeff.mat[1,3]
-
-# 4c.iii Exponentiate coefficient & CI
-# since the conditional logistic model involves taking the log of the odds
-# we can compute the odds ratio by exponentiating the coefficients 
-# in R exp(a) is the same as 'e to the power of a'
-
-beta.pm <- exp(coeff_pm)
-lci     <- exp(coeff_pm - 1.96*se_pm)
-uci     <- exp(coeff_pm + 1.96*se_pm)
-
-# 4c.iv Present results 
-
-OR_pm <- paste(round(beta.pm, 4)," (95%CI: ", round(lci,4), ", ", round(uci,4),")", sep="")
-OR_pm
-
-# 4d Compute Odds Ratio for 10-unit increase
-# we might also be interested in how the odds vary 
-# for larger increments of pm2.5 
-
-# 4d.i compute beta and CI 
-
-beta.pm.10 <- exp(10 * coeff_pm)
-lci.10     <- exp(10 * (coeff_pm - 1.96*se_pm))
-uci.10     <- exp(10 * (coeff_pm + 1.96*se_pm))
-
-# 4c.iv Present results 
-
-OR_pm.10 <- paste(round(beta.pm.10, 4)," (95%CI: ", round(lci.10,4), ", ", round(uci.10,4),")", sep="")
-OR_pm.10
+# Model with cross-basis, no interactions
+survival::clogit(case ~ cb_heat +  
+               strata(id), 
+               method = "efron", 
+               df) 
 
 
-# 4d Plot model 
-# 4d.i Predict odds and standard error
-
-ptemp <- predict(mod.clogit.lin, type = "terms", se = TRUE)
-ptemp <- as.data.frame(ptemp) 
-
-colnames(ptemp) <- c("term.PM","termTemp.ns.3", "termRH.ns.3", "se.PM","seTemp.ns.3", "seRH.ns.3")
-df.pred         <- df %>% bind_cols(ptemp)
-
-# 4d.ii Compute confidence intervals 
-
-df.pred <- df.pred %>%
-           mutate(lci = term.PM - 1.96 * se.PM , 
-                  uci = term.PM + 1.96 * se.PM )
-
-# 4d.iii Exponentiate 
-df.pred <- df.pred %>%
-           mutate(termPM = exp(term.PM),
-           lci = exp(lci), 
-           uci = exp(uci) )
-
-# 4d.iv Plot
-
-ggplot(df.pred, aes(dailyPM)) + 
-  geom_line(aes(y = termPM), color = "lightsalmon2", size = 1) +
-  geom_line(aes(y = lci), color = "grey", linetype = "dashed") + 
-  geom_line(aes(y = uci), color = "grey", linetype = "dashed") +  
-  geom_rug(col = "gray60") +
-  xlab(expression("Daily PM"[2.5]))+
-  ylab("Odds of CVD admission")
+# Models with cross-basis, interactions
 
 
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * age +      
+               strata(id), 
+               method = "efron", 
+               df)
 
-###################################
-#### Footnote: coxph vs clogit ####
-###################################
-# create the two models
-mod.coxph <- coxph(Surv(TimetoEvent, Case) ~ dailyPM + 
-                     ns(dailyTemp, 3) + ns(dailyRH, 3)+
-                     strata(DayID), 
-                   weights = dailyCVDin,
-                   df)
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * sex +      
+               strata(id), 
+               method = "efron", 
+               df)
 
-mod.clogit <- clogit(Case ~ dailyPM + ns(dailyTemp, 3) + ns(dailyRH, 3) + strata(DayID), 
-                     weights = dailyCVDin,
-                     method = "efron",
-                     df)
-# compare their coefficients 
-summary(mod.coxph)
-summary(mod.clogit)
-
-#############################################
-#### Footnote: Plotting Natural Splines  ####
-#############################################
-# 1A Create the models
-
-mod.ns.2 <- clogit(Case ~  ns(dailyPM, df = 2) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
-                     strata(DayID), weights = dailyCVDin, method = "efron", df)  
-mod.ns.3 <- clogit(Case ~  ns(dailyPM, df = 3) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
-                     strata(DayID), weights = dailyCVDin, method = "efron", df) 
-mod.ns.4 <- clogit(Case ~  ns(dailyPM, df = 4) + ns(dailyTemp, df=3) + ns(dailyRH, df=4) + 
-                     strata(DayID), weights = dailyCVDin, method = "efron", df)  
-
-# 1B create predictions for each model
-df.pred <- df
-
-ptemp <- predict(mod.ns.2, type = "terms")
-ptemp <- as.data.frame(ptemp) 
-colnames(ptemp) <- c(c("termPM.ns.2"), colnames(ptemp)[2:ncol(ptemp)])
-df.pred <- df.pred %>% bind_cols(ptemp)
-
-ptemp <- predict(mod.ns.3, type = "terms")
-ptemp <- as.data.frame(ptemp) 
-colnames(ptemp) <- c(c("termPM.ns.3"), colnames(ptemp)[2:ncol(ptemp)])
-df.pred <- df.pred %>% bind_cols(ptemp)
-
-ptemp <- predict(mod.ns.4, type = "terms")
-ptemp <- as.data.frame(ptemp) 
-colnames(ptemp) <- c(c("termPM.ns.4"), colnames(ptemp)[2:ncol(ptemp)])
-df.pred <- df.pred %>% bind_cols(ptemp)
-
-# 1C Plot 
-pdf(paste0(output.folder, "NaturalSplines_for_PM.pdf"))
-ggplot(df.pred, aes(dailyPM)) + 
-  geom_line(aes(y = exp(termPM.ns.2)), color = "Lightsalmon", size = 1) +
-  geom_line(aes(y = exp(termPM.ns.3)), color = "lightsalmon2", size = 1) +
-  geom_line(aes(y = exp(termPM.ns.4)), color = "lightsalmon4", size = 1) +
-  xlab("dailyPm")+
-  ylab("Odds of CVD admission")
-dev.off()
-
-
+survival::clogit(case ~ cb_heat +
+               daily_index_heat * race +      
+               strata(id), 
+               method = "efron", 
+               df)
 ```
 
-## Cox Proportional-Hazards Model
