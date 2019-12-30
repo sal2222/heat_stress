@@ -16,6 +16,32 @@ Environmental Health Sciences
 [Climate and Health Program](https://www.mailman.columbia.edu/research/climate-and-health-program)
 
 
+## Introduction  
+
+### Background
+Project Title: Modeling Environmental Impacts on Heat Stress Illnesses among DoD Servicemembers  
+
+Heat stress illnesses (HSIs), including heat stroke and heat exhaustion, pose a serious and potentially fatal health threat to US forces. HSI incidence rates display an increasing trend (cases among active duty U.S. Army servicemembers increased every year from 2014 to 2017). This project seeks to develop tools to better understand the impact of heat events on HSI cases across different installations. 
+
+The objective of this  investigation is to develop installation-specific operational models for prevention and control of HSIs. This investigation will apply modern epidemiology methods with high-resolution gridded meteorology data to describe the association between heat exposure and heat stress illnesses (HSI) in active duty service members exposed to ambient heat. We will assess absolute and relative values of multiple indices of environmental heat, including heat index (HI) and wet bulb globe temperature (WBGT), to identify trends and define relevant windows of exposure, potential action-level thresholds, and time-in-season effects.  We will characterize individual risk factors as effect modifiers, including sex, age, grade/rank, and body mass index (BMI).  
+
+
+### Specific Aims  
+1. Develop exposure-response curves for environmental heat and HSI morbidity to understand the association between heat and HSIs in the U.S. military at installation, regional, and national levels. We will assess the relationship between environmental heat indicators (temperature, wet bulb globe temperature (WBGT), and heat index) and HSIs. We will investigate relevant windows of exposure through lag analyses, identify breakpoint thresholds, assess time-in-season effects, and determine whether WBGT estimated from meteorological measures explains variability in HSIs better than temperature or heat index. This aim will produce multi-level exposure-response curves for heat indicators and lag structures. We hypothesize that response and lag effects will be nonlinear and that response thresholds will vary by installation due to population dynamics, seasonality, climate features, and acclimatization.  
+
+2. Characterize the contribution of individual risk factors on HSIs. We will assess potential individual effect modifiers, including sex, age group, race/ethnicity, military rank group, and body mass index (BMI, upon entry into service), in terms of odds ratios. We hypothesize that the impact of the risk factors will not vary by location, and that sex/gender, age, and BMI will modify the effect of heat on HSI occurrences. 
+
+3. Predict the impact of future climate change and changes in risk factor distributions on HSI cases at major DoD training installations in CONUS.
+
+### Research Questions
+
+Are recent increases in HSI incidence attributal to changes in ambient temperature/heat? Does this relationship vary by location? How much of the variance in HSIs is accounted for by the environmental conditions?  
+
+Which indices of heat best predict HSI outcomes over short-term and annual time periods -- temperature, heat index, or WBGT? Does this vary by geographic/climate region?  
+
+Do we observe effect estimate changes at defined Heat Category boundaries? Are the universal WBGT-based Heat Cat designations appropriate for all installations?  
+
+
 
 ## Data Preparation
 
