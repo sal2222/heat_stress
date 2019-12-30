@@ -435,13 +435,31 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_summary.html">Annual cases</a>
     </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_models.html">Annual models</a>
     </li>
-    <li class="dropdown-header">Daily cases</li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="case_crossover.html">Case-crossover models</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -505,8 +523,7 @@ sar_df &lt;- furrr::future_map_dfr(sar_file_list, read_sar, .progress = TRUE)
 sar_df &lt;- sar_df %&gt;% select(-c(x11, x12, x13))
 
 sar_df</code></pre>
-<div id="save-file-and-filter-locations" class="section level2">
-<h2>Save file and filter locations</h2>
+<p>Save file and filter locations</p>
 <pre class="r"><code># save dataframe to .csv file
 # save as .rds
 
@@ -609,7 +626,6 @@ Fort Drum
 </tr>
 </tbody>
 </table>
-</div>
 <div id="exploratory-plots" class="section level2">
 <h2>Exploratory Plots</h2>
 <div id="hour-of-day-mean-wbgt" class="section level3">
