@@ -421,6 +421,9 @@ div.tocify {
     <li>
       <a href="annual_tables.html">Annual index tables</a>
     </li>
+    <li>
+      <a href="af_weather.html">Air Force weather station data</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -432,13 +435,34 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_summary.html">Annual cases</a>
     </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_models.html">Annual models</a>
     </li>
-    <li class="dropdown-header">Daily cases</li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="daily_models.html">Overview of daily models</a>
+    </li>
+    <li>
+      <a href="case_crossover.html">Case-crossover models</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -880,7 +904,7 @@ dmed_tidy %&gt;%
          category == &quot;Total&quot;,
          location == &quot;us&quot;,
          year != &quot;2006_2015&quot;) %&gt;%
-  select(-c(category, population, rate, location, strata )) %&gt;% 
+  dplyr::select(-c(category, population, rate, location, strata)) %&gt;% 
   group_by(type, hsi) %&gt;% 
   summarise(sum = sum(count)) %&gt;% 
   knitr::kable() %&gt;% 

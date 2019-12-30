@@ -279,7 +279,7 @@ dmed_tidy %>%
          category == "Total",
          location == "us",
          year != "2006_2015") %>%
-  select(-c(category, population, rate, location, strata )) %>% 
+  dplyr::select(-c(category, population, rate, location, strata)) %>% 
   group_by(type, hsi) %>% 
   summarise(sum = sum(count)) %>% 
   knitr::kable() %>% 
