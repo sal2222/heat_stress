@@ -24,7 +24,13 @@ Metadata: https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/NLDAS_FORA0125_H.002
 
 ## `wget` downloads from .txt file list of URLs
 
-wget --load-cookies C:\Users\slewa\.urs_cookies --save-cookies C:\Users\slewa\.urs_cookies --auth-no-challenge=on --keep-session-cookies --user=sal2222 --ask-password --content-disposition -i D:\nldas_urls\nldas_urls.txt -P D:\nldas
+```{r wget_command, eval = FALSE}
+
+# wget --load-cookies C:\Users\slewa\.urs_cookies --save-cookies C:\Users\slewa\.urs_cookies --auth-no-challenge=on --keep-session-cookies --user=sal2222 --ask-password --content-disposition -i D:\nldas_urls\nldas_urls.txt -P D:\nldas
+
+```
+
+
 
 
 ## Missed files

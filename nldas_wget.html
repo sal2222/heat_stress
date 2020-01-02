@@ -420,6 +420,9 @@ div.tocify {
     <li>
       <a href="annual_tables.html">Annual index tables</a>
     </li>
+    <li>
+      <a href="af_weather.html">Air Force weather station data</a>
+    </li>
   </ul>
 </li>
 <li class="dropdown">
@@ -431,13 +434,34 @@ div.tocify {
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_summary.html">Annual cases</a>
     </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
     <li>
       <a href="dmed_models.html">Annual models</a>
     </li>
-    <li class="dropdown-header">Daily cases</li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="daily_models.html">Overview of daily models</a>
+    </li>
+    <li>
+      <a href="case_crossover.html">Case-crossover models</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -479,7 +503,7 @@ Metadata: <a href="https://hydro1.gesdisc.eosdis.nasa.gov/data/NLDAS/NLDAS_FORA0
 </div>
 <div id="wget-downloads-from-.txt-file-list-of-urls" class="section level2">
 <h2><code>wget</code> downloads from .txt file list of URLs</h2>
-<p>wget –load-cookies C:.urs_cookies –save-cookies C:.urs_cookies –auth-no-challenge=on –keep-session-cookies –user=sal2222 –ask-password –content-disposition -i D:_urls_urls.txt -P D:</p>
+<pre class="r"><code># wget --load-cookies C:\Users\slewa\.urs_cookies --save-cookies C:\Users\slewa\.urs_cookies --auth-no-challenge=on --keep-session-cookies --user=sal2222 --ask-password --content-disposition -i D:\nldas_urls\nldas_urls.txt -P D:\nldas</code></pre>
 </div>
 <div id="missed-files" class="section level2">
 <h2>Missed files</h2>
