@@ -119,7 +119,7 @@ index_long <-
                                "fort_polk", "fort_hood", "fort_stewart", "fort_leonard_wood", "fort_riley",
                                "ntc_and_fort_irwin", "fort_bliss")) %>% 
     unnest(data) %>% 
-    pivot_longer(., cols = `1990`:`2018`, names_to = "year", values_to = "value") %>% 
+    pivot_longer(., cols = `1990`:`2019`, names_to = "year", values_to = "value") %>% 
     mutate(year = as.integer(year)) 
 
 
@@ -185,26 +185,7 @@ joined_rate %>%
     theme(strip.text = element_text(size = 6)) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
   
-  
 
-joined_rate %>%
-    filter(installation == "fort_benning_ga") %>% 
-    ggplot(aes(x = value, y = rate)) +
-    geom_point() +
-    geom_smooth(method = lm, se = FALSE, size = 0.5, color = "black") +
-    geom_smooth(se = FALSE, size = 0.5) +
-    facet_wrap(~ index, scales = "free_x") +
-    labs(
-      title = "Army Heat Stress Illness Ambulatory Rates and Annual Temperature/Heat Indices \n Fort Benning, GA",
-      x = "Index value",
-      y = "HSI rate (per 1,000 persons per year)",
-      caption = "Primary diagnosis"
-    ) +
-    theme_bw() +
-    theme(strip.text = element_text(size = 6)) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
-  
-  
  joined_rate %>%
     filter(installation == "fort_jackson") %>% 
     ggplot(aes(x = value, y = rate)) +
@@ -345,13 +326,251 @@ annual_hsi_nest %>%
 
 Note: NA's are present for models where the conditions were not met (e.g. no days with HI above 125°F, no days with mean temp above 95th percentile). 
 
-
-**Discussion**  
-
 Installations with poorly fitting models (all R^2^ below 25%) are:  
 **Fort Riley, KS** (highest R^2^ = 11.8%), **Fort Bragg, NC** (17.0%), **Fort Leonard Wood, MO** (19.0%), and **Fort Hood, TX** (22.8%).  
 
 A WBGT-based model fit best for 6 installations, and a Heat Index-based model fit best for 5 (Hood, Jackson, Leonard Wood, Stewart).  
+
+
+## Rank top performing models across all installations
+
+```{r ranked_models}
+# All models ranked by R^2
+annual_hsi_nest %>%
+  unnest(glance) %>% 
+  unnest(tidy, names_repair = "universal") %>% 
+  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>%
+  rename(statistic = statistic...8,
+         r_squared = r.squared...5,
+         p_value = p.value...9,
+         log_lik = logLik...11) %>% 
+  ungroup() %>% 
+  arrange(desc(r_squared)) %>% 
+    knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "300px")
+  
+
+# Select top models
+
+annual_hsi_nest %>%
+  unnest(glance) %>% 
+  unnest(tidy, names_repair = "universal") %>% 
+  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>%
+  rename(statistic = statistic...8,
+         r_squared = r.squared...5,
+         p_value = p.value...9,
+         log_lik = logLik...11) %>% 
+  ungroup() %>% 
+  arrange(desc(r_squared)) %>% 
+  dplyr::select(index) %>% 
+  slice(1:12) %>% 
+  distinct() %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 12)
+  
+```
+
+
+## Selected indices (ambulatory)
+
+Based on fits of linear models of annual heat illness ambulatory rates at 11 installations, we selected 10 indices out of 86 tested. 
+Both absolute and relative indices are included. These models generally represent thresholds at the lower end of the heat intensity scales - rather than extreme heat days. 9 of the 10 are based on the full calendar year, rather than just the hot season. 
+
+Further analysis: will hospitalizations be closer tied to more extreme heat indices?
+
+**Absolute**
+days_wbgt_gt82          
+hours_wbgt_gt82         
+days_wbgt_gt85          
+days_hi_gt80 
+
+**Relative**
+days_tmp_gt85pct        
+days_wbgt_max_gt85pct   
+days_wbgt_max_gt1sd
+days_heat_index_gt85pct 
+days_wbgt_max_gt90pct   
+days_tmp_gt90pct_may_sep
+
+
+## Full / Pooled Model
+
+Ambulatory rates, pooled: unweighted by base populations, no indicator variables for installation
+
+```{r full_model, warning = FALSE}
+
+joined_rate %>% 
+  filter(index %in% c("days_hi_gt80", "days_wbgt_gt82", "hours_wbgt_gt82",
+                      "days_wbgt_gt85", "days_tmp_gt85pct", "days_wbgt_max_gt85pct",
+                      "days_wbgt_max_gt1sd", "days_heat_index_gt85pct", 
+                      "days_wbgt_max_gt90pct", "days_tmp_gt90pct_may_sep")) %>% 
+    ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.5, color = "black") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_wrap(~ index, scales = "free_x") +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates and Annual Temperature/Heat Indices \n 
+      Pooled across 11 installations (unweighted)",
+      x = "Index value",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 10)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  
+
+# Nest by index of heat
+
+index_nest <-
+  joined_rate %>%
+    dplyr::select(index, everything()) %>% 
+    nest(data = installation:rate) %>% 
+    mutate(linear_models = map(data, annual_lm),
+           glance = map(linear_models, broom::glance),
+           tidy =   map(linear_models, broom::glance))
+           
+ 
+index_nest %>%
+  unnest(glance) %>% 
+  unnest(tidy, names_repair = "universal") %>% 
+  dplyr::select(index, statistic...7, r.squared...4, p.value...8, logLik...10) %>%
+  rename(statistic = statistic...7,
+         r_squared = r.squared...4,
+         p_value = p.value...8,
+         log_lik = logLik...10) %>%
+  arrange(desc(r_squared)) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "700px")
+
+
+```
+
+Poor fits of pooled, unweighted ambulatory annual rates of heat illness
+
+
+## Pooled linear models, weighted by population
+
+Hypothesis: poor fits due to weighting of Fort Bragg and Fort hood, which had poor fits in separate installation models.
+
+```{r pooled_weighted}
+
+# Join Army population by installation and year
+
+dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+  dplyr::select(location, year, population) %>% 
+  ggplot(aes(x = year, y = population, color = location)) +
+    geom_point() +
+    geom_line() + 
+    labs(
+      title = "Army Installation Population",
+      x = "Year",
+      y = "Population"
+    ) +
+  theme_bw()
+
+
+dmed_population <-
+  dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+  dplyr::select(location, year, population) %>% 
+    mutate(location = recode(location, jackson = "fort_jackson"),
+           location = recode(location, benning = "fort_benning_ga"),                 
+           location = recode(location, bragg = "fort_bragg"),
+           location = recode(location, campbell = "fort_campbell"),
+           location = recode(location, polk = "fort_polk"),
+           location = recode(location, hood = "fort_hood"),
+           location = recode(location, stewart = "fort_stewart"),
+           location = recode(location, leonardwood = "fort_leonard_wood"),
+           location = recode(location, riley = "fort_riley"),
+           location = recode(location, irwin = "ntc_and_fort_irwin"),
+           location = recode(location, bliss = "fort_bliss"),
+           location = as.character(location))
+
+
+
+
+
+joined_rate %>%
+  filter(index %in% c("days_hi_gt80", "days_wbgt_gt82", "hours_wbgt_gt82",
+                      "days_wbgt_gt85", "days_tmp_gt85pct", "days_wbgt_max_gt85pct",
+                      "days_wbgt_max_gt1sd", "days_heat_index_gt85pct", 
+                      "days_wbgt_max_gt90pct", "days_tmp_gt90pct_may_sep")) %>%
+  left_join(dmed_population, by = c("installation" = "location", "year")) %>% 
+    ggplot(aes(x = value, y = rate, size = population)) +
+    geom_point(alpha = 0.2) +
+    geom_smooth(method = lm, se = TRUE, size = 0.5, color = "black", mapping = aes(weight = population)) +
+    facet_wrap(~ index, scales = "free_x") +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates and Annual Temperature/Heat Indices \n 
+      Pooled across 11 installations (weighted by populatio)",
+      x = "Index value",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 10)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+  
+
+# Weighted linear regression function
+
+weighted_lm = function(df) {
+  df %>% 
+    lm(rate ~ value, weights = population, data = .)
+}
+
+
+
+
+weighted_nest <-
+joined_rate %>% 
+  left_join(dmed_population, by = c("installation" = "location", "year")) %>% 
+  dplyr::select(index, everything()) %>% 
+    nest(data = installation:population) %>% 
+    mutate(linear_models = map(data, weighted_lm),
+           glance = map(linear_models, broom::glance),
+           tidy =   map(linear_models, broom::glance))
+  
+weighted_nest %>%
+  unnest(glance) %>% 
+  unnest(tidy, names_repair = "universal") %>% 
+  dplyr::select(index, statistic...7, r.squared...4, p.value...8, logLik...10) %>%
+  rename(statistic = statistic...7,
+         r_squared = r.squared...4,
+         p_value = p.value...8,
+         log_lik = logLik...10) %>%
+  arrange(desc(r_squared)) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "700px")
+
+
+```
+
+
+
+
+
+
+
+
+
+**Discussion**  
+
+
 
 
 

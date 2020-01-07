@@ -46,3 +46,5 @@ fable
 sweep
 tsibble
 janitor
+scales
+formattable
