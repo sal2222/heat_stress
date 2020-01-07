@@ -52,16 +52,16 @@ nldas_wide <-
 
 
 
-## Construct climatology (1990-2018)
+## Construct climatology (1990-2019)
 
 ```{r climatology_function}
-#Construct climatology (1990-2018)
+#Construct climatology (1990-2019)
 
 # Create month and day columns, restrict years
 
 nldas_wide <-
   nldas_wide %>% 
-  filter(lubridate::year(local_dttm) < 2019 &
+  filter(lubridate::year(local_dttm) < 2020 &
            lubridate::year(local_dttm) > 1989) %>%
     mutate(month = month(local_dttm), 
            day = day(local_dttm)) 
@@ -728,7 +728,7 @@ nldas_climatology <-
 nldas_climatology
 nldas_climatology$sd_days_mean[1]
 
-# write_rds(nldas_climatology, "data/nldas_climatology.rds")
+#write_rds(nldas_climatology, "data/nldas_climatology.rds")
 
 
 
@@ -858,7 +858,8 @@ nldas_climatology_summer <-
 nldas_climatology_summer
 nldas_climatology_summer$sd_days_mean_may_sep[1]
 
-# write_rds(nldas_climatology_summer, "data/nldas_climatology_summer.rds")
+#write_rds(nldas_climatology_summer, "data/nldas_climatology_summer.rds")
+
 
 names(nldas_climatology)
 names(nldas_climatology_summer)

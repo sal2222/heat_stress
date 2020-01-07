@@ -503,7 +503,7 @@ local_dst_adjust &lt;-
     mutate(local_dttm = local_dttm + seconds(1))
 
 local_dst_adjust</code></pre>
-<pre><code>## # A tibble: 725 x 20
+<pre><code>## # A tibble: 726 x 20
 ##    utc_dttm            local_dttm          installation longitude latitude   TMP
 ##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;            &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
 ##  1 1990-10-28 07:00:00 1990-10-28 01:00:01 eglin_afb        -86.5     30.6  287.
@@ -516,7 +516,7 @@ local_dst_adjust</code></pre>
 ##  8 1997-10-26 07:00:00 1997-10-26 01:00:01 eglin_afb        -86.5     30.6  297.
 ##  9 1998-10-25 07:00:00 1998-10-25 01:00:01 eglin_afb        -86.5     30.6  288.
 ## 10 1999-10-31 07:00:00 1999-10-31 01:00:01 eglin_afb        -86.5     30.6  292.
-## # ... with 715 more rows, and 14 more variables: SPFH &lt;dbl&gt;, PRES &lt;dbl&gt;,
+## # ... with 716 more rows, and 14 more variables: SPFH &lt;dbl&gt;, PRES &lt;dbl&gt;,
 ## #   UGRD &lt;dbl&gt;, VGRD &lt;dbl&gt;, DSWRF &lt;dbl&gt;, windspeed &lt;dbl&gt;, tmp_f &lt;dbl&gt;,
 ## #   tmp_c &lt;dbl&gt;, rh &lt;dbl&gt;, dp_c &lt;dbl&gt;, heat_index &lt;dbl&gt;, wbgt &lt;dbl&gt;,
 ## #   wbgt_f &lt;dbl&gt;, row &lt;int&gt;</code></pre>
@@ -530,21 +530,21 @@ nldas_wide &lt;-
     arrange(local_dttm) %&gt;% 
     dplyr::select(-row) %&gt;% 
     dplyr::select(installation, local_dttm, tmp_f, heat_index, wbgt_f) </code></pre>
-<div id="construct-climatology-1990-2018" class="section level2">
-<h2>Construct climatology (1990-2018)</h2>
-<pre class="r"><code>#Construct climatology (1990-2018)
+<div id="construct-climatology-1990-2019" class="section level2">
+<h2>Construct climatology (1990-2019)</h2>
+<pre class="r"><code>#Construct climatology (1990-2019)
 
 # Create month and day columns, restrict years
 
 nldas_wide &lt;-
   nldas_wide %&gt;% 
-  filter(lubridate::year(local_dttm) &lt; 2019 &amp;
+  filter(lubridate::year(local_dttm) &lt; 2020 &amp;
            lubridate::year(local_dttm) &gt; 1989) %&gt;%
     mutate(month = month(local_dttm), 
            day = day(local_dttm)) 
 
 nldas_wide</code></pre>
-<pre><code>## # A tibble: 6,355,200 x 7
+<pre><code>## # A tibble: 6,573,772 x 7
 ##    installation    local_dttm          tmp_f heat_index wbgt_f month   day
 ##    &lt;chr&gt;           &lt;dttm&gt;              &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
 ##  1 eglin_afb       1990-01-01 00:00:00  54.7       54.1   53.2     1     1
@@ -557,7 +557,7 @@ nldas_wide</code></pre>
 ##  8 fort_gordon     1990-01-01 00:00:00  40.8       37.0   35.3     1     1
 ##  9 fort_hood       1990-01-01 00:00:00  58.4       58.4   57.2     1     1
 ## 10 fort_jackson    1990-01-01 00:00:00  23.2       23.2   20.6     1     1
-## # ... with 6,355,190 more rows</code></pre>
+## # ... with 6,573,762 more rows</code></pre>
 <pre class="r"><code># Nest by installation
 nest_nldas &lt;-
   nldas_wide %&gt;% 
@@ -567,19 +567,19 @@ nest_nldas</code></pre>
 <pre><code>## # A tibble: 25 x 2
 ##    installation              data
 ##    &lt;chr&gt;           &lt;list&lt;df[,6]&gt;&gt;
-##  1 eglin_afb        [254,208 x 6]
-##  2 fort_benning_ga  [254,208 x 6]
-##  3 fort_bliss       [254,208 x 6]
-##  4 fort_bragg       [254,208 x 6]
-##  5 fort_campbell    [254,208 x 6]
-##  6 fort_carson      [254,208 x 6]
-##  7 fort_drum        [254,208 x 6]
-##  8 fort_gordon      [254,208 x 6]
-##  9 fort_hood        [254,208 x 6]
-## 10 fort_jackson     [254,208 x 6]
+##  1 eglin_afb        [262,951 x 6]
+##  2 fort_benning_ga  [262,952 x 6]
+##  3 fort_bliss       [262,950 x 6]
+##  4 fort_bragg       [262,952 x 6]
+##  5 fort_campbell    [262,951 x 6]
+##  6 fort_carson      [262,950 x 6]
+##  7 fort_drum        [262,952 x 6]
+##  8 fort_gordon      [262,952 x 6]
+##  9 fort_hood        [262,951 x 6]
+## 10 fort_jackson     [262,952 x 6]
 ## # ... with 15 more rows</code></pre>
 <pre class="r"><code>nest_nldas %&gt;% slice(1) %&gt;% unnest(data)</code></pre>
-<pre><code>## # A tibble: 254,208 x 7
+<pre><code>## # A tibble: 262,951 x 7
 ##    installation local_dttm          tmp_f heat_index wbgt_f month   day
 ##    &lt;chr&gt;        &lt;dttm&gt;              &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
 ##  1 eglin_afb    1990-01-01 00:00:00  54.7       54.1   53.2     1     1
@@ -592,7 +592,7 @@ nest_nldas</code></pre>
 ##  8 eglin_afb    1990-01-01 07:00:00  46.0       43.8   43.4     1     1
 ##  9 eglin_afb    1990-01-01 08:00:00  46.0       43.7   44.8     1     1
 ## 10 eglin_afb    1990-01-01 09:00:00  46.0       43.5   46.1     1     1
-## # ... with 254,198 more rows</code></pre>
+## # ... with 262,941 more rows</code></pre>
 <pre class="r"><code># Define Percentile Functions 
   # https://tbradley1013.github.io/2018/10/01/calculating-quantiles-for-groups-with-dplyr-summarize-and-purrr-partial/
 
@@ -643,32 +643,32 @@ nldas_climatology</code></pre>
 <pre><code>## # A tibble: 25 x 3
 ##    installation              data climatology        
 ##    &lt;chr&gt;           &lt;list&lt;df[,6]&gt;&gt; &lt;list&gt;             
-##  1 eglin_afb        [254,208 x 6] &lt;tibble [366 x 24]&gt;
-##  2 fort_benning_ga  [254,208 x 6] &lt;tibble [366 x 24]&gt;
-##  3 fort_bliss       [254,208 x 6] &lt;tibble [366 x 24]&gt;
-##  4 fort_bragg       [254,208 x 6] &lt;tibble [366 x 24]&gt;
-##  5 fort_campbell    [254,208 x 6] &lt;tibble [366 x 24]&gt;
-##  6 fort_carson      [254,208 x 6] &lt;tibble [366 x 24]&gt;
-##  7 fort_drum        [254,208 x 6] &lt;tibble [366 x 24]&gt;
-##  8 fort_gordon      [254,208 x 6] &lt;tibble [366 x 24]&gt;
-##  9 fort_hood        [254,208 x 6] &lt;tibble [366 x 24]&gt;
-## 10 fort_jackson     [254,208 x 6] &lt;tibble [366 x 24]&gt;
+##  1 eglin_afb        [262,951 x 6] &lt;tibble [366 x 24]&gt;
+##  2 fort_benning_ga  [262,952 x 6] &lt;tibble [366 x 24]&gt;
+##  3 fort_bliss       [262,950 x 6] &lt;tibble [366 x 24]&gt;
+##  4 fort_bragg       [262,952 x 6] &lt;tibble [366 x 24]&gt;
+##  5 fort_campbell    [262,951 x 6] &lt;tibble [366 x 24]&gt;
+##  6 fort_carson      [262,950 x 6] &lt;tibble [366 x 24]&gt;
+##  7 fort_drum        [262,952 x 6] &lt;tibble [366 x 24]&gt;
+##  8 fort_gordon      [262,952 x 6] &lt;tibble [366 x 24]&gt;
+##  9 fort_hood        [262,951 x 6] &lt;tibble [366 x 24]&gt;
+## 10 fort_jackson     [262,952 x 6] &lt;tibble [366 x 24]&gt;
 ## # ... with 15 more rows</code></pre>
 <pre class="r"><code>nldas_climatology$climatology[[1]]</code></pre>
 <pre><code>## # A tibble: 366 x 24
 ## # Groups:   month [12]
 ##    mon_day month   day tmp_f_mean heat_index_mean wbgt_f_mean tmp_f_max
 ##    &lt;chr&gt;   &lt;dbl&gt; &lt;int&gt;      &lt;dbl&gt;           &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
-##  1 1-1         1     1       55.4            54.9        54.1      74.6
-##  2 1-2         1     2       54.4            53.9        53.1      74.1
-##  3 1-3         1     3       51.3            50.7        49.8      75.1
-##  4 1-4         1     4       51.6            50.8        50.2      75.3
-##  5 1-5         1     5       53.4            52.8        52.3      74.7
+##  1 1-1         1     1       55.8            55.3        54.5      74.6
+##  2 1-2         1     2       54.8            54.4        53.5      74.1
+##  3 1-3         1     3       51.8            51.2        50.4      75.1
+##  4 1-4         1     4       51.8            51.1        50.5      75.3
+##  5 1-5         1     5       53.4            52.7        52.2      74.7
 ##  6 1-6         1     6       54.2            53.5        52.9      75.2
-##  7 1-7         1     7       51.9            51.2        50.6      74.2
-##  8 1-8         1     8       51.7            51.1        50.5      73.0
-##  9 1-9         1     9       53.8            53.3        52.6      75.4
-## 10 1-10        1    10       54.2            53.6        53.0      76.6
+##  7 1-7         1     7       52.1            51.4        50.8      74.2
+##  8 1-8         1     8       52.0            51.4        50.8      73.0
+##  9 1-9         1     9       53.8            53.2        52.6      75.4
+## 10 1-10        1    10       53.9            53.2        52.6      76.6
 ## # ... with 356 more rows, and 17 more variables: heat_index_max &lt;dbl&gt;,
 ## #   wbgt_f_max &lt;dbl&gt;, tmp_f_min &lt;dbl&gt;, heat_index_min &lt;dbl&gt;, wbgt_f_min &lt;dbl&gt;,
 ## #   tmp_f_sd &lt;dbl&gt;, heat_index_sd &lt;dbl&gt;, wbgt_f_sd &lt;dbl&gt;, `tmp_f_85%` &lt;dbl&gt;,
@@ -698,20 +698,20 @@ nldas_climatology$data[[1]] %&gt;%
             heat_index_mean_anomaly = heat_index_mean.x - heat_index_mean.y,
             wbgt_f_mean_anomaly = wbgt_f_mean.x - wbgt_f_mean.y) %&gt;% 
   dplyr::select(date, tmp_f_mean_anomaly, heat_index_mean_anomaly, wbgt_f_mean_anomaly)</code></pre>
-<pre><code>## # A tibble: 10,592 x 4
+<pre><code>## # A tibble: 10,957 x 4
 ##    date       tmp_f_mean_anomaly heat_index_mean_anomaly wbgt_f_mean_anomaly
 ##    &lt;date&gt;                  &lt;dbl&gt;                   &lt;dbl&gt;               &lt;dbl&gt;
-##  1 1990-01-01             -7.49                  -9.21                 -8.33
-##  2 1990-01-02             -6.61                  -8.40                 -8.19
-##  3 1990-01-03              4.46                   4.26                  4.46
-##  4 1990-01-04              8.41                   9.07                  9.04
-##  5 1990-01-05              7.32                   8.00                  7.78
-##  6 1990-01-06              6.31                   6.96                  7.04
-##  7 1990-01-07              8.68                   9.50                  9.32
-##  8 1990-01-08              0.580                  0.0591                1.11
-##  9 1990-01-09             -2.29                  -3.03                 -2.05
-## 10 1990-01-10              1.92                   1.58                  1.81
-## # ... with 10,582 more rows</code></pre>
+##  1 1990-01-01             -7.88                   -9.65               -8.75 
+##  2 1990-01-02             -7.03                   -8.86               -8.66 
+##  3 1990-01-03              3.96                    3.72                3.91 
+##  4 1990-01-04              8.15                    8.81                8.79 
+##  5 1990-01-05              7.38                    8.08                7.84 
+##  6 1990-01-06              6.30                    6.97                7.03 
+##  7 1990-01-07              8.49                    9.30                9.09 
+##  8 1990-01-08              0.305                  -0.232               0.812
+##  9 1990-01-09             -2.24                   -2.94               -1.96 
+## 10 1990-01-10              2.31                    2.01                2.22 
+## # ... with 10,947 more rows</code></pre>
 <pre class="r"><code># Function
 ### Daily Mean
 anomaly_daily_mean_function &lt;- function(data, climatology) {
@@ -744,33 +744,33 @@ nldas_climatology</code></pre>
 <pre><code>## # A tibble: 25 x 4
 ##    installation              data climatology         anomaly_daily_mean
 ##    &lt;chr&gt;           &lt;list&lt;df[,6]&gt;&gt; &lt;list&gt;              &lt;list&gt;            
-##  1 eglin_afb        [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-##  2 fort_benning_ga  [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-##  3 fort_bliss       [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-##  4 fort_bragg       [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-##  5 fort_campbell    [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-##  6 fort_carson      [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-##  7 fort_drum        [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-##  8 fort_gordon      [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-##  9 fort_hood        [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
-## 10 fort_jackson     [254,208 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [29 x 4]&gt; 
+##  1 eglin_afb        [262,951 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+##  2 fort_benning_ga  [262,952 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+##  3 fort_bliss       [262,950 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+##  4 fort_bragg       [262,952 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+##  5 fort_campbell    [262,951 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+##  6 fort_carson      [262,950 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+##  7 fort_drum        [262,952 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+##  8 fort_gordon      [262,952 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+##  9 fort_hood        [262,951 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
+## 10 fort_jackson     [262,952 x 6] &lt;tibble [366 x 24]&gt; &lt;tibble [30 x 4]&gt; 
 ## # ... with 15 more rows</code></pre>
 <pre class="r"><code>nldas_climatology$anomaly_daily_mean[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 4
+## # A tibble: 30 x 4
 ##     year tmp_f_mean_anomaly_me~ heat_index_mean_anomaly_~ wbgt_f_mean_anomaly_m~
 ##    &lt;dbl&gt;                  &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
-##  1  1990                 1.16                       1.14                  0.928 
-##  2  1991                 0.366                      0.304                 0.200 
-##  3  1992                -0.853                     -1.37                 -1.06  
-##  4  1993                -0.724                     -0.908                -1.00  
-##  5  1994                -0.0144                    -0.486                -0.0829
-##  6  1995                -0.218                     -0.232                -0.398 
-##  7  1996                -0.955                     -1.20                 -1.07  
-##  8  1997                -0.486                     -0.664                -0.566 
-##  9  1998                 1.20                       1.60                  1.10  
-## 10  1999                 0.297                      0.161                -0.0552
-## # ... with 19 more rows</code></pre>
+##  1  1990                 1.12                       1.11                  0.944 
+##  2  1991                 0.320                      0.270                 0.216 
+##  3  1992                -0.899                     -1.40                 -1.04  
+##  4  1993                -0.770                     -0.941                -0.989 
+##  5  1994                -0.0608                    -0.520                -0.0672
+##  6  1995                -0.265                     -0.265                -0.382 
+##  7  1996                -1.00                      -1.23                 -1.06  
+##  8  1997                -0.533                     -0.697                -0.550 
+##  9  1998                 1.15                       1.57                  1.11  
+## 10  1999                 0.251                      0.128                -0.0395
+## # ... with 20 more rows</code></pre>
 </div>
 <div id="daily-anomaly-maximum" class="section level3">
 <h3>Daily anomaly (maximum)</h3>
@@ -806,20 +806,20 @@ by = c(&quot;month&quot;, &quot;day&quot;)
    summarise_at(
          .vars = vars(tmp_f_max_anomaly, heat_index_max_anomaly, wbgt_f_max_anomaly),
             .funs = c(mean = &quot;mean&quot;)) </code></pre>
-<pre><code>## # A tibble: 29 x 4
+<pre><code>## # A tibble: 30 x 4
 ##     year tmp_f_max_anomaly_mean heat_index_max_anomaly_m~ wbgt_f_max_anomaly_me~
 ##    &lt;dbl&gt;                  &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
-##  1  1990                 1.58                       1.56                   1.39 
-##  2  1991                -0.0538                    -0.111                 -0.174
-##  3  1992                -1.01                      -1.71                  -1.23 
-##  4  1993                -0.762                     -1.26                  -1.17 
-##  5  1994                -0.337                     -0.805                 -0.398
-##  6  1995                -0.238                     -0.373                 -0.572
-##  7  1996                -0.784                     -1.19                  -0.957
-##  8  1997                -1.20                      -1.53                  -0.932
-##  9  1998                 1.10                       1.53                   0.610
-## 10  1999                 0.617                      0.387                  0.196
-## # ... with 19 more rows</code></pre>
+##  1  1990                  1.48                      1.48                   1.39 
+##  2  1991                 -0.157                    -0.193                 -0.177
+##  3  1992                 -1.11                     -1.79                  -1.23 
+##  4  1993                 -0.865                    -1.35                  -1.18 
+##  5  1994                 -0.440                    -0.887                 -0.401
+##  6  1995                 -0.341                    -0.455                 -0.575
+##  7  1996                 -0.887                    -1.27                  -0.960
+##  8  1997                 -1.30                     -1.61                  -0.935
+##  9  1998                  0.995                     1.44                   0.607
+## 10  1999                  0.514                     0.305                  0.193
+## # ... with 20 more rows</code></pre>
 <pre class="r"><code># Function
 ### Daily Max
 anomaly_daily_max_function &lt;- function(data) {
@@ -866,33 +866,33 @@ nldas_climatology</code></pre>
 <pre><code>## # A tibble: 25 x 5
 ##    installation            data climatology    anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;         &lt;list&lt;df[,6]&gt;&gt; &lt;list&gt;         &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb      [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_benning~  [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss     [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg     [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbell  [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson    [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum      [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon    [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood      [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson   [254,208 x 6] &lt;tibble [366 ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb      [262,951 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_benning~  [262,952 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss     [262,950 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg     [262,952 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbell  [262,951 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson    [262,950 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum      [262,952 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon    [262,952 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood      [262,951 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson   [262,952 x 6] &lt;tibble [366 ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows</code></pre>
 <pre class="r"><code>nldas_climatology$anomaly_daily_max[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 4
+## # A tibble: 30 x 4
 ##     year tmp_f_max_anomaly_mean heat_index_max_anomaly_m~ wbgt_f_max_anomaly_me~
 ##    &lt;dbl&gt;                  &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
-##  1  1990                 1.58                       1.56                   1.39 
-##  2  1991                -0.0538                    -0.111                 -0.174
-##  3  1992                -1.01                      -1.71                  -1.23 
-##  4  1993                -0.762                     -1.26                  -1.17 
-##  5  1994                -0.337                     -0.805                 -0.398
-##  6  1995                -0.238                     -0.373                 -0.572
-##  7  1996                -0.784                     -1.19                  -0.957
-##  8  1997                -1.20                      -1.53                  -0.932
-##  9  1998                 1.10                       1.53                   0.610
-## 10  1999                 0.617                      0.387                  0.196
-## # ... with 19 more rows</code></pre>
+##  1  1990                  1.48                      1.48                   1.39 
+##  2  1991                 -0.157                    -0.193                 -0.177
+##  3  1992                 -1.11                     -1.79                  -1.23 
+##  4  1993                 -0.865                    -1.35                  -1.18 
+##  5  1994                 -0.440                    -0.887                 -0.401
+##  6  1995                 -0.341                    -0.455                 -0.575
+##  7  1996                 -0.887                    -1.27                  -0.960
+##  8  1997                 -1.30                     -1.61                  -0.935
+##  9  1998                  0.995                     1.44                   0.607
+## 10  1999                  0.514                     0.305                  0.193
+## # ... with 20 more rows</code></pre>
 </div>
 <div id="days-mean-temperature-index-above-climate-normal-percentile-averaged-over-all-hours-of-day" class="section level3">
 <h3>Days mean temperature index above climate normal percentile (averaged over all hours of day)</h3>
@@ -919,20 +919,20 @@ nldas_climatology$data[[1]] %&gt;%
       days_wbgt_gt85pct = sum(wbgt_f_mean.x &gt; `wbgt_f_85%`), 
       days_wbgt_gt90pct = sum(wbgt_f_mean.x &gt; `wbgt_f_90%`),  
       days_wbgt_gt95pct = sum(wbgt_f_mean.x &gt; `wbgt_f_95%`)) </code></pre>
-<pre><code>## # A tibble: 29 x 10
+<pre><code>## # A tibble: 30 x 10
 ##     year days_tmp_gt85pct days_tmp_gt90pct days_tmp_gt95pct days_heat_index~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               22               12                1               25
-##  2  1991               11                4                0               16
-##  3  1992                2                0                0                5
-##  4  1993                7                3                0                9
-##  5  1994               10                4                0               13
-##  6  1995                5                1                0               13
-##  7  1996               11                3                0               20
-##  8  1997               15                5                0               23
-##  9  1998               17                5                0               25
-## 10  1999               22                9                0               32
-## # ... with 19 more rows, and 5 more variables: days_heat_index_gt90pct &lt;int&gt;,
+##  1  1990               22               11                1               24
+##  2  1991               11                3                0               16
+##  3  1992                3                0                0                5
+##  4  1993                6                3                0                7
+##  5  1994                8                4                0               12
+##  6  1995                5                1                0               14
+##  7  1996                9                3                0               19
+##  8  1997               15                5                0               19
+##  9  1998               16                5                0               24
+## 10  1999               20                9                0               33
+## # ... with 20 more rows, and 5 more variables: days_heat_index_gt90pct &lt;int&gt;,
 ## #   days_heat_index_gt95pct &lt;int&gt;, days_wbgt_gt85pct &lt;int&gt;,
 ## #   days_wbgt_gt90pct &lt;int&gt;, days_wbgt_gt95pct &lt;int&gt;</code></pre>
 <pre class="r"><code># Function
@@ -970,33 +970,33 @@ nldas_climatology</code></pre>
 <pre><code>## # A tibble: 25 x 6
 ##    installation          data climatology anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;        &lt;list&lt;df[,6]&gt; &lt;list&gt;      &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_bennin~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbe~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb    [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_bennin~ [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss   [262,950 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg   [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbe~ [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson  [262,950 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum    [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon  [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood    [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows, and 1 more variable: anomaly_days_mean &lt;list&gt;</code></pre>
 <pre class="r"><code>nldas_climatology$anomaly_days_mean[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 10
+## # A tibble: 30 x 10
 ##     year days_tmp_gt85pct days_tmp_gt90pct days_tmp_gt95pct days_heat_index~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               22               12                1               25
-##  2  1991               11                4                0               16
-##  3  1992                2                0                0                5
-##  4  1993                7                3                0                9
-##  5  1994               10                4                0               13
-##  6  1995                5                1                0               13
-##  7  1996               11                3                0               20
-##  8  1997               15                5                0               23
-##  9  1998               17                5                0               25
-## 10  1999               22                9                0               32
-## # ... with 19 more rows, and 5 more variables: days_heat_index_gt90pct &lt;int&gt;,
+##  1  1990               22               11                1               24
+##  2  1991               11                3                0               16
+##  3  1992                3                0                0                5
+##  4  1993                6                3                0                7
+##  5  1994                8                4                0               12
+##  6  1995                5                1                0               14
+##  7  1996                9                3                0               19
+##  8  1997               15                5                0               19
+##  9  1998               16                5                0               24
+## 10  1999               20                9                0               33
+## # ... with 20 more rows, and 5 more variables: days_heat_index_gt90pct &lt;int&gt;,
 ## #   days_heat_index_gt95pct &lt;int&gt;, days_wbgt_gt85pct &lt;int&gt;,
 ## #   days_wbgt_gt90pct &lt;int&gt;, days_wbgt_gt95pct &lt;int&gt;</code></pre>
 </div>
@@ -1032,20 +1032,20 @@ nldas_climatology</code></pre>
         days_wbgt_max_gt85pct = sum(wbgt_f_max &gt; `wbgt_f_max_85%`), 
         days_wbgt_max_gt90pct = sum(wbgt_f_max &gt; `wbgt_f_max_90%`),  
         days_wbgt_max_gt95pct = sum(wbgt_f_max &gt; `wbgt_f_max_95%`)) </code></pre>
-<pre><code>## # A tibble: 29 x 10
+<pre><code>## # A tibble: 30 x 10
 ##     year days_tmp_max_gt~ days_tmp_max_gt~ days_tmp_max_gt~ days_heat_index~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               78               53               37               73
-##  2  1991               57               32               20               64
-##  3  1992               30               13                7               20
-##  4  1993               36               23               12               28
-##  5  1994               41               24               11               40
-##  6  1995               63               30               15               59
-##  7  1996               63               32               17               57
-##  8  1997               40               19               13               45
-##  9  1998              101               67               43               93
-## 10  1999               70               45               38               63
-## # ... with 19 more rows, and 5 more variables:
+##  1  1990               70               48               29               68
+##  2  1991               54               30               16               58
+##  3  1992               27               11                7               19
+##  4  1993               34               16                8               26
+##  5  1994               41               22               10               36
+##  6  1995               54               26               11               57
+##  7  1996               60               24               15               54
+##  8  1997               36               14               13               39
+##  9  1998               93               58               36               86
+## 10  1999               63               42               34               54
+## # ... with 20 more rows, and 5 more variables:
 ## #   days_heat_index_max_gt90pct &lt;int&gt;, days_heat_index_max_gt95pct &lt;int&gt;,
 ## #   days_wbgt_max_gt85pct &lt;int&gt;, days_wbgt_max_gt90pct &lt;int&gt;,
 ## #   days_wbgt_max_gt95pct &lt;int&gt;</code></pre>
@@ -1094,34 +1094,34 @@ nldas_climatology</code></pre>
 <pre><code>## # A tibble: 25 x 7
 ##    installation          data climatology anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;        &lt;list&lt;df[,6]&gt; &lt;list&gt;      &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_bennin~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbe~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb    [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_bennin~ [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss   [262,950 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg   [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbe~ [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson  [262,950 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum    [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon  [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood    [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows, and 2 more variables: anomaly_days_mean &lt;list&gt;,
 ## #   anomaly_days_max &lt;list&gt;</code></pre>
 <pre class="r"><code>nldas_climatology$anomaly_days_max[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 10
+## # A tibble: 30 x 10
 ##     year days_tmp_max_gt~ days_tmp_max_gt~ days_tmp_max_gt~ days_heat_index~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               78               53               37               73
-##  2  1991               57               32               20               64
-##  3  1992               30               13                7               20
-##  4  1993               36               23               12               28
-##  5  1994               41               24               11               40
-##  6  1995               63               30               15               59
-##  7  1996               63               32               17               57
-##  8  1997               40               19               13               45
-##  9  1998              101               67               43               93
-## 10  1999               70               45               38               63
-## # ... with 19 more rows, and 5 more variables:
+##  1  1990               70               48               29               68
+##  2  1991               54               30               16               58
+##  3  1992               27               11                7               19
+##  4  1993               34               16                8               26
+##  5  1994               41               22               10               36
+##  6  1995               54               26               11               57
+##  7  1996               60               24               15               54
+##  8  1997               36               14               13               39
+##  9  1998               93               58               36               86
+## 10  1999               63               42               34               54
+## # ... with 20 more rows, and 5 more variables:
 ## #   days_heat_index_max_gt90pct &lt;int&gt;, days_heat_index_max_gt95pct &lt;int&gt;,
 ## #   days_wbgt_max_gt85pct &lt;int&gt;, days_wbgt_max_gt90pct &lt;int&gt;,
 ## #   days_wbgt_max_gt95pct &lt;int&gt;</code></pre>
@@ -1201,20 +1201,20 @@ by = c(&quot;month&quot; = &quot;month&quot;, &quot;day&quot; = &quot;day&quot;)
 ##   # Using lambdas
 ##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
 ## This warning is displayed once per session.</code></pre>
-<pre><code>## # A tibble: 29 x 7
+<pre><code>## # A tibble: 30 x 7
 ##     year days_tmp_max_gt~ days_heat_index~ days_wbgt_max_g~ days_tmp_max_gt~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               74               68               65                2
-##  2  1991               50               51               45                0
-##  3  1992               26               20               30                0
-##  4  1993               37               27               34                1
-##  5  1994               35               37               47                0
-##  6  1995               50               50               43                3
-##  7  1996               49               53               42                2
-##  8  1997               33               40               48                1
-##  9  1998               89               89               52                2
-## 10  1999               65               57               58                4
-## # ... with 19 more rows, and 2 more variables: days_heat_index_max_gt2sd &lt;int&gt;,
+##  1  1990               59               65               63                0
+##  2  1991               43               52               46                0
+##  3  1992               25               20               31                0
+##  4  1993               29               26               32                0
+##  5  1994               35               36               47                0
+##  6  1995               40               48               42                0
+##  7  1996               45               49               43                1
+##  8  1997               27               35               51                1
+##  9  1998               80               85               52                2
+## 10  1999               55               57               58                0
+## # ... with 20 more rows, and 2 more variables: days_heat_index_max_gt2sd &lt;int&gt;,
 ## #   days_wbgt_max_gt2sd &lt;int&gt;</code></pre>
 <pre class="r"><code># Function: daily max standard dev anomalies
 
@@ -1291,34 +1291,34 @@ nldas_climatology</code></pre>
 <pre><code>## # A tibble: 25 x 8
 ##    installation          data climatology anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;        &lt;list&lt;df[,6]&gt; &lt;list&gt;      &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_bennin~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbe~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb    [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_bennin~ [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss   [262,950 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg   [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbe~ [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson  [262,950 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum    [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon  [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood    [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows, and 3 more variables: anomaly_days_mean &lt;list&gt;,
 ## #   anomaly_days_max &lt;list&gt;, sd_days_max &lt;list&gt;</code></pre>
 <pre class="r"><code>nldas_climatology$sd_days_max[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 7
+## # A tibble: 30 x 7
 ##     year days_tmp_max_gt~ days_heat_index~ days_wbgt_max_g~ days_tmp_max_gt~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               74               68               65                2
-##  2  1991               50               51               45                0
-##  3  1992               26               20               30                0
-##  4  1993               37               27               34                1
-##  5  1994               35               37               47                0
-##  6  1995               50               50               43                3
-##  7  1996               49               53               42                2
-##  8  1997               33               40               48                1
-##  9  1998               89               89               52                2
-## 10  1999               65               57               58                4
-## # ... with 19 more rows, and 2 more variables: days_heat_index_max_gt2sd &lt;int&gt;,
+##  1  1990               59               65               63                0
+##  2  1991               43               52               46                0
+##  3  1992               25               20               31                0
+##  4  1993               29               26               32                0
+##  5  1994               35               36               47                0
+##  6  1995               40               48               42                0
+##  7  1996               45               49               43                1
+##  8  1997               27               35               51                1
+##  9  1998               80               85               52                2
+## 10  1999               55               57               58                0
+## # ... with 20 more rows, and 2 more variables: days_heat_index_max_gt2sd &lt;int&gt;,
 ## #   days_wbgt_max_gt2sd &lt;int&gt;</code></pre>
 </div>
 <div id="days-mean-temperature-index-above-1-or-2-standard-deviations-of-mean-daily-temperature-climate-normal" class="section level3">
@@ -1384,20 +1384,20 @@ by = c(&quot;month&quot; = &quot;month&quot;, &quot;day&quot; = &quot;day&quot;)
         days_tmp_mean_gt2sd = sum(tmp_f_mean &gt; (mean_tmp_f_mean + 2 * tmp_f_mean_sd)), 
         days_heat_index_mean_gt2sd = sum(heat_index_mean &gt; (mean_heat_index_mean + 2 * heat_index_mean_sd)),
         days_wbgt_mean_gt2sd = sum(wbgt_f_mean &gt; (mean_wbgt_f_mean + 2 * wbgt_f_mean_sd)))</code></pre>
-<pre><code>## # A tibble: 29 x 7
+<pre><code>## # A tibble: 30 x 7
 ##     year days_tmp_mean_g~ days_heat_index~ days_wbgt_mean_~ days_tmp_mean_g~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               54               53               45                1
-##  2  1991               63               68               62                0
-##  3  1992               30               24               25                0
-##  4  1993               37               35               34                0
-##  5  1994               49               45               43                0
-##  6  1995               54               58               53                3
-##  7  1996               49               46               44                3
-##  8  1997               47               49               45                2
-##  9  1998               85               86               73                2
-## 10  1999               58               57               53                2
-## # ... with 19 more rows, and 2 more variables:
+##  1  1990               47               52               45                0
+##  2  1991               63               68               63                0
+##  3  1992               30               24               26                0
+##  4  1993               29               33               32                0
+##  5  1994               48               43               41                0
+##  6  1995               49               56               52                0
+##  7  1996               46               46               47                1
+##  8  1997               45               50               45                2
+##  9  1998               81               84               70                1
+## 10  1999               53               57               53                1
+## # ... with 20 more rows, and 2 more variables:
 ## #   days_heat_index_mean_gt2sd &lt;int&gt;, days_wbgt_mean_gt2sd &lt;int&gt;</code></pre>
 <pre class="r"><code># Function: daily mean standard dev anomalies
 
@@ -1475,36 +1475,36 @@ nldas_climatology</code></pre>
 <pre><code>## # A tibble: 25 x 9
 ##    installation          data climatology anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;        &lt;list&lt;df[,6]&gt; &lt;list&gt;      &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_bennin~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg   [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbe~ [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon  [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood    [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson [254,208 x 6] &lt;tibble [3~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb    [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_bennin~ [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss   [262,950 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg   [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbe~ [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson  [262,950 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum    [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon  [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood    [262,951 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson [262,952 x 6] &lt;tibble [3~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows, and 4 more variables: anomaly_days_mean &lt;list&gt;,
 ## #   anomaly_days_max &lt;list&gt;, sd_days_max &lt;list&gt;, sd_days_mean &lt;list&gt;</code></pre>
 <pre class="r"><code>nldas_climatology$sd_days_mean[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 7
+## # A tibble: 30 x 7
 ##     year days_tmp_mean_g~ days_heat_index~ days_wbgt_mean_~ days_tmp_mean_g~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               54               53               45                1
-##  2  1991               63               68               62                0
-##  3  1992               30               24               25                0
-##  4  1993               37               35               34                0
-##  5  1994               49               45               43                0
-##  6  1995               54               58               53                3
-##  7  1996               49               46               44                3
-##  8  1997               47               49               45                2
-##  9  1998               85               86               73                2
-## 10  1999               58               57               53                2
-## # ... with 19 more rows, and 2 more variables:
+##  1  1990               47               52               45                0
+##  2  1991               63               68               63                0
+##  3  1992               30               24               26                0
+##  4  1993               29               33               32                0
+##  5  1994               48               43               41                0
+##  6  1995               49               56               52                0
+##  7  1996               46               46               47                1
+##  8  1997               45               50               45                2
+##  9  1998               81               84               70                1
+## 10  1999               53               57               53                1
+## # ... with 20 more rows, and 2 more variables:
 ## #   days_heat_index_mean_gt2sd &lt;int&gt;, days_wbgt_mean_gt2sd &lt;int&gt;</code></pre>
-<pre class="r"><code># write_rds(nldas_climatology, &quot;data/nldas_climatology.rds&quot;)</code></pre>
+<pre class="r"><code>#write_rds(nldas_climatology, &quot;data/nldas_climatology.rds&quot;)</code></pre>
 </div>
 </div>
 <div id="heat-season-anomalies" class="section level2">
@@ -1533,33 +1533,33 @@ nldas_climatology_summer</code></pre>
 <pre><code>## # A tibble: 25 x 4
 ##    installation    summer_data        summer_climatology anomaly_daily_mean_may~
 ##    &lt;chr&gt;           &lt;list&gt;             &lt;list&gt;             &lt;list&gt;                 
-##  1 eglin_afb       &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-##  2 fort_benning_ga &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-##  3 fort_bliss      &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-##  4 fort_bragg      &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-##  5 fort_campbell   &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-##  6 fort_carson     &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-##  7 fort_drum       &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-##  8 fort_gordon     &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-##  9 fort_hood       &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
-## 10 fort_jackson    &lt;tibble [106,488 ~ &lt;tibble [153 x 24~ &lt;tibble [29 x 4]&gt;      
+##  1 eglin_afb       &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+##  2 fort_benning_ga &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+##  3 fort_bliss      &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+##  4 fort_bragg      &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+##  5 fort_campbell   &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+##  6 fort_carson     &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+##  7 fort_drum       &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+##  8 fort_gordon     &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+##  9 fort_hood       &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
+## 10 fort_jackson    &lt;tibble [110,160 ~ &lt;tibble [153 x 24~ &lt;tibble [30 x 4]&gt;      
 ## # ... with 15 more rows</code></pre>
 <pre class="r"><code>nldas_climatology_summer$anomaly_daily_mean_may_sep[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 4
+## # A tibble: 30 x 4
 ##     year tmp_f_mean_anomaly_me~ heat_index_mean_anomaly_~ wbgt_f_mean_anomaly_m~
 ##    &lt;dbl&gt;                  &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
-##  1  1990                  0.298                     0.197                 0.0476
-##  2  1991                  0.273                     0.197                 0.145 
-##  3  1992                 -0.900                    -1.81                 -1.18  
-##  4  1993                  0.200                     0.175                -0.161 
-##  5  1994                 -1.02                     -2.22                 -1.07  
-##  6  1995                  0.537                     0.570                 0.184 
-##  7  1996                  0.247                    -0.211                -0.132 
-##  8  1997                 -0.781                    -1.08                 -0.826 
-##  9  1998                  1.43                      2.34                  1.21  
-## 10  1999                 -0.213                    -0.448                -0.623 
-## # ... with 19 more rows</code></pre>
+##  1  1990                 0.146                     0.0644                0.00899
+##  2  1991                 0.121                     0.0644                0.107  
+##  3  1992                -1.05                     -1.94                 -1.22   
+##  4  1993                 0.0481                    0.0424               -0.200  
+##  5  1994                -1.17                     -2.35                 -1.11   
+##  6  1995                 0.385                     0.437                 0.145  
+##  7  1996                 0.0952                   -0.344                -0.170  
+##  8  1997                -0.933                    -1.22                 -0.865  
+##  9  1998                 1.28                      2.21                  1.17   
+## 10  1999                -0.366                    -0.581                -0.662  
+## # ... with 20 more rows</code></pre>
 </div>
 <div id="may-sep-daily-anomaly-maximum" class="section level3">
 <h3>MAY-SEP Daily anomaly (maximum)</h3>
@@ -1572,33 +1572,33 @@ nldas_climatology_summer</code></pre>
 <pre><code>## # A tibble: 25 x 5
 ##    installation  summer_data  summer_climatol~ anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;         &lt;list&gt;       &lt;list&gt;           &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb     &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_benning~ &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss    &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg    &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbell &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson   &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum     &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon   &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood     &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson  &lt;tibble [10~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb     &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_benning~ &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss    &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg    &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbell &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson   &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum     &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon   &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood     &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson  &lt;tibble [11~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows</code></pre>
 <pre class="r"><code>nldas_climatology_summer$anomaly_daily_max_may_sep[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 4
+## # A tibble: 30 x 4
 ##     year tmp_f_max_anomaly_mean heat_index_max_anomaly_m~ wbgt_f_max_anomaly_me~
 ##    &lt;dbl&gt;                  &lt;dbl&gt;                     &lt;dbl&gt;                  &lt;dbl&gt;
-##  1  1990                  0.705                     0.506                 0.530 
-##  2  1991                 -0.551                    -0.677                -0.419 
-##  3  1992                 -1.01                     -2.26                 -1.31  
-##  4  1993                  0.244                    -0.331                -0.302 
-##  5  1994                 -1.67                     -2.86                 -1.48  
-##  6  1995                  0.554                     0.332                -0.0471
-##  7  1996                  0.211                    -0.596                -0.0890
-##  8  1997                 -1.42                     -2.01                 -0.842 
-##  9  1998                  1.89                      2.83                  0.641 
-## 10  1999                 -0.254                    -0.749                -0.535 
-## # ... with 19 more rows</code></pre>
+##  1  1990                 0.478                      0.318                  0.477
+##  2  1991                -0.778                     -0.865                 -0.473
+##  3  1992                -1.24                      -2.45                  -1.36 
+##  4  1993                 0.0173                    -0.518                 -0.356
+##  5  1994                -1.90                      -3.05                  -1.53 
+##  6  1995                 0.327                      0.144                 -0.101
+##  7  1996                -0.0161                    -0.784                 -0.143
+##  8  1997                -1.65                      -2.20                  -0.896
+##  9  1998                 1.67                       2.64                   0.587
+## 10  1999                -0.481                     -0.937                 -0.589
+## # ... with 20 more rows</code></pre>
 </div>
 <div id="may-sep-days-mean-temperature-index-above-climate-normal-percentile-averaged-over-all-hours-of-day" class="section level3">
 <h3>MAY-SEP Days mean temperature index above climate normal percentile (averaged over all hours of day)</h3>
@@ -1611,33 +1611,33 @@ nldas_climatology_summer</code></pre>
 <pre><code>## # A tibble: 25 x 6
 ##    installation summer_data summer_climatol~ anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;        &lt;list&gt;      &lt;list&gt;           &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_bennin~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbe~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_bennin~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbe~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows, and 1 more variable: anomaly_days_mean_may_sep &lt;list&gt;</code></pre>
 <pre class="r"><code>nldas_climatology_summer$anomaly_days_mean_may_sep[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 10
+## # A tibble: 30 x 10
 ##     year days_tmp_gt85pct days_tmp_gt90pct days_tmp_gt95pct days_heat_index~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990                0                0                0                3
+##  1  1990                0                0                0                2
 ##  2  1991                0                0                0                3
 ##  3  1992                0                0                0                0
-##  4  1993                0                0                0                2
+##  4  1993                0                0                0                1
 ##  5  1994                0                0                0                0
-##  6  1995                1                0                0                4
-##  7  1996                0                0                0                4
+##  6  1995                0                0                0                5
+##  7  1996                0                0                0                3
 ##  8  1997                1                1                0                4
-##  9  1998                0                0                0                6
-## 10  1999                3                0                0                7
-## # ... with 19 more rows, and 5 more variables: days_heat_index_gt90pct &lt;int&gt;,
+##  9  1998                0                0                0                5
+## 10  1999                1                0                0                8
+## # ... with 20 more rows, and 5 more variables: days_heat_index_gt90pct &lt;int&gt;,
 ## #   days_heat_index_gt95pct &lt;int&gt;, days_wbgt_gt85pct &lt;int&gt;,
 ## #   days_wbgt_gt90pct &lt;int&gt;, days_wbgt_gt95pct &lt;int&gt;</code></pre>
 </div>
@@ -1653,34 +1653,34 @@ nldas_climatology_summer</code></pre>
 <pre><code>## # A tibble: 25 x 7
 ##    installation summer_data summer_climatol~ anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;        &lt;list&gt;      &lt;list&gt;           &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_bennin~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbe~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_bennin~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbe~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows, and 2 more variables:
 ## #   anomaly_days_mean_may_sep &lt;list&gt;, anomaly_days_max_may_sep &lt;list&gt;</code></pre>
 <pre class="r"><code>nldas_climatology_summer$anomaly_days_max_may_sep[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 10
+## # A tibble: 30 x 10
 ##     year days_tmp_max_gt~ days_tmp_max_gt~ days_tmp_max_gt~ days_heat_index~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               30               17               13               26
-##  2  1991               16                8                5               20
-##  3  1992                9                7                3                5
-##  4  1993               21               14                7               15
-##  5  1994                7                3                1                5
-##  6  1995               40               20               11               31
-##  7  1996               26               12                7               19
-##  8  1997               10                6                3               15
-##  9  1998               61               44               28               52
-## 10  1999               20               10                7               17
-## # ... with 19 more rows, and 5 more variables:
+##  1  1990               24               15                7               24
+##  2  1991               15                6                3               15
+##  3  1992                8                5                3                4
+##  4  1993               20                8                4               13
+##  5  1994                7                2                1                5
+##  6  1995               32               16                7               29
+##  7  1996               25                8                5               18
+##  8  1997                8                3                3               11
+##  9  1998               55               37               23               46
+## 10  1999               14                7                3               11
+## # ... with 20 more rows, and 5 more variables:
 ## #   days_heat_index_max_gt90pct &lt;int&gt;, days_heat_index_max_gt95pct &lt;int&gt;,
 ## #   days_wbgt_max_gt85pct &lt;int&gt;, days_wbgt_max_gt90pct &lt;int&gt;,
 ## #   days_wbgt_max_gt95pct &lt;int&gt;</code></pre>
@@ -1697,35 +1697,35 @@ nldas_climatology_summer</code></pre>
 <pre><code>## # A tibble: 25 x 8
 ##    installation summer_data summer_climatol~ anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;        &lt;list&gt;      &lt;list&gt;           &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_bennin~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbe~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_bennin~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbe~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows, and 3 more variables:
 ## #   anomaly_days_mean_may_sep &lt;list&gt;, anomaly_days_max_may_sep &lt;list&gt;,
 ## #   sd_days_max_may_sep &lt;list&gt;</code></pre>
 <pre class="r"><code>nldas_climatology_summer$sd_days_max_may_sep[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 7
+## # A tibble: 30 x 7
 ##     year days_tmp_max_gt~ days_heat_index~ days_wbgt_max_g~ days_tmp_max_gt~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               29               24               19                2
-##  2  1991               10               14               16                0
-##  3  1992                9                6               11                0
-##  4  1993               21               14               20                1
-##  5  1994                3                6               15                0
-##  6  1995               30               24               22                3
-##  7  1996               18               20               14                2
-##  8  1997                9               14               22                1
-##  9  1998               52               54               19                2
-## 10  1999               16               15               20                3
-## # ... with 19 more rows, and 2 more variables: days_heat_index_max_gt2sd &lt;int&gt;,
+##  1  1990               17               23               18                0
+##  2  1991                5               14               15                0
+##  3  1992                9                5               11                0
+##  4  1993               15               13               20                0
+##  5  1994                3                6               14                0
+##  6  1995               19               23               21                0
+##  7  1996               16               19               14                1
+##  8  1997                5               10               22                1
+##  9  1998               47               51               18                2
+## 10  1999                8               13               20                0
+## # ... with 20 more rows, and 2 more variables: days_heat_index_max_gt2sd &lt;int&gt;,
 ## #   days_wbgt_max_gt2sd &lt;int&gt;</code></pre>
 </div>
 <div id="may-sep-days-mean-temperature-index-above-1-or-2-standard-deviations-of-mean-daily-temperature-climate-normal" class="section level3">
@@ -1740,37 +1740,38 @@ nldas_climatology_summer</code></pre>
 <pre><code>## # A tibble: 25 x 9
 ##    installation summer_data summer_climatol~ anomaly_daily_m~ anomaly_daily_m~
 ##    &lt;chr&gt;        &lt;list&gt;      &lt;list&gt;           &lt;list&gt;           &lt;list&gt;          
-##  1 eglin_afb    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  2 fort_bennin~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  3 fort_bliss   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  4 fort_bragg   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  5 fort_campbe~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  6 fort_carson  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  7 fort_drum    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  8 fort_gordon  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-##  9 fort_hood    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
-## 10 fort_jackson &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [29 x 4~ &lt;tibble [29 x 4~
+##  1 eglin_afb    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  2 fort_bennin~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  3 fort_bliss   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  4 fort_bragg   &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  5 fort_campbe~ &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  6 fort_carson  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  7 fort_drum    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  8 fort_gordon  &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+##  9 fort_hood    &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
+## 10 fort_jackson &lt;tibble [1~ &lt;tibble [153 x ~ &lt;tibble [30 x 4~ &lt;tibble [30 x 4~
 ## # ... with 15 more rows, and 4 more variables:
 ## #   anomaly_days_mean_may_sep &lt;list&gt;, anomaly_days_max_may_sep &lt;list&gt;,
 ## #   sd_days_max_may_sep &lt;list&gt;, sd_days_mean_may_sep &lt;list&gt;</code></pre>
 <pre class="r"><code>nldas_climatology_summer$sd_days_mean_may_sep[1]</code></pre>
 <pre><code>## [[1]]
-## # A tibble: 29 x 7
+## # A tibble: 30 x 7
 ##     year days_tmp_mean_g~ days_heat_index~ days_wbgt_mean_~ days_tmp_mean_g~
 ##    &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;            &lt;int&gt;
-##  1  1990               19               18               12                1
-##  2  1991               19               23               20                0
-##  3  1992               10                5                5                0
-##  4  1993               22               18               19                0
-##  5  1994                8                7                8                0
-##  6  1995               26               29               25                3
-##  7  1996               20               17               14                3
-##  8  1997               13               15               12                2
-##  9  1998               51               50               37                2
-## 10  1999               16               16               14                2
-## # ... with 19 more rows, and 2 more variables:
+##  1  1990               13               17               11                0
+##  2  1991               18               22               20                0
+##  3  1992               11                4                5                0
+##  4  1993               14               16               17                0
+##  5  1994                8                7                7                0
+##  6  1995               21               28               24                0
+##  7  1996               18               16               16                1
+##  8  1997               11               14               12                2
+##  9  1998               46               49               34                1
+## 10  1999               10               15               14                1
+## # ... with 20 more rows, and 2 more variables:
 ## #   days_heat_index_mean_gt2sd &lt;int&gt;, days_wbgt_mean_gt2sd &lt;int&gt;</code></pre>
-<pre class="r"><code># write_rds(nldas_climatology_summer, &quot;data/nldas_climatology_summer.rds&quot;)
+<pre class="r"><code>#write_rds(nldas_climatology_summer, &quot;data/nldas_climatology_summer.rds&quot;)
+
 
 names(nldas_climatology)</code></pre>
 <pre><code>## [1] &quot;installation&quot;       &quot;data&quot;               &quot;climatology&quot;       

@@ -21,6 +21,7 @@ library(sweep)
 library(viridis)
 library(tsibble)
 library(lubridate)
+library(janitor)
 ```
 
 We want to use local time for daily averages. 
@@ -33,26 +34,34 @@ nldas_wide <- read_rds("data/nldas_wide.rds")
 # Add one second to duplicate times
 local_dst_adjust <-
   nldas_wide %>%
-    mutate(row = dplyr::row_number()) %>% 
-    tsibble::duplicates(key = installation, index = local_dttm) %>% 
+    group_by(installation) %>% 
+    arrange(installation, utc_dttm) %>%
+    ungroup() %>% 
+    mutate(row = dplyr::row_number()) %>%
+    tsibble::duplicates(key = installation, index = local_dttm) %>%
     filter(local_dttm != lead(local_dttm, default = "1")) %>% 
     mutate(local_dttm = local_dttm + seconds(1))
 
-local_dst_adjust
+
+ 
+local_dst_adjust 
 
 # Remove rows with duplicate local times and replace with updated rows (+1 second)
 
 nldas_wide <-
   nldas_wide %>%
-    mutate(row = dplyr::row_number()) %>% 
+    group_by(installation) %>% 
+    arrange(installation, utc_dttm) %>% 
+    ungroup() %>% 
+    mutate(row = dplyr::row_number()) %>%
     filter(!row %in% local_dst_adjust$row) %>% 
     bind_rows(local_dst_adjust) %>% 
-    arrange(local_dttm) %>% 
+    arrange(installation, local_dttm) %>% 
     dplyr::select(-row)
 
 # Check for duplicates
 nldas_wide %>% 
-  duplicates(key = installation, index = local_dttm)
+  tsibble::duplicates(key = installation, index = local_dttm)
 
 
 nldas_tsibble <-
@@ -81,8 +90,9 @@ nldas_daily <-
 
 nldas_daily
 
-nldas_daily %>% 
-  filter(date >= date("2019-07-01")) %>% 
+nldas_daily %>%
+    filter(date >= date("2019-07-01") &
+             date <= date("2019-07-31")) %>% 
     autoplot(wbgt_f_mean)
 
 ```
@@ -123,6 +133,8 @@ nldas_annual <-
 nldas_annual
 
 # write_rds(nldas_annual, "data/nldas_annual.rds")
+
+
 
 nldas_annual %>% 
     autoplot(wbgt_f_mean)
@@ -259,6 +271,7 @@ heat_risk_hours <-
 heat_risk_hours
 
 # write_rds(heat_risk_hours, "data/heat_risk_hours.rds")
+
 ```
 
 

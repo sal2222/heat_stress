@@ -69,13 +69,13 @@ Read-in data prepared in [`nldas_averaged`](nldas_averaged.html) and [`climatolo
 # Read data saved in "nldas_averaged" and "climatology" pages
 
 nldas_annual <- read_rds("data/nldas_annual.rds") %>% 
-        filter(year < 2019,
+        filter(year < 2020,
                year > 1989)
 heat_risk_days <- read_rds("data/heat_risk_days.rds") %>% 
-        filter(year < 2019,
+        filter(year < 2020,
               year > 1989)
 heat_risk_hours <- read_rds("data/heat_risk_hours.rds") %>% 
-        filter(year < 2019,
+        filter(year < 2020,
                year > 1989)
 nldas_climatology <- read_rds("data/nldas_climatology.rds")
 
@@ -88,19 +88,19 @@ nldas_climatology_summer <- read_rds("data/nldas_climatology_summer.rds")
 nldas_annual_nest <-
   nldas_annual %>% 
     dplyr::select(installation:wbgt_f_mean) %>%
-    filter(year < 2019) %>% 
+    filter(year < 2020) %>% 
     as_tibble() %>% 
     nest(., annual_mean = year:wbgt_f_mean)
 
 heat_risk_days_nest <-
   heat_risk_days %>% 
-    filter(year < 2019) %>% 
+    filter(year < 2020) %>% 
     as_tibble() %>% 
     nest(., heat_risk_days = year:days_wbgt_gt90)
 
 heat_risk_hours_nest <-
   heat_risk_hours %>% 
-    filter(year < 2019,
+    filter(year < 2020,
            year > 1989) %>% 
     as_tibble() %>% 
     nest(., heat_risk_hours = year:hours_wbgt_gt90)
@@ -200,7 +200,8 @@ annual_tables_list <-
 
 annual_tables_list 
 
-# write_rds(annual_tables_list, "data/annual_tables_list.rds")
+#write_rds(annual_tables_list, "data/annual_tables_list.rds")
+
 
 ```
 

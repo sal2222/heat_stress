@@ -528,13 +528,13 @@ div.tocify {
 <pre class="r"><code># Read data saved in &quot;nldas_averaged&quot; and &quot;climatology&quot; pages
 
 nldas_annual &lt;- read_rds(&quot;data/nldas_annual.rds&quot;) %&gt;% 
-        filter(year &lt; 2019,
+        filter(year &lt; 2020,
                year &gt; 1989)
 heat_risk_days &lt;- read_rds(&quot;data/heat_risk_days.rds&quot;) %&gt;% 
-        filter(year &lt; 2019,
+        filter(year &lt; 2020,
               year &gt; 1989)
 heat_risk_hours &lt;- read_rds(&quot;data/heat_risk_hours.rds&quot;) %&gt;% 
-        filter(year &lt; 2019,
+        filter(year &lt; 2020,
                year &gt; 1989)
 nldas_climatology &lt;- read_rds(&quot;data/nldas_climatology.rds&quot;)
 
@@ -544,19 +544,19 @@ nldas_climatology_summer &lt;- read_rds(&quot;data/nldas_climatology_summer.rds&
 <pre class="r"><code>nldas_annual_nest &lt;-
   nldas_annual %&gt;% 
     dplyr::select(installation:wbgt_f_mean) %&gt;%
-    filter(year &lt; 2019) %&gt;% 
+    filter(year &lt; 2020) %&gt;% 
     as_tibble() %&gt;% 
     nest(., annual_mean = year:wbgt_f_mean)
 
 heat_risk_days_nest &lt;-
   heat_risk_days %&gt;% 
-    filter(year &lt; 2019) %&gt;% 
+    filter(year &lt; 2020) %&gt;% 
     as_tibble() %&gt;% 
     nest(., heat_risk_days = year:days_wbgt_gt90)
 
 heat_risk_hours_nest &lt;-
   heat_risk_hours %&gt;% 
-    filter(year &lt; 2019,
+    filter(year &lt; 2020,
            year &gt; 1989) %&gt;% 
     as_tibble() %&gt;% 
     nest(., heat_risk_hours = year:hours_wbgt_gt90)
@@ -567,7 +567,7 @@ absolutes_annual_nest &lt;-
   left_join(heat_risk_hours_nest, by = &quot;installation&quot;)
 
 absolutes_annual_nest</code></pre>
-<pre><code>## # A tsibble: 725 x 16 [1Y]
+<pre><code>## # A tsibble: 750 x 16 [1Y]
 ## # Key:       installation [25]
 ##    installation  year tmp_f_mean heat_index_mean wbgt_f_mean tmp_f_max
 ##    &lt;chr&gt;        &lt;dbl&gt;      &lt;dbl&gt;           &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
@@ -581,7 +581,7 @@ absolutes_annual_nest</code></pre>
 ##  8 eglin_afb     1997       68.7            70.1        66.6      97.0
 ##  9 eglin_afb     1998       70.4            72.4        68.3      97.2
 ## 10 eglin_afb     1999       69.5            70.9        67.1      98.2
-## # ... with 715 more rows, and 10 more variables: heat_index_max &lt;dbl&gt;,
+## # ... with 740 more rows, and 10 more variables: heat_index_max &lt;dbl&gt;,
 ## #   wbgt_f_max &lt;dbl&gt;, tmp_f_min &lt;dbl&gt;, heat_index_min &lt;dbl&gt;, wbgt_f_min &lt;dbl&gt;,
 ## #   tmp_f_sd &lt;dbl&gt;, heat_index_sd &lt;dbl&gt;, wbgt_f_sd &lt;dbl&gt;,
 ## #   heat_risk_days &lt;list&lt;df[,9]&gt;&gt;, heat_risk_hours &lt;list&lt;df[,9]&gt;&gt;</code></pre>
@@ -596,7 +596,7 @@ absolutes_annual_nest</code></pre>
   dplyr::select(-c(summer_data, summer_climatology))
   
 annual_index_nested</code></pre>
-<pre><code>## # A tsibble: 725 x 28 [1Y]
+<pre><code>## # A tsibble: 750 x 28 [1Y]
 ## # Key:       installation [25]
 ##    installation  year tmp_f_mean heat_index_mean wbgt_f_mean tmp_f_max
 ##    &lt;chr&gt;        &lt;dbl&gt;      &lt;dbl&gt;           &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
@@ -610,7 +610,7 @@ annual_index_nested</code></pre>
 ##  8 eglin_afb     1997       68.7            70.1        66.6      97.0
 ##  9 eglin_afb     1998       70.4            72.4        68.3      97.2
 ## 10 eglin_afb     1999       69.5            70.9        67.1      98.2
-## # ... with 715 more rows, and 22 more variables: heat_index_max &lt;dbl&gt;,
+## # ... with 740 more rows, and 22 more variables: heat_index_max &lt;dbl&gt;,
 ## #   wbgt_f_max &lt;dbl&gt;, tmp_f_min &lt;dbl&gt;, heat_index_min &lt;dbl&gt;, wbgt_f_min &lt;dbl&gt;,
 ## #   tmp_f_sd &lt;dbl&gt;, heat_index_sd &lt;dbl&gt;, wbgt_f_sd &lt;dbl&gt;,
 ## #   heat_risk_days &lt;list&lt;df[,9]&gt;&gt;, heat_risk_hours &lt;list&lt;df[,9]&gt;&gt;,
@@ -669,7 +669,7 @@ annual_index_nested</code></pre>
 <pre><code>## Joining, by = c(&quot;installation&quot;, &quot;year&quot;)
 ## Joining, by = c(&quot;installation&quot;, &quot;year&quot;)</code></pre>
 <pre class="r"><code>nldas_annual_index </code></pre>
-<pre><code>## # A tsibble: 725 x 88 [1Y]
+<pre><code>## # A tsibble: 750 x 88 [1Y]
 ## # Key:       installation [25]
 ##    installation  year tmp_f_mean heat_index_mean wbgt_f_mean tmp_f_max
 ##    &lt;chr&gt;        &lt;dbl&gt;      &lt;dbl&gt;           &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt;
@@ -683,7 +683,7 @@ annual_index_nested</code></pre>
 ##  8 eglin_afb     1997       68.7            70.1        66.6      97.0
 ##  9 eglin_afb     1998       70.4            72.4        68.3      97.2
 ## 10 eglin_afb     1999       69.5            70.9        67.1      98.2
-## # ... with 715 more rows, and 82 more variables: heat_index_max &lt;dbl&gt;,
+## # ... with 740 more rows, and 82 more variables: heat_index_max &lt;dbl&gt;,
 ## #   wbgt_f_max &lt;dbl&gt;, tmp_f_min &lt;dbl&gt;, heat_index_min &lt;dbl&gt;, wbgt_f_min &lt;dbl&gt;,
 ## #   tmp_f_sd &lt;dbl&gt;, heat_index_sd &lt;dbl&gt;, wbgt_f_sd &lt;dbl&gt;, days_hi_gt80 &lt;int&gt;,
 ## #   days_hi_gt90 &lt;int&gt;, days_hi_gt103 &lt;int&gt;, days_hi_gt125 &lt;int&gt;,
@@ -739,19 +739,19 @@ annual_tables_list </code></pre>
 <pre><code>## # A tibble: 25 x 2
 ## # Groups:   installation [25]
 ##    installation               data
-##    &lt;chr&gt;           &lt;list&lt;df[,30]&gt;&gt;
-##  1 eglin_afb             [86 x 30]
-##  2 fort_benning_ga       [86 x 30]
-##  3 fort_bliss            [86 x 30]
-##  4 fort_bragg            [86 x 30]
-##  5 fort_campbell         [86 x 30]
-##  6 fort_carson           [86 x 30]
-##  7 fort_drum             [86 x 30]
-##  8 fort_gordon           [86 x 30]
-##  9 fort_hood             [86 x 30]
-## 10 fort_jackson          [86 x 30]
+##    &lt;chr&gt;           &lt;list&lt;df[,31]&gt;&gt;
+##  1 eglin_afb             [86 x 31]
+##  2 fort_benning_ga       [86 x 31]
+##  3 fort_bliss            [86 x 31]
+##  4 fort_bragg            [86 x 31]
+##  5 fort_campbell         [86 x 31]
+##  6 fort_carson           [86 x 31]
+##  7 fort_drum             [86 x 31]
+##  8 fort_gordon           [86 x 31]
+##  9 fort_hood             [86 x 31]
+## 10 fort_jackson          [86 x 31]
 ## # ... with 15 more rows</code></pre>
-<pre class="r"><code># write_rds(annual_tables_list, &quot;data/annual_tables_list.rds&quot;)</code></pre>
+<pre class="r"><code>#write_rds(annual_tables_list, &quot;data/annual_tables_list.rds&quot;)</code></pre>
 </div>
 <div id="example-table-eglin_afb" class="section level3">
 <h3>Example Table: eglin_afb</h3>
@@ -855,11 +855,14 @@ index
 <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
 2018
 </th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+2019
+</th>
 </tr>
 </thead>
 <tbody>
 <tr grouplength="28">
-<td colspan="30" style="border-bottom: 1px solid;">
+<td colspan="31" style="border-bottom: 1px solid;">
 <strong>Absolute Metric</strong>
 </td>
 </tr>
@@ -954,6 +957,9 @@ tmp_f_mean
 <td style="text-align:right;">
 69.83
 </td>
+<td style="text-align:right;">
+70.64
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -1045,6 +1051,9 @@ heat_index_mean
 </td>
 <td style="text-align:right;">
 72.03
+</td>
+<td style="text-align:right;">
+71.78
 </td>
 </tr>
 <tr>
@@ -1138,6 +1147,9 @@ wbgt_f_mean
 <td style="text-align:right;">
 68.26
 </td>
+<td style="text-align:right;">
+66.75
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -1229,6 +1241,9 @@ tmp_f_max
 </td>
 <td style="text-align:right;">
 94.39
+</td>
+<td style="text-align:right;">
+107.22
 </td>
 </tr>
 <tr>
@@ -1322,6 +1337,9 @@ heat_index_max
 <td style="text-align:right;">
 109.32
 </td>
+<td style="text-align:right;">
+111.11
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -1413,6 +1431,9 @@ wbgt_f_max
 </td>
 <td style="text-align:right;">
 99.01
+</td>
+<td style="text-align:right;">
+98.85
 </td>
 </tr>
 <tr>
@@ -1506,6 +1527,9 @@ tmp_f_min
 <td style="text-align:right;">
 23.14
 </td>
+<td style="text-align:right;">
+25.99
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -1597,6 +1621,9 @@ heat_index_min
 </td>
 <td style="text-align:right;">
 23.14
+</td>
+<td style="text-align:right;">
+25.99
 </td>
 </tr>
 <tr>
@@ -1690,6 +1717,9 @@ wbgt_f_min
 <td style="text-align:right;">
 21.29
 </td>
+<td style="text-align:right;">
+22.22
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -1781,6 +1811,9 @@ tmp_f_sd
 </td>
 <td style="text-align:right;">
 13.84
+</td>
+<td style="text-align:right;">
+16.32
 </td>
 </tr>
 <tr>
@@ -1874,6 +1907,9 @@ heat_index_sd
 <td style="text-align:right;">
 16.74
 </td>
+<td style="text-align:right;">
+18.47
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -1965,6 +2001,9 @@ wbgt_f_sd
 </td>
 <td style="text-align:right;">
 13.78
+</td>
+<td style="text-align:right;">
+14.52
 </td>
 </tr>
 <tr>
@@ -2058,6 +2097,9 @@ days_hi_gt80
 <td style="text-align:right;">
 193.00
 </td>
+<td style="text-align:right;">
+196.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -2149,6 +2191,9 @@ days_hi_gt90
 </td>
 <td style="text-align:right;">
 129.00
+</td>
+<td style="text-align:right;">
+136.00
 </td>
 </tr>
 <tr>
@@ -2242,10 +2287,16 @@ days_hi_gt103
 <td style="text-align:right;">
 8.00
 </td>
+<td style="text-align:right;">
+38.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
 days_hi_gt125
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -2426,6 +2477,9 @@ days_wbgt_gt82
 <td style="text-align:right;">
 147.00
 </td>
+<td style="text-align:right;">
+156.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -2517,6 +2571,9 @@ days_wbgt_gt85
 </td>
 <td style="text-align:right;">
 106.00
+</td>
+<td style="text-align:right;">
+115.00
 </td>
 </tr>
 <tr>
@@ -2610,6 +2667,9 @@ days_wbgt_gt88
 <td style="text-align:right;">
 54.00
 </td>
+<td style="text-align:right;">
+56.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -2701,6 +2761,9 @@ days_wbgt_gt90
 </td>
 <td style="text-align:right;">
 28.00
+</td>
+<td style="text-align:right;">
+27.00
 </td>
 </tr>
 <tr>
@@ -2794,6 +2857,9 @@ hours_hi_gt80
 <td style="text-align:right;">
 3211.00
 </td>
+<td style="text-align:right;">
+3296.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -2885,6 +2951,9 @@ hours_hi_gt90
 </td>
 <td style="text-align:right;">
 1348.00
+</td>
+<td style="text-align:right;">
+1751.00
 </td>
 </tr>
 <tr>
@@ -2978,10 +3047,16 @@ hours_hi_gt103
 <td style="text-align:right;">
 40.00
 </td>
+<td style="text-align:right;">
+182.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
 hours_hi_gt125
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -3162,6 +3237,9 @@ hours_wbgt_gt82
 <td style="text-align:right;">
 1235.00
 </td>
+<td style="text-align:right;">
+1279.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -3253,6 +3331,9 @@ hours_wbgt_gt85
 </td>
 <td style="text-align:right;">
 648.00
+</td>
+<td style="text-align:right;">
+732.00
 </td>
 </tr>
 <tr>
@@ -3346,6 +3427,9 @@ hours_wbgt_gt88
 <td style="text-align:right;">
 207.00
 </td>
+<td style="text-align:right;">
+227.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -3438,9 +3522,12 @@ hours_wbgt_gt90
 <td style="text-align:right;">
 64.00
 </td>
+<td style="text-align:right;">
+71.00
+</td>
 </tr>
 <tr grouplength="58">
-<td colspan="30" style="border-bottom: 1px solid;">
+<td colspan="31" style="border-bottom: 1px solid;">
 <strong>Relative Metric</strong>
 </td>
 </tr>
@@ -3449,91 +3536,94 @@ hours_wbgt_gt90
 tmp_f_mean_anomaly_mean
 </td>
 <td style="text-align:right;">
-1.16
+1.12
 </td>
 <td style="text-align:right;">
-0.37
+0.32
 </td>
 <td style="text-align:right;">
--0.85
+-0.90
 </td>
 <td style="text-align:right;">
--0.72
+-0.77
+</td>
+<td style="text-align:right;">
+-0.06
+</td>
+<td style="text-align:right;">
+-0.26
+</td>
+<td style="text-align:right;">
+-1.00
+</td>
+<td style="text-align:right;">
+-0.53
+</td>
+<td style="text-align:right;">
+1.15
+</td>
+<td style="text-align:right;">
+0.25
+</td>
+<td style="text-align:right;">
+-0.24
+</td>
+<td style="text-align:right;">
+-0.42
+</td>
+<td style="text-align:right;">
+0.45
+</td>
+<td style="text-align:right;">
+-0.70
 </td>
 <td style="text-align:right;">
 -0.01
 </td>
 <td style="text-align:right;">
--0.22
+-0.03
 </td>
 <td style="text-align:right;">
--0.96
+0.63
 </td>
 <td style="text-align:right;">
--0.49
+0.54
 </td>
 <td style="text-align:right;">
-1.20
+-1.21
 </td>
 <td style="text-align:right;">
-0.30
+-0.76
 </td>
 <td style="text-align:right;">
--0.19
+-2.25
 </td>
 <td style="text-align:right;">
--0.37
+-0.09
 </td>
 <td style="text-align:right;">
-0.49
+1.18
 </td>
 <td style="text-align:right;">
--0.65
+-0.51
 </td>
 <td style="text-align:right;">
-0.04
+-1.62
 </td>
 <td style="text-align:right;">
-0.01
+1.52
 </td>
 <td style="text-align:right;">
-0.68
+1.02
 </td>
 <td style="text-align:right;">
-0.59
+1.29
 </td>
 <td style="text-align:right;">
--1.17
+0.57
 </td>
 <td style="text-align:right;">
--0.71
-</td>
-<td style="text-align:right;">
--2.21
-</td>
-<td style="text-align:right;">
--0.04
-</td>
-<td style="text-align:right;">
-1.22
-</td>
-<td style="text-align:right;">
--0.47
-</td>
-<td style="text-align:right;">
--1.57
-</td>
-<td style="text-align:right;">
-1.57
-</td>
-<td style="text-align:right;">
-1.07
-</td>
-<td style="text-align:right;">
-1.34
-</td>
-<td style="text-align:right;">
-0.62
+1.32
 </td>
 </tr>
 <tr>
@@ -3541,91 +3631,94 @@ tmp_f_mean_anomaly_mean
 heat_index_mean_anomaly_mean
 </td>
 <td style="text-align:right;">
-1.14
+1.11
 </td>
 <td style="text-align:right;">
-0.30
+0.27
 </td>
 <td style="text-align:right;">
--1.37
+-1.40
 </td>
 <td style="text-align:right;">
--0.91
-</td>
-<td style="text-align:right;">
--0.49
-</td>
-<td style="text-align:right;">
--0.23
-</td>
-<td style="text-align:right;">
--1.20
-</td>
-<td style="text-align:right;">
--0.66
-</td>
-<td style="text-align:right;">
-1.60
-</td>
-<td style="text-align:right;">
-0.16
-</td>
-<td style="text-align:right;">
--0.36
-</td>
-<td style="text-align:right;">
--0.85
-</td>
-<td style="text-align:right;">
-0.53
-</td>
-<td style="text-align:right;">
--0.85
-</td>
-<td style="text-align:right;">
-0.13
-</td>
-<td style="text-align:right;">
-0.25
-</td>
-<td style="text-align:right;">
-0.73
-</td>
-<td style="text-align:right;">
-0.71
-</td>
-<td style="text-align:right;">
--1.36
-</td>
-<td style="text-align:right;">
--0.89
-</td>
-<td style="text-align:right;">
--1.87
-</td>
-<td style="text-align:right;">
--0.14
-</td>
-<td style="text-align:right;">
-0.99
+-0.94
 </td>
 <td style="text-align:right;">
 -0.52
 </td>
 <td style="text-align:right;">
--1.80
+-0.27
 </td>
 <td style="text-align:right;">
-2.36
+-1.23
 </td>
 <td style="text-align:right;">
-1.67
+-0.70
 </td>
 <td style="text-align:right;">
-1.64
+1.57
 </td>
 <td style="text-align:right;">
-1.28
+0.13
+</td>
+<td style="text-align:right;">
+-0.40
+</td>
+<td style="text-align:right;">
+-0.88
+</td>
+<td style="text-align:right;">
+0.49
+</td>
+<td style="text-align:right;">
+-0.88
+</td>
+<td style="text-align:right;">
+0.10
+</td>
+<td style="text-align:right;">
+0.21
+</td>
+<td style="text-align:right;">
+0.70
+</td>
+<td style="text-align:right;">
+0.67
+</td>
+<td style="text-align:right;">
+-1.39
+</td>
+<td style="text-align:right;">
+-0.92
+</td>
+<td style="text-align:right;">
+-1.90
+</td>
+<td style="text-align:right;">
+-0.17
+</td>
+<td style="text-align:right;">
+0.96
+</td>
+<td style="text-align:right;">
+-0.55
+</td>
+<td style="text-align:right;">
+-1.83
+</td>
+<td style="text-align:right;">
+2.32
+</td>
+<td style="text-align:right;">
+1.63
+</td>
+<td style="text-align:right;">
+1.61
+</td>
+<td style="text-align:right;">
+1.25
+</td>
+<td style="text-align:right;">
+0.93
 </td>
 </tr>
 <tr>
@@ -3633,91 +3726,94 @@ heat_index_mean_anomaly_mean
 wbgt_f_mean_anomaly_mean
 </td>
 <td style="text-align:right;">
-0.93
+0.94
 </td>
 <td style="text-align:right;">
-0.20
+0.22
+</td>
+<td style="text-align:right;">
+-1.04
+</td>
+<td style="text-align:right;">
+-0.99
+</td>
+<td style="text-align:right;">
+-0.07
+</td>
+<td style="text-align:right;">
+-0.38
 </td>
 <td style="text-align:right;">
 -1.06
 </td>
 <td style="text-align:right;">
--1.00
+-0.55
 </td>
 <td style="text-align:right;">
--0.08
+1.11
 </td>
 <td style="text-align:right;">
--0.40
-</td>
-<td style="text-align:right;">
--1.07
-</td>
-<td style="text-align:right;">
--0.57
-</td>
-<td style="text-align:right;">
-1.10
-</td>
-<td style="text-align:right;">
--0.06
-</td>
-<td style="text-align:right;">
--0.65
-</td>
-<td style="text-align:right;">
--0.69
-</td>
-<td style="text-align:right;">
-0.34
-</td>
-<td style="text-align:right;">
--0.26
-</td>
-<td style="text-align:right;">
-0.34
-</td>
-<td style="text-align:right;">
-0.35
-</td>
-<td style="text-align:right;">
-0.52
-</td>
-<td style="text-align:right;">
-0.29
-</td>
-<td style="text-align:right;">
--0.73
+-0.04
 </td>
 <td style="text-align:right;">
 -0.63
 </td>
 <td style="text-align:right;">
--2.16
+-0.68
 </td>
 <td style="text-align:right;">
--0.53
+0.36
 </td>
 <td style="text-align:right;">
-0.97
+-0.25
 </td>
 <td style="text-align:right;">
--0.12
+0.36
 </td>
 <td style="text-align:right;">
--1.31
+0.36
 </td>
 <td style="text-align:right;">
-2.01
+0.53
 </td>
 <td style="text-align:right;">
-1.37
+0.31
 </td>
 <td style="text-align:right;">
-1.84
+-0.72
 </td>
 <td style="text-align:right;">
-1.07
+-0.61
+</td>
+<td style="text-align:right;">
+-2.15
+</td>
+<td style="text-align:right;">
+-0.51
+</td>
+<td style="text-align:right;">
+0.98
+</td>
+<td style="text-align:right;">
+-0.10
+</td>
+<td style="text-align:right;">
+-1.30
+</td>
+<td style="text-align:right;">
+2.03
+</td>
+<td style="text-align:right;">
+1.38
+</td>
+<td style="text-align:right;">
+1.86
+</td>
+<td style="text-align:right;">
+1.08
+</td>
+<td style="text-align:right;">
+-0.50
 </td>
 </tr>
 <tr>
@@ -3725,91 +3821,94 @@ wbgt_f_mean_anomaly_mean
 tmp_f_max_anomaly_mean
 </td>
 <td style="text-align:right;">
-1.58
+1.48
 </td>
 <td style="text-align:right;">
--0.05
+-0.16
 </td>
 <td style="text-align:right;">
--1.01
+-1.11
 </td>
 <td style="text-align:right;">
--0.76
+-0.86
+</td>
+<td style="text-align:right;">
+-0.44
 </td>
 <td style="text-align:right;">
 -0.34
 </td>
 <td style="text-align:right;">
--0.24
+-0.89
 </td>
 <td style="text-align:right;">
--0.78
+-1.30
 </td>
 <td style="text-align:right;">
--1.20
+0.99
 </td>
 <td style="text-align:right;">
-1.10
+0.51
 </td>
 <td style="text-align:right;">
-0.62
+0.44
 </td>
 <td style="text-align:right;">
-0.55
+-0.51
 </td>
 <td style="text-align:right;">
--0.41
+0.00
 </td>
 <td style="text-align:right;">
-0.10
+-1.19
 </td>
 <td style="text-align:right;">
--1.09
+-0.55
 </td>
 <td style="text-align:right;">
--0.45
+-0.64
 </td>
 <td style="text-align:right;">
--0.54
+0.77
 </td>
 <td style="text-align:right;">
-0.87
+0.94
 </td>
 <td style="text-align:right;">
-1.04
+-1.38
 </td>
 <td style="text-align:right;">
--1.28
+-0.31
 </td>
 <td style="text-align:right;">
--0.21
+-1.80
 </td>
 <td style="text-align:right;">
--1.70
+1.60
 </td>
 <td style="text-align:right;">
-1.70
+1.67
 </td>
 <td style="text-align:right;">
-1.77
+-0.84
 </td>
 <td style="text-align:right;">
--0.74
+-1.19
 </td>
 <td style="text-align:right;">
--1.09
+1.09
 </td>
 <td style="text-align:right;">
-1.20
+0.73
 </td>
 <td style="text-align:right;">
-0.83
+0.64
 </td>
 <td style="text-align:right;">
-0.75
+-0.32
 </td>
 <td style="text-align:right;">
--0.22
+2.98
 </td>
 </tr>
 <tr>
@@ -3817,91 +3916,94 @@ tmp_f_max_anomaly_mean
 heat_index_max_anomaly_mean
 </td>
 <td style="text-align:right;">
-1.56
+1.48
 </td>
 <td style="text-align:right;">
--0.11
+-0.19
 </td>
 <td style="text-align:right;">
--1.71
+-1.79
 </td>
 <td style="text-align:right;">
--1.26
+-1.35
 </td>
 <td style="text-align:right;">
--0.81
+-0.89
 </td>
 <td style="text-align:right;">
--0.37
+-0.45
 </td>
 <td style="text-align:right;">
--1.19
+-1.27
 </td>
 <td style="text-align:right;">
--1.53
+-1.61
+</td>
+<td style="text-align:right;">
+1.44
+</td>
+<td style="text-align:right;">
+0.31
+</td>
+<td style="text-align:right;">
+-0.08
+</td>
+<td style="text-align:right;">
+-1.14
+</td>
+<td style="text-align:right;">
+0.03
+</td>
+<td style="text-align:right;">
+-1.09
+</td>
+<td style="text-align:right;">
+-0.41
+</td>
+<td style="text-align:right;">
+-0.34
+</td>
+<td style="text-align:right;">
+0.68
+</td>
+<td style="text-align:right;">
+0.86
+</td>
+<td style="text-align:right;">
+-1.29
+</td>
+<td style="text-align:right;">
+-0.32
+</td>
+<td style="text-align:right;">
+-1.45
+</td>
+<td style="text-align:right;">
+1.25
+</td>
+<td style="text-align:right;">
+1.50
+</td>
+<td style="text-align:right;">
+-0.60
+</td>
+<td style="text-align:right;">
+-1.27
+</td>
+<td style="text-align:right;">
+2.07
 </td>
 <td style="text-align:right;">
 1.53
 </td>
 <td style="text-align:right;">
-0.39
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
--1.05
-</td>
-<td style="text-align:right;">
-0.11
-</td>
-<td style="text-align:right;">
--1.00
-</td>
-<td style="text-align:right;">
--0.33
-</td>
-<td style="text-align:right;">
--0.26
-</td>
-<td style="text-align:right;">
-0.76
-</td>
-<td style="text-align:right;">
-0.94
-</td>
-<td style="text-align:right;">
--1.21
-</td>
-<td style="text-align:right;">
--0.24
-</td>
-<td style="text-align:right;">
--1.37
-</td>
-<td style="text-align:right;">
 1.34
 </td>
 <td style="text-align:right;">
-1.58
+0.67
 </td>
 <td style="text-align:right;">
--0.51
-</td>
-<td style="text-align:right;">
--1.18
-</td>
-<td style="text-align:right;">
-2.15
-</td>
-<td style="text-align:right;">
-1.61
-</td>
-<td style="text-align:right;">
-1.42
-</td>
-<td style="text-align:right;">
-0.75
+2.38
 </td>
 </tr>
 <tr>
@@ -3912,13 +4014,13 @@ wbgt_f_max_anomaly_mean
 1.39
 </td>
 <td style="text-align:right;">
--0.17
+-0.18
 </td>
 <td style="text-align:right;">
 -1.23
 </td>
 <td style="text-align:right;">
--1.17
+-1.18
 </td>
 <td style="text-align:right;">
 -0.40
@@ -3930,22 +4032,22 @@ wbgt_f_max_anomaly_mean
 -0.96
 </td>
 <td style="text-align:right;">
--0.93
+-0.94
 </td>
 <td style="text-align:right;">
 0.61
 </td>
 <td style="text-align:right;">
-0.20
+0.19
 </td>
 <td style="text-align:right;">
 -0.47
 </td>
 <td style="text-align:right;">
--0.75
+-0.76
 </td>
 <td style="text-align:right;">
-0.02
+0.01
 </td>
 <td style="text-align:right;">
 -0.46
@@ -3957,10 +4059,10 @@ wbgt_f_max_anomaly_mean
 0.31
 </td>
 <td style="text-align:right;">
-0.72
+0.71
 </td>
 <td style="text-align:right;">
-0.47
+0.46
 </td>
 <td style="text-align:right;">
 -0.43
@@ -3969,19 +4071,19 @@ wbgt_f_max_anomaly_mean
 -0.67
 </td>
 <td style="text-align:right;">
--1.67
+-1.68
 </td>
 <td style="text-align:right;">
 0.36
 </td>
 <td style="text-align:right;">
-1.05
+1.04
 </td>
 <td style="text-align:right;">
 -0.23
 </td>
 <td style="text-align:right;">
--0.69
+-0.70
 </td>
 <td style="text-align:right;">
 1.89
@@ -3995,6 +4097,9 @@ wbgt_f_max_anomaly_mean
 <td style="text-align:right;">
 0.53
 </td>
+<td style="text-align:right;">
+0.09
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
@@ -4007,46 +4112,43 @@ days_tmp_gt85pct
 11.00
 </td>
 <td style="text-align:right;">
-2.00
+3.00
 </td>
 <td style="text-align:right;">
-7.00
+6.00
 </td>
 <td style="text-align:right;">
-10.00
+8.00
 </td>
 <td style="text-align:right;">
 5.00
 </td>
 <td style="text-align:right;">
-11.00
+9.00
 </td>
 <td style="text-align:right;">
 15.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-19.00
 </td>
 <td style="text-align:right;">
 16.00
 </td>
 <td style="text-align:right;">
-7.00
+20.00
+</td>
+<td style="text-align:right;">
+13.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+9.00
 </td>
 <td style="text-align:right;">
 21.00
-</td>
-<td style="text-align:right;">
-12.00
 </td>
 <td style="text-align:right;">
 13.00
@@ -4055,37 +4157,43 @@ days_tmp_gt85pct
 15.00
 </td>
 <td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-12.00
-</td>
-<td style="text-align:right;">
-4.00
+14.00
 </td>
 <td style="text-align:right;">
 9.00
 </td>
 <td style="text-align:right;">
-18.00
-</td>
-<td style="text-align:right;">
-17.00
+10.00
 </td>
 <td style="text-align:right;">
 4.00
 </td>
 <td style="text-align:right;">
-25.00
+10.00
 </td>
 <td style="text-align:right;">
-13.00
+17.00
 </td>
 <td style="text-align:right;">
-32.00
+18.00
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+12.00
+</td>
+<td style="text-align:right;">
+31.00
 </td>
 <td style="text-align:right;">
 27.00
+</td>
+<td style="text-align:right;">
+79.00
 </td>
 </tr>
 <tr>
@@ -4093,10 +4201,10 @@ days_tmp_gt85pct
 days_tmp_gt90pct
 </td>
 <td style="text-align:right;">
-12.00
+11.00
 </td>
 <td style="text-align:right;">
-4.00
+3.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -4123,46 +4231,46 @@ days_tmp_gt90pct
 9.00
 </td>
 <td style="text-align:right;">
-5.00
+3.00
 </td>
 <td style="text-align:right;">
 4.00
 </td>
 <td style="text-align:right;">
-6.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
 5.00
 </td>
 <td style="text-align:right;">
 3.00
 </td>
 <td style="text-align:right;">
-1.00
+7.00
+</td>
+<td style="text-align:right;">
+4.00
 </td>
 <td style="text-align:right;">
 1.00
 </td>
 <td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
 1.00
 </td>
 <td style="text-align:right;">
-6.00
+0.00
 </td>
 <td style="text-align:right;">
-11.00
+2.00
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+10.00
 </td>
 <td style="text-align:right;">
 1.00
@@ -4174,10 +4282,13 @@ days_tmp_gt90pct
 7.00
 </td>
 <td style="text-align:right;">
-14.00
+16.00
 </td>
 <td style="text-align:right;">
-6.00
+5.00
+</td>
+<td style="text-align:right;">
+51.00
 </td>
 </tr>
 <tr>
@@ -4221,7 +4332,7 @@ days_tmp_gt95pct
 0.00
 </td>
 <td style="text-align:right;">
-2.00
+3.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -4270,6 +4381,9 @@ days_tmp_gt95pct
 </td>
 <td style="text-align:right;">
 0.00
+</td>
+<td style="text-align:right;">
+23.00
 </td>
 </tr>
 <tr>
@@ -4277,7 +4391,7 @@ days_tmp_gt95pct
 days_heat_index_gt85pct
 </td>
 <td style="text-align:right;">
-25.00
+24.00
 </td>
 <td style="text-align:right;">
 16.00
@@ -4286,82 +4400,85 @@ days_heat_index_gt85pct
 5.00
 </td>
 <td style="text-align:right;">
-9.00
+7.00
 </td>
 <td style="text-align:right;">
-13.00
+12.00
 </td>
 <td style="text-align:right;">
-13.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-23.00
-</td>
-<td style="text-align:right;">
-25.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-23.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-16.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-18.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-23.00
+14.00
 </td>
 <td style="text-align:right;">
 19.00
 </td>
 <td style="text-align:right;">
-5.00
+19.00
 </td>
 <td style="text-align:right;">
-53.00
+24.00
+</td>
+<td style="text-align:right;">
+33.00
+</td>
+<td style="text-align:right;">
+21.00
 </td>
 <td style="text-align:right;">
 22.00
 </td>
 <td style="text-align:right;">
-40.00
+27.00
 </td>
 <td style="text-align:right;">
-45.00
+10.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+23.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+49.00
+</td>
+<td style="text-align:right;">
+21.00
+</td>
+<td style="text-align:right;">
+42.00
+</td>
+<td style="text-align:right;">
+41.00
+</td>
+<td style="text-align:right;">
+39.00
 </td>
 </tr>
 <tr>
@@ -4369,10 +4486,10 @@ days_heat_index_gt85pct
 days_heat_index_gt90pct
 </td>
 <td style="text-align:right;">
-15.00
+14.00
 </td>
 <td style="text-align:right;">
-4.00
+3.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -4381,7 +4498,7 @@ days_heat_index_gt90pct
 5.00
 </td>
 <td style="text-align:right;">
-4.00
+5.00
 </td>
 <td style="text-align:right;">
 3.00
@@ -4396,25 +4513,25 @@ days_heat_index_gt90pct
 7.00
 </td>
 <td style="text-align:right;">
-14.00
+15.00
 </td>
 <td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-5.00
-</td>
-<td style="text-align:right;">
-10.00
+8.00
 </td>
 <td style="text-align:right;">
 4.00
 </td>
 <td style="text-align:right;">
-16.00
+9.00
 </td>
 <td style="text-align:right;">
-8.00
+4.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+6.00
 </td>
 <td style="text-align:right;">
 4.00
@@ -4426,7 +4543,7 @@ days_heat_index_gt90pct
 4.00
 </td>
 <td style="text-align:right;">
-6.00
+7.00
 </td>
 <td style="text-align:right;">
 7.00
@@ -4435,7 +4552,7 @@ days_heat_index_gt90pct
 5.00
 </td>
 <td style="text-align:right;">
-8.00
+9.00
 </td>
 <td style="text-align:right;">
 14.00
@@ -4444,16 +4561,19 @@ days_heat_index_gt90pct
 1.00
 </td>
 <td style="text-align:right;">
-29.00
+26.00
 </td>
 <td style="text-align:right;">
 9.00
 </td>
 <td style="text-align:right;">
+18.00
+</td>
+<td style="text-align:right;">
 17.00
 </td>
 <td style="text-align:right;">
-18.00
+10.00
 </td>
 </tr>
 <tr>
@@ -4512,9 +4632,6 @@ days_heat_index_gt95pct
 0.00
 </td>
 <td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
 1.00
 </td>
 <td style="text-align:right;">
@@ -4530,22 +4647,28 @@ days_heat_index_gt95pct
 0.00
 </td>
 <td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
 2.00
 </td>
 <td style="text-align:right;">
 0.00
 </td>
 <td style="text-align:right;">
-7.00
+5.00
 </td>
 <td style="text-align:right;">
 2.00
 </td>
 <td style="text-align:right;">
-4.00
+3.00
 </td>
 <td style="text-align:right;">
-2.00
+0.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 </tr>
 <tr>
@@ -4553,64 +4676,64 @@ days_heat_index_gt95pct
 days_wbgt_gt85pct
 </td>
 <td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-5.00
+23.00
 </td>
 <td style="text-align:right;">
 9.00
 </td>
 <td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
 7.00
-</td>
-<td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-13.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-20.00
 </td>
 <td style="text-align:right;">
 12.00
 </td>
 <td style="text-align:right;">
-19.00
-</td>
-<td style="text-align:right;">
-18.00
-</td>
-<td style="text-align:right;">
-8.00
-</td>
-<td style="text-align:right;">
-26.00
+14.00
 </td>
 <td style="text-align:right;">
 16.00
 </td>
 <td style="text-align:right;">
-13.00
+20.00
 </td>
 <td style="text-align:right;">
-17.00
+10.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+18.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
+26.00
 </td>
 <td style="text-align:right;">
 15.00
 </td>
 <td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
 13.00
+</td>
+<td style="text-align:right;">
+14.00
 </td>
 <td style="text-align:right;">
 4.00
@@ -4619,10 +4742,10 @@ days_wbgt_gt85pct
 6.00
 </td>
 <td style="text-align:right;">
-18.00
+16.00
 </td>
 <td style="text-align:right;">
-18.00
+19.00
 </td>
 <td style="text-align:right;">
 3.00
@@ -4634,10 +4757,13 @@ days_wbgt_gt85pct
 14.00
 </td>
 <td style="text-align:right;">
-34.00
+35.00
 </td>
 <td style="text-align:right;">
 30.00
+</td>
+<td style="text-align:right;">
+16.00
 </td>
 </tr>
 <tr>
@@ -4645,7 +4771,7 @@ days_wbgt_gt85pct
 days_wbgt_gt90pct
 </td>
 <td style="text-align:right;">
-11.00
+12.00
 </td>
 <td style="text-align:right;">
 3.00
@@ -4663,7 +4789,7 @@ days_wbgt_gt90pct
 1.00
 </td>
 <td style="text-align:right;">
-2.00
+3.00
 </td>
 <td style="text-align:right;">
 5.00
@@ -4672,10 +4798,10 @@ days_wbgt_gt90pct
 3.00
 </td>
 <td style="text-align:right;">
-6.00
+5.00
 </td>
 <td style="text-align:right;">
-4.00
+2.00
 </td>
 <td style="text-align:right;">
 6.00
@@ -4693,7 +4819,7 @@ days_wbgt_gt90pct
 6.00
 </td>
 <td style="text-align:right;">
-4.00
+1.00
 </td>
 <td style="text-align:right;">
 5.00
@@ -4705,13 +4831,13 @@ days_wbgt_gt90pct
 3.00
 </td>
 <td style="text-align:right;">
-1.00
+2.00
 </td>
 <td style="text-align:right;">
 1.00
 </td>
 <td style="text-align:right;">
-6.00
+7.00
 </td>
 <td style="text-align:right;">
 13.00
@@ -4720,7 +4846,7 @@ days_wbgt_gt90pct
 1.00
 </td>
 <td style="text-align:right;">
-16.00
+18.00
 </td>
 <td style="text-align:right;">
 7.00
@@ -4729,7 +4855,10 @@ days_wbgt_gt90pct
 15.00
 </td>
 <td style="text-align:right;">
-5.00
+6.00
+</td>
+<td style="text-align:right;">
+2.00
 </td>
 </tr>
 <tr>
@@ -4773,7 +4902,7 @@ days_wbgt_gt95pct
 0.00
 </td>
 <td style="text-align:right;">
-2.00
+3.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -4819,6 +4948,9 @@ days_wbgt_gt95pct
 </td>
 <td style="text-align:right;">
 2.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -4829,304 +4961,28 @@ days_wbgt_gt95pct
 days_tmp_max_gt85pct
 </td>
 <td style="text-align:right;">
-78.00
-</td>
-<td style="text-align:right;">
-57.00
-</td>
-<td style="text-align:right;">
-30.00
-</td>
-<td style="text-align:right;">
-36.00
-</td>
-<td style="text-align:right;">
-41.00
-</td>
-<td style="text-align:right;">
-63.00
-</td>
-<td style="text-align:right;">
-63.00
-</td>
-<td style="text-align:right;">
-40.00
-</td>
-<td style="text-align:right;">
-101.00
-</td>
-<td style="text-align:right;">
 70.00
 </td>
 <td style="text-align:right;">
-86.00
-</td>
-<td style="text-align:right;">
-48.00
-</td>
-<td style="text-align:right;">
-67.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-40.00
-</td>
-<td style="text-align:right;">
-47.00
-</td>
-<td style="text-align:right;">
-76.00
-</td>
-<td style="text-align:right;">
-84.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-68.00
-</td>
-<td style="text-align:right;">
-82.00
-</td>
-<td style="text-align:right;">
-138.00
-</td>
-<td style="text-align:right;">
-101.00
-</td>
-<td style="text-align:right;">
-38.00
-</td>
-<td style="text-align:right;">
-46.00
-</td>
-<td style="text-align:right;">
-85.00
-</td>
-<td style="text-align:right;">
-56.00
-</td>
-<td style="text-align:right;">
-75.00
-</td>
-<td style="text-align:right;">
-51.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_tmp_max_gt90pct
-</td>
-<td style="text-align:right;">
-53.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-13.00
-</td>
-<td style="text-align:right;">
-23.00
-</td>
-<td style="text-align:right;">
-24.00
-</td>
-<td style="text-align:right;">
-30.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-19.00
-</td>
-<td style="text-align:right;">
-67.00
-</td>
-<td style="text-align:right;">
-45.00
-</td>
-<td style="text-align:right;">
-51.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-46.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-25.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-45.00
-</td>
-<td style="text-align:right;">
-50.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-40.00
-</td>
-<td style="text-align:right;">
-43.00
-</td>
-<td style="text-align:right;">
-106.00
-</td>
-<td style="text-align:right;">
-66.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-23.00
-</td>
-<td style="text-align:right;">
-46.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-47.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_tmp_max_gt95pct
-</td>
-<td style="text-align:right;">
-37.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-12.00
-</td>
-<td style="text-align:right;">
-11.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-13.00
-</td>
-<td style="text-align:right;">
-43.00
-</td>
-<td style="text-align:right;">
-38.00
-</td>
-<td style="text-align:right;">
-41.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-39.00
-</td>
-<td style="text-align:right;">
-12.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-25.00
-</td>
-<td style="text-align:right;">
-36.00
-</td>
-<td style="text-align:right;">
-7.00
+54.00
 </td>
 <td style="text-align:right;">
 27.00
 </td>
 <td style="text-align:right;">
-31.00
+34.00
 </td>
 <td style="text-align:right;">
-87.00
+41.00
 </td>
 <td style="text-align:right;">
-44.00
+54.00
 </td>
 <td style="text-align:right;">
-12.00
+60.00
 </td>
 <td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-16.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-18.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_heat_index_max_gt85pct
-</td>
-<td style="text-align:right;">
-73.00
-</td>
-<td style="text-align:right;">
-64.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-40.00
-</td>
-<td style="text-align:right;">
-59.00
-</td>
-<td style="text-align:right;">
-57.00
-</td>
-<td style="text-align:right;">
-45.00
+36.00
 </td>
 <td style="text-align:right;">
 93.00
@@ -5135,562 +4991,295 @@ days_heat_index_max_gt85pct
 63.00
 </td>
 <td style="text-align:right;">
-67.00
-</td>
-<td style="text-align:right;">
-43.00
-</td>
-<td style="text-align:right;">
-68.00
-</td>
-<td style="text-align:right;">
-38.00
-</td>
-<td style="text-align:right;">
-43.00
-</td>
-<td style="text-align:right;">
-64.00
-</td>
-<td style="text-align:right;">
-60.00
-</td>
-<td style="text-align:right;">
-69.00
-</td>
-<td style="text-align:right;">
-42.00
-</td>
-<td style="text-align:right;">
-64.00
-</td>
-<td style="text-align:right;">
-80.00
-</td>
-<td style="text-align:right;">
-104.00
-</td>
-<td style="text-align:right;">
-82.00
-</td>
-<td style="text-align:right;">
-59.00
-</td>
-<td style="text-align:right;">
-42.00
-</td>
-<td style="text-align:right;">
-105.00
-</td>
-<td style="text-align:right;">
-78.00
-</td>
-<td style="text-align:right;">
-88.00
-</td>
-<td style="text-align:right;">
-82.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_heat_index_max_gt90pct
-</td>
-<td style="text-align:right;">
-48.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-8.00
-</td>
-<td style="text-align:right;">
-18.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-30.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-55.00
-</td>
-<td style="text-align:right;">
-39.00
-</td>
-<td style="text-align:right;">
-39.00
-</td>
-<td style="text-align:right;">
-25.00
+77.00
 </td>
 <td style="text-align:right;">
 47.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-34.00
-</td>
-<td style="text-align:right;">
-38.00
-</td>
-<td style="text-align:right;">
-46.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-39.00
-</td>
-<td style="text-align:right;">
-46.00
-</td>
-<td style="text-align:right;">
-70.00
-</td>
-<td style="text-align:right;">
-53.00
-</td>
-<td style="text-align:right;">
-40.00
-</td>
-<td style="text-align:right;">
-23.00
-</td>
-<td style="text-align:right;">
-72.00
-</td>
-<td style="text-align:right;">
-36.00
-</td>
-<td style="text-align:right;">
-55.00
-</td>
-<td style="text-align:right;">
-53.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_heat_index_max_gt95pct
-</td>
-<td style="text-align:right;">
-31.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-13.00
-</td>
-<td style="text-align:right;">
-23.00
-</td>
-<td style="text-align:right;">
-19.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-41.00
-</td>
-<td style="text-align:right;">
-35.00
-</td>
-<td style="text-align:right;">
-31.00
-</td>
-<td style="text-align:right;">
-18.00
-</td>
-<td style="text-align:right;">
-35.00
-</td>
-<td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-25.00
-</td>
-<td style="text-align:right;">
-25.00
-</td>
-<td style="text-align:right;">
-34.00
-</td>
-<td style="text-align:right;">
-12.00
-</td>
-<td style="text-align:right;">
-24.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-42.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-53.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-42.00
-</td>
-<td style="text-align:right;">
-35.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_wbgt_max_gt85pct
-</td>
-<td style="text-align:right;">
-78.00
-</td>
-<td style="text-align:right;">
-56.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-46.00
-</td>
-<td style="text-align:right;">
-49.00
-</td>
-<td style="text-align:right;">
-55.00
-</td>
-<td style="text-align:right;">
-54.00
 </td>
 <td style="text-align:right;">
 61.00
 </td>
 <td style="text-align:right;">
-66.00
+26.00
 </td>
 <td style="text-align:right;">
-68.00
-</td>
-<td style="text-align:right;">
-60.00
-</td>
-<td style="text-align:right;">
-49.00
-</td>
-<td style="text-align:right;">
-72.00
-</td>
-<td style="text-align:right;">
-42.00
-</td>
-<td style="text-align:right;">
-62.00
-</td>
-<td style="text-align:right;">
-69.00
-</td>
-<td style="text-align:right;">
-83.00
-</td>
-<td style="text-align:right;">
-59.00
-</td>
-<td style="text-align:right;">
-53.00
-</td>
-<td style="text-align:right;">
-42.00
-</td>
-<td style="text-align:right;">
-55.00
-</td>
-<td style="text-align:right;">
-75.00
-</td>
-<td style="text-align:right;">
-69.00
-</td>
-<td style="text-align:right;">
-58.00
-</td>
-<td style="text-align:right;">
-50.00
-</td>
-<td style="text-align:right;">
-104.00
-</td>
-<td style="text-align:right;">
-77.00
-</td>
-<td style="text-align:right;">
-108.00
-</td>
-<td style="text-align:right;">
-71.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_wbgt_max_gt90pct
-</td>
-<td style="text-align:right;">
-47.00
-</td>
-<td style="text-align:right;">
-31.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-25.00
-</td>
-<td style="text-align:right;">
-27.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-43.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-50.00
-</td>
-<td style="text-align:right;">
-27.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-50.00
-</td>
-<td style="text-align:right;">
-25.00
+35.00
 </td>
 <td style="text-align:right;">
 40.00
 </td>
 <td style="text-align:right;">
-50.00
-</td>
-<td style="text-align:right;">
-50.00
-</td>
-<td style="text-align:right;">
-39.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-25.00
-</td>
-<td style="text-align:right;">
-45.00
-</td>
-<td style="text-align:right;">
-39.00
-</td>
-<td style="text-align:right;">
-35.00
-</td>
-<td style="text-align:right;">
-27.00
-</td>
-<td style="text-align:right;">
-73.00
-</td>
-<td style="text-align:right;">
-52.00
-</td>
-<td style="text-align:right;">
 70.00
-</td>
-<td style="text-align:right;">
-44.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_tmp_max_gt1sd
-</td>
-<td style="text-align:right;">
-74.00
-</td>
-<td style="text-align:right;">
-50.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-37.00
-</td>
-<td style="text-align:right;">
-35.00
-</td>
-<td style="text-align:right;">
-50.00
-</td>
-<td style="text-align:right;">
-49.00
-</td>
-<td style="text-align:right;">
-33.00
-</td>
-<td style="text-align:right;">
-89.00
-</td>
-<td style="text-align:right;">
-65.00
-</td>
-<td style="text-align:right;">
-77.00
-</td>
-<td style="text-align:right;">
-42.00
-</td>
-<td style="text-align:right;">
-54.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-46.00
-</td>
-<td style="text-align:right;">
-67.00
-</td>
-<td style="text-align:right;">
-76.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-54.00
-</td>
-<td style="text-align:right;">
-72.00
-</td>
-<td style="text-align:right;">
-127.00
-</td>
-<td style="text-align:right;">
-91.00
-</td>
-<td style="text-align:right;">
-30.00
-</td>
-<td style="text-align:right;">
-39.00
 </td>
 <td style="text-align:right;">
 79.00
 </td>
 <td style="text-align:right;">
-49.00
+26.00
 </td>
 <td style="text-align:right;">
-69.00
+60.00
 </td>
 <td style="text-align:right;">
-50.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_heat_index_max_gt1sd
+73.00
 </td>
 <td style="text-align:right;">
-68.00
+131.00
 </td>
 <td style="text-align:right;">
-51.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-27.00
+95.00
 </td>
 <td style="text-align:right;">
 37.00
 </td>
 <td style="text-align:right;">
+43.00
+</td>
+<td style="text-align:right;">
+79.00
+</td>
+<td style="text-align:right;">
 50.00
 </td>
 <td style="text-align:right;">
-53.00
+70.00
 </td>
 <td style="text-align:right;">
-40.00
+48.00
 </td>
 <td style="text-align:right;">
-89.00
+145.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_tmp_max_gt90pct
+</td>
+<td style="text-align:right;">
+48.00
+</td>
+<td style="text-align:right;">
+30.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+16.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+58.00
+</td>
+<td style="text-align:right;">
+42.00
+</td>
+<td style="text-align:right;">
+50.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+44.00
+</td>
+<td style="text-align:right;">
+21.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+37.00
+</td>
+<td style="text-align:right;">
+41.00
+</td>
+<td style="text-align:right;">
+13.00
+</td>
+<td style="text-align:right;">
+36.00
+</td>
+<td style="text-align:right;">
+37.00
+</td>
+<td style="text-align:right;">
+99.00
+</td>
+<td style="text-align:right;">
+65.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+36.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+42.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+118.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_tmp_max_gt95pct
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+16.00
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+10.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+13.00
+</td>
+<td style="text-align:right;">
+36.00
+</td>
+<td style="text-align:right;">
+34.00
+</td>
+<td style="text-align:right;">
+37.00
+</td>
+<td style="text-align:right;">
+21.00
+</td>
+<td style="text-align:right;">
+32.00
+</td>
+<td style="text-align:right;">
+10.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+76.00
+</td>
+<td style="text-align:right;">
+43.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+10.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+31.00
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+108.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_heat_index_max_gt85pct
+</td>
+<td style="text-align:right;">
+68.00
+</td>
+<td style="text-align:right;">
+58.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+36.00
 </td>
 <td style="text-align:right;">
 57.00
 </td>
 <td style="text-align:right;">
-69.00
+54.00
 </td>
 <td style="text-align:right;">
-40.00
+39.00
+</td>
+<td style="text-align:right;">
+86.00
+</td>
+<td style="text-align:right;">
+54.00
+</td>
+<td style="text-align:right;">
+62.00
+</td>
+<td style="text-align:right;">
+42.00
 </td>
 <td style="text-align:right;">
 62.00
@@ -5699,13 +5288,13 @@ days_heat_index_max_gt1sd
 35.00
 </td>
 <td style="text-align:right;">
-40.00
+38.00
 </td>
 <td style="text-align:right;">
-61.00
+58.00
 </td>
 <td style="text-align:right;">
-59.00
+57.00
 </td>
 <td style="text-align:right;">
 64.00
@@ -5714,10 +5303,10 @@ days_heat_index_max_gt1sd
 40.00
 </td>
 <td style="text-align:right;">
-54.00
+60.00
 </td>
 <td style="text-align:right;">
-75.00
+72.00
 </td>
 <td style="text-align:right;">
 98.00
@@ -5726,22 +5315,595 @@ days_heat_index_max_gt1sd
 78.00
 </td>
 <td style="text-align:right;">
-51.00
+55.00
 </td>
 <td style="text-align:right;">
-40.00
+39.00
 </td>
 <td style="text-align:right;">
 101.00
 </td>
 <td style="text-align:right;">
-66.00
+67.00
 </td>
 <td style="text-align:right;">
-87.00
+83.00
+</td>
+<td style="text-align:right;">
+74.00
+</td>
+<td style="text-align:right;">
+140.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_heat_index_max_gt90pct
+</td>
+<td style="text-align:right;">
+43.00
+</td>
+<td style="text-align:right;">
+30.00
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
+21.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+27.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
+51.00
+</td>
+<td style="text-align:right;">
+39.00
+</td>
+<td style="text-align:right;">
+36.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+44.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+34.00
+</td>
+<td style="text-align:right;">
+43.00
+</td>
+<td style="text-align:right;">
+18.00
+</td>
+<td style="text-align:right;">
+34.00
+</td>
+<td style="text-align:right;">
+41.00
+</td>
+<td style="text-align:right;">
+61.00
+</td>
+<td style="text-align:right;">
+52.00
+</td>
+<td style="text-align:right;">
+36.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+69.00
+</td>
+<td style="text-align:right;">
+31.00
+</td>
+<td style="text-align:right;">
+52.00
+</td>
+<td style="text-align:right;">
+46.00
+</td>
+<td style="text-align:right;">
+98.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_heat_index_max_gt95pct
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+16.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+12.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+18.00
+</td>
+<td style="text-align:right;">
+13.00
+</td>
+<td style="text-align:right;">
+38.00
+</td>
+<td style="text-align:right;">
+32.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+18.00
+</td>
+<td style="text-align:right;">
+33.00
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+23.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+12.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+37.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+50.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+38.00
+</td>
+<td style="text-align:right;">
+31.00
+</td>
+<td style="text-align:right;">
+76.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_wbgt_max_gt85pct
+</td>
+<td style="text-align:right;">
+73.00
+</td>
+<td style="text-align:right;">
+53.00
+</td>
+<td style="text-align:right;">
+30.00
+</td>
+<td style="text-align:right;">
+44.00
+</td>
+<td style="text-align:right;">
+47.00
+</td>
+<td style="text-align:right;">
+53.00
+</td>
+<td style="text-align:right;">
+50.00
+</td>
+<td style="text-align:right;">
+59.00
+</td>
+<td style="text-align:right;">
+62.00
+</td>
+<td style="text-align:right;">
+64.00
+</td>
+<td style="text-align:right;">
+56.00
+</td>
+<td style="text-align:right;">
+48.00
+</td>
+<td style="text-align:right;">
+70.00
+</td>
+<td style="text-align:right;">
+39.00
+</td>
+<td style="text-align:right;">
+61.00
+</td>
+<td style="text-align:right;">
+64.00
 </td>
 <td style="text-align:right;">
 80.00
+</td>
+<td style="text-align:right;">
+58.00
+</td>
+<td style="text-align:right;">
+50.00
+</td>
+<td style="text-align:right;">
+40.00
+</td>
+<td style="text-align:right;">
+54.00
+</td>
+<td style="text-align:right;">
+75.00
+</td>
+<td style="text-align:right;">
+67.00
+</td>
+<td style="text-align:right;">
+56.00
+</td>
+<td style="text-align:right;">
+48.00
+</td>
+<td style="text-align:right;">
+101.00
+</td>
+<td style="text-align:right;">
+75.00
+</td>
+<td style="text-align:right;">
+103.00
+</td>
+<td style="text-align:right;">
+66.00
+</td>
+<td style="text-align:right;">
+77.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_wbgt_max_gt90pct
+</td>
+<td style="text-align:right;">
+44.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+27.00
+</td>
+<td style="text-align:right;">
+39.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+49.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+28.00
+</td>
+<td style="text-align:right;">
+50.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+39.00
+</td>
+<td style="text-align:right;">
+49.00
+</td>
+<td style="text-align:right;">
+46.00
+</td>
+<td style="text-align:right;">
+39.00
+</td>
+<td style="text-align:right;">
+28.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+42.00
+</td>
+<td style="text-align:right;">
+38.00
+</td>
+<td style="text-align:right;">
+34.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+72.00
+</td>
+<td style="text-align:right;">
+52.00
+</td>
+<td style="text-align:right;">
+68.00
+</td>
+<td style="text-align:right;">
+43.00
+</td>
+<td style="text-align:right;">
+36.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_tmp_max_gt1sd
+</td>
+<td style="text-align:right;">
+59.00
+</td>
+<td style="text-align:right;">
+43.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+35.00
+</td>
+<td style="text-align:right;">
+40.00
+</td>
+<td style="text-align:right;">
+45.00
+</td>
+<td style="text-align:right;">
+27.00
+</td>
+<td style="text-align:right;">
+80.00
+</td>
+<td style="text-align:right;">
+55.00
+</td>
+<td style="text-align:right;">
+70.00
+</td>
+<td style="text-align:right;">
+42.00
+</td>
+<td style="text-align:right;">
+50.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+30.00
+</td>
+<td style="text-align:right;">
+35.00
+</td>
+<td style="text-align:right;">
+58.00
+</td>
+<td style="text-align:right;">
+65.00
+</td>
+<td style="text-align:right;">
+23.00
+</td>
+<td style="text-align:right;">
+46.00
+</td>
+<td style="text-align:right;">
+57.00
+</td>
+<td style="text-align:right;">
+116.00
+</td>
+<td style="text-align:right;">
+88.00
+</td>
+<td style="text-align:right;">
+30.00
+</td>
+<td style="text-align:right;">
+31.00
+</td>
+<td style="text-align:right;">
+65.00
+</td>
+<td style="text-align:right;">
+46.00
+</td>
+<td style="text-align:right;">
+66.00
+</td>
+<td style="text-align:right;">
+42.00
+</td>
+<td style="text-align:right;">
+139.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_heat_index_max_gt1sd
+</td>
+<td style="text-align:right;">
+65.00
+</td>
+<td style="text-align:right;">
+52.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+36.00
+</td>
+<td style="text-align:right;">
+48.00
+</td>
+<td style="text-align:right;">
+49.00
+</td>
+<td style="text-align:right;">
+35.00
+</td>
+<td style="text-align:right;">
+85.00
+</td>
+<td style="text-align:right;">
+57.00
+</td>
+<td style="text-align:right;">
+64.00
+</td>
+<td style="text-align:right;">
+41.00
+</td>
+<td style="text-align:right;">
+61.00
+</td>
+<td style="text-align:right;">
+33.00
+</td>
+<td style="text-align:right;">
+37.00
+</td>
+<td style="text-align:right;">
+52.00
+</td>
+<td style="text-align:right;">
+56.00
+</td>
+<td style="text-align:right;">
+59.00
+</td>
+<td style="text-align:right;">
+39.00
+</td>
+<td style="text-align:right;">
+52.00
+</td>
+<td style="text-align:right;">
+70.00
+</td>
+<td style="text-align:right;">
+92.00
+</td>
+<td style="text-align:right;">
+79.00
+</td>
+<td style="text-align:right;">
+50.00
+</td>
+<td style="text-align:right;">
+35.00
+</td>
+<td style="text-align:right;">
+100.00
+</td>
+<td style="text-align:right;">
+64.00
+</td>
+<td style="text-align:right;">
+82.00
+</td>
+<td style="text-align:right;">
+72.00
+</td>
+<td style="text-align:right;">
+144.00
 </td>
 </tr>
 <tr>
@@ -5749,28 +5911,28 @@ days_heat_index_max_gt1sd
 days_wbgt_max_gt1sd
 </td>
 <td style="text-align:right;">
-65.00
+63.00
 </td>
 <td style="text-align:right;">
-45.00
+46.00
 </td>
 <td style="text-align:right;">
-30.00
+31.00
 </td>
 <td style="text-align:right;">
-34.00
+32.00
 </td>
 <td style="text-align:right;">
 47.00
 </td>
 <td style="text-align:right;">
-43.00
-</td>
-<td style="text-align:right;">
 42.00
 </td>
 <td style="text-align:right;">
-48.00
+43.00
+</td>
+<td style="text-align:right;">
+51.00
 </td>
 <td style="text-align:right;">
 52.00
@@ -5788,34 +5950,34 @@ days_wbgt_max_gt1sd
 60.00
 </td>
 <td style="text-align:right;">
+32.00
+</td>
+<td style="text-align:right;">
+48.00
+</td>
+<td style="text-align:right;">
+63.00
+</td>
+<td style="text-align:right;">
+71.00
+</td>
+<td style="text-align:right;">
+56.00
+</td>
+<td style="text-align:right;">
+41.00
+</td>
+<td style="text-align:right;">
 34.00
 </td>
 <td style="text-align:right;">
-49.00
+42.00
 </td>
 <td style="text-align:right;">
-62.00
+66.00
 </td>
 <td style="text-align:right;">
-72.00
-</td>
-<td style="text-align:right;">
-54.00
-</td>
-<td style="text-align:right;">
-39.00
-</td>
-<td style="text-align:right;">
-34.00
-</td>
-<td style="text-align:right;">
-40.00
-</td>
-<td style="text-align:right;">
-64.00
-</td>
-<td style="text-align:right;">
-61.00
+58.00
 </td>
 <td style="text-align:right;">
 50.00
@@ -5827,13 +5989,16 @@ days_wbgt_max_gt1sd
 91.00
 </td>
 <td style="text-align:right;">
-65.00
+64.00
 </td>
 <td style="text-align:right;">
 89.00
 </td>
 <td style="text-align:right;">
-61.00
+59.00
+</td>
+<td style="text-align:right;">
+55.00
 </td>
 </tr>
 <tr>
@@ -5841,7 +6006,16 @@ days_wbgt_max_gt1sd
 days_tmp_max_gt2sd
 </td>
 <td style="text-align:right;">
-2.00
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -5851,6 +6025,33 @@ days_tmp_max_gt2sd
 </td>
 <td style="text-align:right;">
 1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -5859,73 +6060,40 @@ days_tmp_max_gt2sd
 3.00
 </td>
 <td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
 0.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-5.00
-</td>
-<td style="text-align:right;">
-25.00
 </td>
 <td style="text-align:right;">
 8.00
 </td>
 <td style="text-align:right;">
-0.00
+1.00
 </td>
 <td style="text-align:right;">
-3.00
+18.00
 </td>
 <td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-0.00
+7.00
 </td>
 <td style="text-align:right;">
 0.00
 </td>
 <td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
 0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+82.00
 </td>
 </tr>
 <tr>
@@ -5933,7 +6101,7 @@ days_tmp_max_gt2sd
 days_heat_index_max_gt2sd
 </td>
 <td style="text-align:right;">
-2.00
+1.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -5948,7 +6116,7 @@ days_heat_index_max_gt2sd
 0.00
 </td>
 <td style="text-align:right;">
-6.00
+5.00
 </td>
 <td style="text-align:right;">
 1.00
@@ -5957,10 +6125,10 @@ days_heat_index_max_gt2sd
 3.00
 </td>
 <td style="text-align:right;">
-5.00
+4.00
 </td>
 <td style="text-align:right;">
-5.00
+4.00
 </td>
 <td style="text-align:right;">
 2.00
@@ -5969,7 +6137,13 @@ days_heat_index_max_gt2sd
 1.00
 </td>
 <td style="text-align:right;">
-8.00
+6.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -5978,25 +6152,19 @@ days_heat_index_max_gt2sd
 1.00
 </td>
 <td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
 0.00
 </td>
 <td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-8.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-8.00
-</td>
-<td style="text-align:right;">
 7.00
 </td>
 <td style="text-align:right;">
-7.00
+5.00
+</td>
+<td style="text-align:right;">
+6.00
 </td>
 <td style="text-align:right;">
 2.00
@@ -6008,7 +6176,7 @@ days_heat_index_max_gt2sd
 4.00
 </td>
 <td style="text-align:right;">
-10.00
+7.00
 </td>
 <td style="text-align:right;">
 4.00
@@ -6017,7 +6185,10 @@ days_heat_index_max_gt2sd
 2.00
 </td>
 <td style="text-align:right;">
-8.00
+7.00
+</td>
+<td style="text-align:right;">
+22.00
 </td>
 </tr>
 <tr>
@@ -6025,7 +6196,7 @@ days_heat_index_max_gt2sd
 days_wbgt_max_gt2sd
 </td>
 <td style="text-align:right;">
-7.00
+8.00
 </td>
 <td style="text-align:right;">
 6.00
@@ -6046,10 +6217,10 @@ days_wbgt_max_gt2sd
 6.00
 </td>
 <td style="text-align:right;">
-11.00
+10.00
 </td>
 <td style="text-align:right;">
-4.00
+5.00
 </td>
 <td style="text-align:right;">
 4.00
@@ -6058,7 +6229,7 @@ days_wbgt_max_gt2sd
 2.00
 </td>
 <td style="text-align:right;">
-5.00
+6.00
 </td>
 <td style="text-align:right;">
 6.00
@@ -6070,16 +6241,16 @@ days_wbgt_max_gt2sd
 7.00
 </td>
 <td style="text-align:right;">
-9.00
+10.00
 </td>
 <td style="text-align:right;">
 8.00
 </td>
 <td style="text-align:right;">
-10.00
+9.00
 </td>
 <td style="text-align:right;">
-7.00
+6.00
 </td>
 <td style="text-align:right;">
 1.00
@@ -6100,7 +6271,7 @@ days_wbgt_max_gt2sd
 6.00
 </td>
 <td style="text-align:right;">
-15.00
+16.00
 </td>
 <td style="text-align:right;">
 8.00
@@ -6111,97 +6282,103 @@ days_wbgt_max_gt2sd
 <td style="text-align:right;">
 9.00
 </td>
+<td style="text-align:right;">
+6.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
 tmp_f_mean_anomaly_mean_may_sep
 </td>
 <td style="text-align:right;">
-0.30
+0.15
 </td>
 <td style="text-align:right;">
-0.27
+0.12
 </td>
 <td style="text-align:right;">
--0.90
+-1.05
 </td>
 <td style="text-align:right;">
-0.20
+0.05
 </td>
 <td style="text-align:right;">
--1.02
-</td>
-<td style="text-align:right;">
-0.54
-</td>
-<td style="text-align:right;">
-0.25
-</td>
-<td style="text-align:right;">
--0.78
-</td>
-<td style="text-align:right;">
-1.43
-</td>
-<td style="text-align:right;">
--0.21
-</td>
-<td style="text-align:right;">
-0.54
-</td>
-<td style="text-align:right;">
--0.99
+-1.17
 </td>
 <td style="text-align:right;">
 0.38
 </td>
 <td style="text-align:right;">
--0.76
+0.10
 </td>
 <td style="text-align:right;">
--0.28
+-0.93
 </td>
 <td style="text-align:right;">
--0.02
+1.28
 </td>
 <td style="text-align:right;">
-0.40
+-0.37
 </td>
 <td style="text-align:right;">
-0.76
+0.39
 </td>
 <td style="text-align:right;">
--0.88
+-1.14
 </td>
 <td style="text-align:right;">
--0.49
+0.23
 </td>
 <td style="text-align:right;">
-1.22
+-0.91
 </td>
 <td style="text-align:right;">
-0.55
+-0.44
 </td>
 <td style="text-align:right;">
--0.24
+-0.17
 </td>
 <td style="text-align:right;">
--1.19
-</td>
-<td style="text-align:right;">
--0.61
-</td>
-<td style="text-align:right;">
-0.86
+0.25
 </td>
 <td style="text-align:right;">
 0.60
 </td>
 <td style="text-align:right;">
+-1.03
+</td>
+<td style="text-align:right;">
+-0.64
+</td>
+<td style="text-align:right;">
+1.06
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+<td style="text-align:right;">
+-0.39
+</td>
+<td style="text-align:right;">
+-1.34
+</td>
+<td style="text-align:right;">
 -0.77
 </td>
 <td style="text-align:right;">
-0.84
+0.71
+</td>
+<td style="text-align:right;">
+0.45
+</td>
+<td style="text-align:right;">
+-0.92
+</td>
+<td style="text-align:right;">
+0.69
+</td>
+<td style="text-align:right;">
+4.41
 </td>
 </tr>
 <tr>
@@ -6209,91 +6386,94 @@ tmp_f_mean_anomaly_mean_may_sep
 heat_index_mean_anomaly_mean_may_sep
 </td>
 <td style="text-align:right;">
-0.20
+0.06
 </td>
 <td style="text-align:right;">
-0.20
+0.06
 </td>
 <td style="text-align:right;">
--1.81
+-1.94
 </td>
 <td style="text-align:right;">
-0.18
+0.04
 </td>
 <td style="text-align:right;">
--2.22
+-2.35
 </td>
 <td style="text-align:right;">
-0.57
+0.44
 </td>
 <td style="text-align:right;">
--0.21
+-0.34
 </td>
 <td style="text-align:right;">
--1.08
-</td>
-<td style="text-align:right;">
-2.34
-</td>
-<td style="text-align:right;">
--0.45
-</td>
-<td style="text-align:right;">
-0.37
-</td>
-<td style="text-align:right;">
--1.97
-</td>
-<td style="text-align:right;">
-0.17
-</td>
-<td style="text-align:right;">
--1.18
-</td>
-<td style="text-align:right;">
--0.22
-</td>
-<td style="text-align:right;">
-0.51
-</td>
-<td style="text-align:right;">
-0.53
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
--1.18
-</td>
-<td style="text-align:right;">
--0.98
-</td>
-<td style="text-align:right;">
-2.50
-</td>
-<td style="text-align:right;">
-0.59
-</td>
-<td style="text-align:right;">
--0.86
-</td>
-<td style="text-align:right;">
--1.33
-</td>
-<td style="text-align:right;">
--1.01
+-1.22
 </td>
 <td style="text-align:right;">
 2.21
 </td>
 <td style="text-align:right;">
-1.85
+-0.58
 </td>
 <td style="text-align:right;">
--0.67
+0.24
 </td>
 <td style="text-align:right;">
-1.94
+-2.10
+</td>
+<td style="text-align:right;">
+0.04
+</td>
+<td style="text-align:right;">
+-1.31
+</td>
+<td style="text-align:right;">
+-0.35
+</td>
+<td style="text-align:right;">
+0.38
+</td>
+<td style="text-align:right;">
+0.40
+</td>
+<td style="text-align:right;">
+0.87
+</td>
+<td style="text-align:right;">
+-1.31
+</td>
+<td style="text-align:right;">
+-1.12
+</td>
+<td style="text-align:right;">
+2.36
+</td>
+<td style="text-align:right;">
+0.45
+</td>
+<td style="text-align:right;">
+-0.99
+</td>
+<td style="text-align:right;">
+-1.46
+</td>
+<td style="text-align:right;">
+-1.14
+</td>
+<td style="text-align:right;">
+2.08
+</td>
+<td style="text-align:right;">
+1.72
+</td>
+<td style="text-align:right;">
+-0.80
+</td>
+<td style="text-align:right;">
+1.81
+</td>
+<td style="text-align:right;">
+3.86
 </td>
 </tr>
 <tr>
@@ -6301,91 +6481,94 @@ heat_index_mean_anomaly_mean_may_sep
 wbgt_f_mean_anomaly_mean_may_sep
 </td>
 <td style="text-align:right;">
-0.05
+0.01
+</td>
+<td style="text-align:right;">
+0.11
+</td>
+<td style="text-align:right;">
+-1.22
+</td>
+<td style="text-align:right;">
+-0.20
+</td>
+<td style="text-align:right;">
+-1.11
 </td>
 <td style="text-align:right;">
 0.15
 </td>
 <td style="text-align:right;">
--1.18
+-0.17
 </td>
 <td style="text-align:right;">
--0.16
+-0.86
 </td>
 <td style="text-align:right;">
--1.07
+1.17
 </td>
 <td style="text-align:right;">
-0.18
+-0.66
 </td>
 <td style="text-align:right;">
 -0.13
 </td>
 <td style="text-align:right;">
--0.83
+-1.37
 </td>
 <td style="text-align:right;">
-1.21
+0.00
 </td>
 <td style="text-align:right;">
--0.62
-</td>
-<td style="text-align:right;">
--0.09
-</td>
-<td style="text-align:right;">
--1.33
+-0.25
 </td>
 <td style="text-align:right;">
 0.04
 </td>
 <td style="text-align:right;">
--0.21
+0.43
 </td>
 <td style="text-align:right;">
-0.08
+0.18
 </td>
 <td style="text-align:right;">
-0.47
+0.20
 </td>
 <td style="text-align:right;">
-0.21
+-0.39
 </td>
 <td style="text-align:right;">
-0.24
+-0.57
 </td>
 <td style="text-align:right;">
--0.35
+1.34
 </td>
 <td style="text-align:right;">
--0.53
+-0.12
 </td>
 <td style="text-align:right;">
-1.37
+-0.39
 </td>
 <td style="text-align:right;">
--0.08
+-0.63
 </td>
 <td style="text-align:right;">
 -0.36
 </td>
 <td style="text-align:right;">
--0.59
+1.25
 </td>
 <td style="text-align:right;">
--0.32
+1.12
 </td>
 <td style="text-align:right;">
-1.29
+-0.05
 </td>
 <td style="text-align:right;">
-1.16
+1.40
 </td>
 <td style="text-align:right;">
--0.01
-</td>
-<td style="text-align:right;">
-1.44
+1.12
 </td>
 </tr>
 <tr>
@@ -6393,91 +6576,94 @@ wbgt_f_mean_anomaly_mean_may_sep
 tmp_f_max_anomaly_mean_may_sep
 </td>
 <td style="text-align:right;">
-0.71
+0.48
 </td>
 <td style="text-align:right;">
--0.55
+-0.78
 </td>
 <td style="text-align:right;">
--1.01
+-1.24
 </td>
 <td style="text-align:right;">
-0.24
+0.02
 </td>
 <td style="text-align:right;">
--1.67
+-1.90
 </td>
 <td style="text-align:right;">
-0.55
+0.33
 </td>
 <td style="text-align:right;">
-0.21
+-0.02
 </td>
 <td style="text-align:right;">
--1.42
+-1.65
 </td>
 <td style="text-align:right;">
-1.89
+1.67
 </td>
 <td style="text-align:right;">
--0.25
+-0.48
 </td>
 <td style="text-align:right;">
-1.37
+1.14
 </td>
 <td style="text-align:right;">
--1.36
+-1.59
 </td>
 <td style="text-align:right;">
-0.15
+-0.08
 </td>
 <td style="text-align:right;">
--1.80
+-2.03
 </td>
 <td style="text-align:right;">
--0.74
+-0.97
 </td>
 <td style="text-align:right;">
--0.64
+-0.87
 </td>
 <td style="text-align:right;">
-0.58
+0.35
 </td>
 <td style="text-align:right;">
-1.72
+1.49
 </td>
 <td style="text-align:right;">
--1.05
+-1.27
 </td>
 <td style="text-align:right;">
-0.76
+0.53
 </td>
 <td style="text-align:right;">
-1.55
+1.32
 </td>
 <td style="text-align:right;">
-2.59
+2.36
 </td>
 <td style="text-align:right;">
-0.34
+0.11
 </td>
 <td style="text-align:right;">
--1.66
+-1.88
 </td>
 <td style="text-align:right;">
--0.06
+-0.29
 </td>
 <td style="text-align:right;">
-0.82
+0.59
 </td>
 <td style="text-align:right;">
-0.21
+-0.02
 </td>
 <td style="text-align:right;">
--1.52
+-1.75
 </td>
 <td style="text-align:right;">
-0.06
+-0.17
+</td>
+<td style="text-align:right;">
+6.58
 </td>
 </tr>
 <tr>
@@ -6485,91 +6671,94 @@ tmp_f_max_anomaly_mean_may_sep
 heat_index_max_anomaly_mean_may_sep
 </td>
 <td style="text-align:right;">
-0.51
-</td>
-<td style="text-align:right;">
--0.68
-</td>
-<td style="text-align:right;">
--2.26
-</td>
-<td style="text-align:right;">
--0.33
-</td>
-<td style="text-align:right;">
--2.86
-</td>
-<td style="text-align:right;">
-0.33
-</td>
-<td style="text-align:right;">
--0.60
-</td>
-<td style="text-align:right;">
--2.01
-</td>
-<td style="text-align:right;">
-2.83
-</td>
-<td style="text-align:right;">
--0.75
-</td>
-<td style="text-align:right;">
-0.55
-</td>
-<td style="text-align:right;">
--2.63
-</td>
-<td style="text-align:right;">
--0.28
-</td>
-<td style="text-align:right;">
--1.59
-</td>
-<td style="text-align:right;">
--0.67
-</td>
-<td style="text-align:right;">
-0.03
-</td>
-<td style="text-align:right;">
-0.36
-</td>
-<td style="text-align:right;">
-1.40
-</td>
-<td style="text-align:right;">
--0.77
-</td>
-<td style="text-align:right;">
-0.58
-</td>
-<td style="text-align:right;">
-3.22
-</td>
-<td style="text-align:right;">
-2.08
-</td>
-<td style="text-align:right;">
--0.05
-</td>
-<td style="text-align:right;">
--1.23
-</td>
-<td style="text-align:right;">
--0.11
-</td>
-<td style="text-align:right;">
-2.30
-</td>
-<td style="text-align:right;">
-1.84
+0.32
 </td>
 <td style="text-align:right;">
 -0.87
 </td>
 <td style="text-align:right;">
-1.68
+-2.45
+</td>
+<td style="text-align:right;">
+-0.52
+</td>
+<td style="text-align:right;">
+-3.05
+</td>
+<td style="text-align:right;">
+0.14
+</td>
+<td style="text-align:right;">
+-0.78
+</td>
+<td style="text-align:right;">
+-2.20
+</td>
+<td style="text-align:right;">
+2.64
+</td>
+<td style="text-align:right;">
+-0.94
+</td>
+<td style="text-align:right;">
+0.36
+</td>
+<td style="text-align:right;">
+-2.81
+</td>
+<td style="text-align:right;">
+-0.47
+</td>
+<td style="text-align:right;">
+-1.78
+</td>
+<td style="text-align:right;">
+-0.86
+</td>
+<td style="text-align:right;">
+-0.16
+</td>
+<td style="text-align:right;">
+0.17
+</td>
+<td style="text-align:right;">
+1.21
+</td>
+<td style="text-align:right;">
+-0.96
+</td>
+<td style="text-align:right;">
+0.39
+</td>
+<td style="text-align:right;">
+3.03
+</td>
+<td style="text-align:right;">
+1.89
+</td>
+<td style="text-align:right;">
+-0.24
+</td>
+<td style="text-align:right;">
+-1.42
+</td>
+<td style="text-align:right;">
+-0.30
+</td>
+<td style="text-align:right;">
+2.11
+</td>
+<td style="text-align:right;">
+1.65
+</td>
+<td style="text-align:right;">
+-1.05
+</td>
+<td style="text-align:right;">
+1.49
+</td>
+<td style="text-align:right;">
+5.44
 </td>
 </tr>
 <tr>
@@ -6577,91 +6766,94 @@ heat_index_max_anomaly_mean_may_sep
 wbgt_f_max_anomaly_mean_may_sep
 </td>
 <td style="text-align:right;">
-0.53
+0.48
 </td>
 <td style="text-align:right;">
--0.42
+-0.47
 </td>
 <td style="text-align:right;">
--1.31
+-1.36
 </td>
 <td style="text-align:right;">
--0.30
+-0.36
 </td>
 <td style="text-align:right;">
--1.48
+-1.53
 </td>
 <td style="text-align:right;">
--0.05
+-0.10
 </td>
 <td style="text-align:right;">
--0.09
+-0.14
 </td>
 <td style="text-align:right;">
--0.84
+-0.90
 </td>
 <td style="text-align:right;">
-0.64
+0.59
 </td>
 <td style="text-align:right;">
--0.54
+-0.59
 </td>
 <td style="text-align:right;">
--0.40
+-0.46
 </td>
 <td style="text-align:right;">
--1.48
+-1.53
 </td>
 <td style="text-align:right;">
--0.24
+-0.29
 </td>
 <td style="text-align:right;">
--0.96
+-1.01
 </td>
 <td style="text-align:right;">
-0.11
+0.06
 </td>
 <td style="text-align:right;">
-0.85
+0.80
 </td>
 <td style="text-align:right;">
-0.54
+0.49
 </td>
 <td style="text-align:right;">
-0.78
+0.73
 </td>
 <td style="text-align:right;">
--0.11
+-0.17
 </td>
 <td style="text-align:right;">
--0.61
+-0.66
 </td>
 <td style="text-align:right;">
-1.47
+1.42
 </td>
 <td style="text-align:right;">
-0.98
+0.93
 </td>
 <td style="text-align:right;">
--0.44
+-0.49
 </td>
 <td style="text-align:right;">
--0.85
+-0.90
 </td>
 <td style="text-align:right;">
-0.08
+0.02
 </td>
 <td style="text-align:right;">
-1.64
+1.59
 </td>
 <td style="text-align:right;">
-1.12
+1.07
 </td>
 <td style="text-align:right;">
-0.14
+0.09
 </td>
 <td style="text-align:right;">
-1.20
+1.15
+</td>
+<td style="text-align:right;">
+1.56
 </td>
 </tr>
 <tr>
@@ -6684,7 +6876,7 @@ days_tmp_gt85pct_may_sep
 0.00
 </td>
 <td style="text-align:right;">
-1.00
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -6694,12 +6886,12 @@ days_tmp_gt85pct_may_sep
 </td>
 <td style="text-align:right;">
 0.00
+</td>
+<td style="text-align:right;">
+1.00
 </td>
 <td style="text-align:right;">
 3.00
-</td>
-<td style="text-align:right;">
-6.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -6754,6 +6946,9 @@ days_tmp_gt85pct_may_sep
 </td>
 <td style="text-align:right;">
 0.00
+</td>
+<td style="text-align:right;">
+59.00
 </td>
 </tr>
 <tr>
@@ -6821,12 +7016,12 @@ days_tmp_gt90pct_may_sep
 0.00
 </td>
 <td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
 1.00
 </td>
 <td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
 0.00
 </td>
 <td style="text-align:right;">
@@ -6846,6 +7041,9 @@ days_tmp_gt90pct_may_sep
 </td>
 <td style="text-align:right;">
 0.00
+</td>
+<td style="text-align:right;">
+44.00
 </td>
 </tr>
 <tr>
@@ -6939,97 +7137,103 @@ days_tmp_gt95pct_may_sep
 <td style="text-align:right;">
 0.00
 </td>
+<td style="text-align:right;">
+20.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
 days_heat_index_gt85pct_may_sep
 </td>
 <td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
 2.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-6.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-11.00
-</td>
-<td style="text-align:right;">
-1.00
 </td>
 <td style="text-align:right;">
 3.00
 </td>
 <td style="text-align:right;">
-13.00
-</td>
-<td style="text-align:right;">
-7.00
+0.00
 </td>
 <td style="text-align:right;">
 1.00
 </td>
 <td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-23.00
+0.00
 </td>
 <td style="text-align:right;">
 5.00
 </td>
 <td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
 0.00
 </td>
 <td style="text-align:right;">
-12.00
+7.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+16.00
 </td>
 </tr>
 <tr>
@@ -7082,7 +7286,7 @@ days_heat_index_gt90pct_may_sep
 2.00
 </td>
 <td style="text-align:right;">
-3.00
+1.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -7112,13 +7316,16 @@ days_heat_index_gt90pct_may_sep
 0.00
 </td>
 <td style="text-align:right;">
-10.00
+7.00
 </td>
 <td style="text-align:right;">
 1.00
 </td>
 <td style="text-align:right;">
 0.00
+</td>
+<td style="text-align:right;">
+5.00
 </td>
 <td style="text-align:right;">
 5.00
@@ -7180,7 +7387,7 @@ days_heat_index_gt95pct_may_sep
 0.00
 </td>
 <td style="text-align:right;">
-2.00
+1.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -7204,7 +7411,7 @@ days_heat_index_gt95pct_may_sep
 0.00
 </td>
 <td style="text-align:right;">
-2.00
+0.00
 </td>
 <td style="text-align:right;">
 1.00
@@ -7213,7 +7420,10 @@ days_heat_index_gt95pct_may_sep
 0.00
 </td>
 <td style="text-align:right;">
-2.00
+0.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 </tr>
 <tr>
@@ -7239,7 +7449,7 @@ days_wbgt_gt85pct_may_sep
 1.00
 </td>
 <td style="text-align:right;">
-1.00
+0.00
 </td>
 <td style="text-align:right;">
 1.00
@@ -7251,61 +7461,64 @@ days_wbgt_gt85pct_may_sep
 2.00
 </td>
 <td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
 1.00
 </td>
 <td style="text-align:right;">
 0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-1.00
 </td>
 </tr>
 <tr>
@@ -7335,6 +7548,9 @@ days_wbgt_gt90pct_may_sep
 </td>
 <td style="text-align:right;">
 1.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -7491,97 +7707,103 @@ days_wbgt_gt95pct_may_sep
 <td style="text-align:right;">
 0.00
 </td>
+<td style="text-align:right;">
+0.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
 days_tmp_max_gt85pct_may_sep
 </td>
 <td style="text-align:right;">
-30.00
+24.00
 </td>
 <td style="text-align:right;">
-16.00
+15.00
 </td>
 <td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-40.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-61.00
+8.00
 </td>
 <td style="text-align:right;">
 20.00
 </td>
 <td style="text-align:right;">
-41.00
+7.00
 </td>
 <td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-46.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-45.00
-</td>
-<td style="text-align:right;">
-64.00
-</td>
-<td style="text-align:right;">
-86.00
-</td>
-<td style="text-align:right;">
-33.00
-</td>
-<td style="text-align:right;">
-9.00
+32.00
 </td>
 <td style="text-align:right;">
 25.00
 </td>
 <td style="text-align:right;">
-38.00
+8.00
+</td>
+<td style="text-align:right;">
+55.00
 </td>
 <td style="text-align:right;">
 14.00
 </td>
 <td style="text-align:right;">
+34.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+42.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+38.00
+</td>
+<td style="text-align:right;">
+58.00
+</td>
+<td style="text-align:right;">
+81.00
+</td>
+<td style="text-align:right;">
+31.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+35.00
+</td>
+<td style="text-align:right;">
 10.00
 </td>
 <td style="text-align:right;">
-16.00
+8.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+95.00
 </td>
 </tr>
 <tr>
@@ -7589,58 +7811,31 @@ days_tmp_max_gt85pct_may_sep
 days_tmp_max_gt90pct_may_sep
 </td>
 <td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-8.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-12.00
+15.00
 </td>
 <td style="text-align:right;">
 6.00
 </td>
 <td style="text-align:right;">
-44.00
+5.00
 </td>
 <td style="text-align:right;">
-10.00
+8.00
 </td>
 <td style="text-align:right;">
-25.00
+2.00
 </td>
 <td style="text-align:right;">
-0.00
+16.00
 </td>
 <td style="text-align:right;">
-22.00
+8.00
 </td>
 <td style="text-align:right;">
-1.00
+3.00
 </td>
 <td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-11.00
-</td>
-<td style="text-align:right;">
-30.00
+37.00
 </td>
 <td style="text-align:right;">
 7.00
@@ -7649,13 +7844,114 @@ days_tmp_max_gt90pct_may_sep
 24.00
 </td>
 <td style="text-align:right;">
-38.00
+0.00
 </td>
 <td style="text-align:right;">
-71.00
+20.00
 </td>
 <td style="text-align:right;">
-25.00
+1.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+34.00
+</td>
+<td style="text-align:right;">
+64.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+10.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+87.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_tmp_max_gt95pct_may_sep
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+7.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+23.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+12.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+3.00
 </td>
 <td style="text-align:right;">
 1.00
@@ -7664,21 +7960,54 @@ days_tmp_max_gt90pct_may_sep
 14.00
 </td>
 <td style="text-align:right;">
-20.00
+3.00
 </td>
 <td style="text-align:right;">
-3.00
+13.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
+49.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 6.00
 </td>
 <td style="text-align:right;">
-7.00
+3.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+82.00
 </td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_tmp_max_gt95pct_may_sep
+days_heat_index_max_gt85pct_may_sep
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+4.00
 </td>
 <td style="text-align:right;">
 13.00
@@ -7687,218 +8016,7 @@ days_tmp_max_gt95pct_may_sep
 5.00
 </td>
 <td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-11.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-6.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
 29.00
-</td>
-<td style="text-align:right;">
-58.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-6.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-5.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_heat_index_max_gt85pct_may_sep
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-5.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-5.00
-</td>
-<td style="text-align:right;">
-31.00
-</td>
-<td style="text-align:right;">
-19.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-52.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-35.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-27.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-11.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-32.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-38.00
-</td>
-<td style="text-align:right;">
-68.00
-</td>
-<td style="text-align:right;">
-58.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-23.00
-</td>
-<td style="text-align:right;">
-51.00
-</td>
-<td style="text-align:right;">
-34.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-40.00
-</td>
-</tr>
-<tr>
-<td style="text-align:left; padding-left: 2em;" indentlevel="1">
-days_heat_index_max_gt90pct_may_sep
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-5.00
-</td>
-<td style="text-align:right;">
-16.00
-</td>
-<td style="text-align:right;">
-11.00
-</td>
-<td style="text-align:right;">
-6.00
-</td>
-<td style="text-align:right;">
-31.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-0.00
 </td>
 <td style="text-align:right;">
 18.00
@@ -7907,40 +8025,90 @@ days_heat_index_max_gt90pct_may_sep
 11.00
 </td>
 <td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-23.00
+46.00
 </td>
 <td style="text-align:right;">
 11.00
 </td>
 <td style="text-align:right;">
-23.00
+31.00
 </td>
 <td style="text-align:right;">
-43.00
+0.00
 </td>
 <td style="text-align:right;">
-40.00
-</td>
-<td style="text-align:right;">
-16.00
-</td>
-<td style="text-align:right;">
-12.00
+21.00
 </td>
 <td style="text-align:right;">
 15.00
 </td>
 <td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
+24.00
+</td>
+<td style="text-align:right;">
+12.00
+</td>
+<td style="text-align:right;">
+30.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
 34.00
+</td>
+<td style="text-align:right;">
+61.00
+</td>
+<td style="text-align:right;">
+54.00
+</td>
+<td style="text-align:right;">
+21.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+21.00
+</td>
+<td style="text-align:right;">
+48.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+35.00
+</td>
+<td style="text-align:right;">
+93.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left; padding-left: 2em;" indentlevel="1">
+days_heat_index_max_gt90pct_may_sep
+</td>
+<td style="text-align:right;">
+13.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+5.00
 </td>
 <td style="text-align:right;">
 15.00
@@ -7949,7 +8117,73 @@ days_heat_index_max_gt90pct_may_sep
 10.00
 </td>
 <td style="text-align:right;">
-26.00
+4.00
+</td>
+<td style="text-align:right;">
+29.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+16.00
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+13.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+21.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+39.00
+</td>
+<td style="text-align:right;">
+33.00
+</td>
+<td style="text-align:right;">
+16.00
+</td>
+<td style="text-align:right;">
+10.00
+</td>
+<td style="text-align:right;">
+12.00
+</td>
+<td style="text-align:right;">
+31.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+65.00
 </td>
 </tr>
 <tr>
@@ -7957,43 +8191,43 @@ days_heat_index_max_gt90pct_may_sep
 days_heat_index_max_gt95pct_may_sep
 </td>
 <td style="text-align:right;">
-12.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-5.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-4.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
 9.00
 </td>
 <td style="text-align:right;">
-16.00
+2.00
 </td>
 <td style="text-align:right;">
 0.00
 </td>
 <td style="text-align:right;">
-14.00
+4.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+12.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+13.00
 </td>
 <td style="text-align:right;">
 3.00
@@ -8002,46 +8236,49 @@ days_heat_index_max_gt95pct_may_sep
 1.00
 </td>
 <td style="text-align:right;">
-11.00
+9.00
 </td>
 <td style="text-align:right;">
-4.00
+3.00
 </td>
 <td style="text-align:right;">
-16.00
+12.00
 </td>
 <td style="text-align:right;">
 6.00
 </td>
 <td style="text-align:right;">
-13.00
-</td>
-<td style="text-align:right;">
-27.00
-</td>
-<td style="text-align:right;">
-24.00
-</td>
-<td style="text-align:right;">
-11.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-11.00
+10.00
 </td>
 <td style="text-align:right;">
 23.00
 </td>
 <td style="text-align:right;">
-9.00
+20.00
 </td>
 <td style="text-align:right;">
-7.00
+11.00
 </td>
 <td style="text-align:right;">
-17.00
+3.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+20.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+14.00
+</td>
+<td style="text-align:right;">
+52.00
 </td>
 </tr>
 <tr>
@@ -8049,67 +8286,67 @@ days_heat_index_max_gt95pct_may_sep
 days_wbgt_max_gt85pct_may_sep
 </td>
 <td style="text-align:right;">
-28.00
+24.00
 </td>
 <td style="text-align:right;">
-20.00
+19.00
 </td>
 <td style="text-align:right;">
 12.00
-</td>
-<td style="text-align:right;">
-28.00
-</td>
-<td style="text-align:right;">
-16.00
-</td>
-<td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-26.00
-</td>
-<td style="text-align:right;">
-29.00
 </td>
 <td style="text-align:right;">
 27.00
 </td>
 <td style="text-align:right;">
-20.00
+15.00
+</td>
+<td style="text-align:right;">
+28.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+25.00
+</td>
+<td style="text-align:right;">
+17.00
 </td>
 <td style="text-align:right;">
 12.00
 </td>
 <td style="text-align:right;">
+31.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+23.00
+</td>
+<td style="text-align:right;">
 32.00
 </td>
 <td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-24.00
-</td>
-<td style="text-align:right;">
-35.00
-</td>
-<td style="text-align:right;">
-33.00
+32.00
 </td>
 <td style="text-align:right;">
 30.00
 </td>
 <td style="text-align:right;">
-22.00
+20.00
 </td>
 <td style="text-align:right;">
 16.00
 </td>
 <td style="text-align:right;">
-40.00
+39.00
 </td>
 <td style="text-align:right;">
 41.00
@@ -8118,22 +8355,25 @@ days_wbgt_max_gt85pct_may_sep
 19.00
 </td>
 <td style="text-align:right;">
-20.00
+18.00
 </td>
 <td style="text-align:right;">
 24.00
 </td>
 <td style="text-align:right;">
-45.00
+43.00
+</td>
+<td style="text-align:right;">
+33.00
 </td>
 <td style="text-align:right;">
 34.00
 </td>
 <td style="text-align:right;">
-36.00
+30.00
 </td>
 <td style="text-align:right;">
-34.00
+41.00
 </td>
 </tr>
 <tr>
@@ -8147,22 +8387,16 @@ days_wbgt_max_gt90pct_may_sep
 12.00
 </td>
 <td style="text-align:right;">
-9.00
+8.00
 </td>
 <td style="text-align:right;">
 12.00
 </td>
 <td style="text-align:right;">
-11.00
+10.00
 </td>
 <td style="text-align:right;">
-18.00
-</td>
-<td style="text-align:right;">
-14.00
-</td>
-<td style="text-align:right;">
-19.00
+16.00
 </td>
 <td style="text-align:right;">
 14.00
@@ -8171,7 +8405,13 @@ days_wbgt_max_gt90pct_may_sep
 18.00
 </td>
 <td style="text-align:right;">
-7.00
+14.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
+6.00
 </td>
 <td style="text-align:right;">
 9.00
@@ -8186,10 +8426,10 @@ days_wbgt_max_gt90pct_may_sep
 16.00
 </td>
 <td style="text-align:right;">
-25.00
+24.00
 </td>
 <td style="text-align:right;">
-20.00
+18.00
 </td>
 <td style="text-align:right;">
 22.00
@@ -8204,10 +8444,10 @@ days_wbgt_max_gt90pct_may_sep
 22.00
 </td>
 <td style="text-align:right;">
-24.00
+23.00
 </td>
 <td style="text-align:right;">
-13.00
+12.00
 </td>
 <td style="text-align:right;">
 9.00
@@ -8222,10 +8462,13 @@ days_wbgt_max_gt90pct_may_sep
 22.00
 </td>
 <td style="text-align:right;">
-19.00
+18.00
 </td>
 <td style="text-align:right;">
-19.00
+18.00
+</td>
+<td style="text-align:right;">
+15.00
 </td>
 </tr>
 <tr>
@@ -8233,91 +8476,94 @@ days_wbgt_max_gt90pct_may_sep
 days_tmp_max_gt1sd_may_sep
 </td>
 <td style="text-align:right;">
-29.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-30.00
-</td>
-<td style="text-align:right;">
-18.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-52.00
-</td>
-<td style="text-align:right;">
-16.00
-</td>
-<td style="text-align:right;">
-34.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-22.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-8.00
-</td>
-<td style="text-align:right;">
-12.00
-</td>
-<td style="text-align:right;">
-21.00
-</td>
-<td style="text-align:right;">
-41.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-33.00
-</td>
-<td style="text-align:right;">
-59.00
-</td>
-<td style="text-align:right;">
-80.00
-</td>
-<td style="text-align:right;">
-27.00
+17.00
 </td>
 <td style="text-align:right;">
 5.00
 </td>
 <td style="text-align:right;">
-22.00
+9.00
 </td>
 <td style="text-align:right;">
-32.00
+15.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+16.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+47.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+13.00
+</td>
+<td style="text-align:right;">
+34.00
+</td>
+<td style="text-align:right;">
+4.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+44.00
+</td>
+<td style="text-align:right;">
+69.00
+</td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+15.00
+</td>
+<td style="text-align:right;">
+19.00
+</td>
+<td style="text-align:right;">
+11.00
+</td>
+<td style="text-align:right;">
+3.00
 </td>
 <td style="text-align:right;">
 12.00
 </td>
 <td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-15.00
+92.00
 </td>
 </tr>
 <tr>
@@ -8325,37 +8571,37 @@ days_tmp_max_gt1sd_may_sep
 days_heat_index_max_gt1sd_may_sep
 </td>
 <td style="text-align:right;">
-24.00
+23.00
 </td>
 <td style="text-align:right;">
 14.00
+</td>
+<td style="text-align:right;">
+5.00
+</td>
+<td style="text-align:right;">
+13.00
 </td>
 <td style="text-align:right;">
 6.00
 </td>
 <td style="text-align:right;">
-14.00
+23.00
 </td>
 <td style="text-align:right;">
-6.00
+19.00
 </td>
 <td style="text-align:right;">
-24.00
+10.00
 </td>
 <td style="text-align:right;">
-20.00
+51.00
 </td>
 <td style="text-align:right;">
-14.00
+13.00
 </td>
 <td style="text-align:right;">
-54.00
-</td>
-<td style="text-align:right;">
-15.00
-</td>
-<td style="text-align:right;">
-34.00
+30.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -8364,31 +8610,31 @@ days_heat_index_max_gt1sd_may_sep
 22.00
 </td>
 <td style="text-align:right;">
-14.00
+13.00
 </td>
 <td style="text-align:right;">
-11.00
+10.00
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+13.00
 </td>
 <td style="text-align:right;">
 26.00
 </td>
 <td style="text-align:right;">
-17.00
-</td>
-<td style="text-align:right;">
-31.00
-</td>
-<td style="text-align:right;">
 18.00
 </td>
 <td style="text-align:right;">
-31.00
+29.00
 </td>
 <td style="text-align:right;">
-63.00
+59.00
 </td>
 <td style="text-align:right;">
-56.00
+50.00
 </td>
 <td style="text-align:right;">
 21.00
@@ -8397,19 +8643,22 @@ days_heat_index_max_gt1sd_may_sep
 17.00
 </td>
 <td style="text-align:right;">
-25.00
+22.00
 </td>
 <td style="text-align:right;">
-48.00
+45.00
 </td>
 <td style="text-align:right;">
-30.00
+29.00
 </td>
 <td style="text-align:right;">
-15.00
+12.00
 </td>
 <td style="text-align:right;">
-39.00
+35.00
+</td>
+<td style="text-align:right;">
+96.00
 </td>
 </tr>
 <tr>
@@ -8417,10 +8666,10 @@ days_heat_index_max_gt1sd_may_sep
 days_wbgt_max_gt1sd_may_sep
 </td>
 <td style="text-align:right;">
-19.00
+18.00
 </td>
 <td style="text-align:right;">
-16.00
+15.00
 </td>
 <td style="text-align:right;">
 11.00
@@ -8429,10 +8678,10 @@ days_wbgt_max_gt1sd_may_sep
 20.00
 </td>
 <td style="text-align:right;">
-15.00
+14.00
 </td>
 <td style="text-align:right;">
-22.00
+21.00
 </td>
 <td style="text-align:right;">
 14.00
@@ -8441,7 +8690,7 @@ days_wbgt_max_gt1sd_may_sep
 22.00
 </td>
 <td style="text-align:right;">
-19.00
+18.00
 </td>
 <td style="text-align:right;">
 20.00
@@ -8456,16 +8705,16 @@ days_wbgt_max_gt1sd_may_sep
 24.00
 </td>
 <td style="text-align:right;">
-7.00
+6.00
 </td>
 <td style="text-align:right;">
-19.00
+18.00
 </td>
 <td style="text-align:right;">
 28.00
 </td>
 <td style="text-align:right;">
-25.00
+24.00
 </td>
 <td style="text-align:right;">
 27.00
@@ -8477,25 +8726,22 @@ days_wbgt_max_gt1sd_may_sep
 9.00
 </td>
 <td style="text-align:right;">
-31.00
+32.00
 </td>
 <td style="text-align:right;">
 35.00
 </td>
 <td style="text-align:right;">
+13.00
+</td>
+<td style="text-align:right;">
 14.00
 </td>
 <td style="text-align:right;">
-15.00
+19.00
 </td>
 <td style="text-align:right;">
-20.00
-</td>
-<td style="text-align:right;">
-33.00
-</td>
-<td style="text-align:right;">
-26.00
+34.00
 </td>
 <td style="text-align:right;">
 25.00
@@ -8503,13 +8749,28 @@ days_wbgt_max_gt1sd_may_sep
 <td style="text-align:right;">
 26.00
 </td>
+<td style="text-align:right;">
+26.00
+</td>
+<td style="text-align:right;">
+23.00
+</td>
 </tr>
 <tr>
 <td style="text-align:left; padding-left: 2em;" indentlevel="1">
 days_tmp_max_gt2sd_may_sep
 </td>
 <td style="text-align:right;">
-2.00
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -8519,6 +8780,33 @@ days_tmp_max_gt2sd_may_sep
 </td>
 <td style="text-align:right;">
 1.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -8527,64 +8815,28 @@ days_tmp_max_gt2sd_may_sep
 3.00
 </td>
 <td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+8.00
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:right;">
+17.00
+</td>
+<td style="text-align:right;">
+6.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
 2.00
 </td>
 <td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
 0.00
-</td>
-<td style="text-align:right;">
-2.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:right;">
-10.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-9.00
-</td>
-<td style="text-align:right;">
-5.00
-</td>
-<td style="text-align:right;">
-24.00
-</td>
-<td style="text-align:right;">
-7.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-3.00
-</td>
-<td style="text-align:right;">
-1.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -8594,6 +8846,9 @@ days_tmp_max_gt2sd_may_sep
 </td>
 <td style="text-align:right;">
 0.00
+</td>
+<td style="text-align:right;">
+73.00
 </td>
 </tr>
 <tr>
@@ -8601,7 +8856,7 @@ days_tmp_max_gt2sd_may_sep
 days_heat_index_max_gt2sd_may_sep
 </td>
 <td style="text-align:right;">
-2.00
+1.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -8616,7 +8871,7 @@ days_heat_index_max_gt2sd_may_sep
 0.00
 </td>
 <td style="text-align:right;">
-6.00
+5.00
 </td>
 <td style="text-align:right;">
 1.00
@@ -8625,13 +8880,28 @@ days_heat_index_max_gt2sd_may_sep
 3.00
 </td>
 <td style="text-align:right;">
-5.00
+4.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+2.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 3.00
 </td>
 <td style="text-align:right;">
-2.00
+0.00
+</td>
+<td style="text-align:right;">
+0.00
+</td>
+<td style="text-align:right;">
+0.00
 </td>
 <td style="text-align:right;">
 0.00
@@ -8641,30 +8911,15 @@ days_heat_index_max_gt2sd_may_sep
 </td>
 <td style="text-align:right;">
 0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-0.00
-</td>
-<td style="text-align:right;">
-8.00
-</td>
-<td style="text-align:right;">
-1.00
 </td>
 <td style="text-align:right;">
 5.00
 </td>
 <td style="text-align:right;">
-7.00
+5.00
 </td>
 <td style="text-align:right;">
-7.00
+6.00
 </td>
 <td style="text-align:right;">
 2.00
@@ -8676,7 +8931,7 @@ days_heat_index_max_gt2sd_may_sep
 4.00
 </td>
 <td style="text-align:right;">
-7.00
+4.00
 </td>
 <td style="text-align:right;">
 4.00
@@ -8686,6 +8941,9 @@ days_heat_index_max_gt2sd_may_sep
 </td>
 <td style="text-align:right;">
 6.00
+</td>
+<td style="text-align:right;">
+19.00
 </td>
 </tr>
 <tr>
@@ -8693,7 +8951,7 @@ days_heat_index_max_gt2sd_may_sep
 days_wbgt_max_gt2sd_may_sep
 </td>
 <td style="text-align:right;">
-6.00
+7.00
 </td>
 <td style="text-align:right;">
 5.00
@@ -8714,7 +8972,7 @@ days_wbgt_max_gt2sd_may_sep
 6.00
 </td>
 <td style="text-align:right;">
-9.00
+8.00
 </td>
 <td style="text-align:right;">
 4.00
@@ -8726,10 +8984,10 @@ days_wbgt_max_gt2sd_may_sep
 2.00
 </td>
 <td style="text-align:right;">
-3.00
+4.00
 </td>
 <td style="text-align:right;">
-3.00
+2.00
 </td>
 <td style="text-align:right;">
 3.00
@@ -8738,13 +8996,13 @@ days_wbgt_max_gt2sd_may_sep
 6.00
 </td>
 <td style="text-align:right;">
-7.00
+8.00
 </td>
 <td style="text-align:right;">
 7.00
 </td>
 <td style="text-align:right;">
-10.00
+9.00
 </td>
 <td style="text-align:right;">
 5.00
@@ -8768,7 +9026,7 @@ days_wbgt_max_gt2sd_may_sep
 4.00
 </td>
 <td style="text-align:right;">
-12.00
+13.00
 </td>
 <td style="text-align:right;">
 6.00
@@ -8778,6 +9036,9 @@ days_wbgt_max_gt2sd_may_sep
 </td>
 <td style="text-align:right;">
 9.00
+</td>
+<td style="text-align:right;">
+5.00
 </td>
 </tr>
 </tbody>

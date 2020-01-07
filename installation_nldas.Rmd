@@ -85,6 +85,30 @@ second_set_bases <- c(
 second_set_bases 
 ```
 
+
+Full set of bases (used in `nldas_list_end2019`):
+```{r full_set}
+
+
+full_set_bases <- c(
+      "Fort Benning GA", "Fort Bragg","Fort Campbell",
+      "Fort Jackson", "Fort Polk", "Fort Hood",
+      "Fort Stewart", "Fort Leonard Wood", "Fort Riley",
+      "NTC and Fort Irwin", "Fort Bliss", "Fort Lewis",
+      "Fort Sill", "Fort Carson", "Fort Gordon", "Fort Drum",
+      "MCB Quantico", "MCRD San Diego", "Twentynine Palms Main Base",
+      "MCB Camp Lejeune", "MCRD Beaufort Parris Island", "MCB Camp Pendleton",
+      "Eglin AFB", "Lackland AFB", "Fort Sam Houston") %>% 
+  stringr::str_replace_all(., " ", "_") %>%
+  stringr::str_to_lower()
+  
+
+full_set_bases 
+
+```
+
+
+
 Extract by location from first list and create an NLDAS object for each.
 
 
@@ -114,6 +138,26 @@ nldas_list_joint %>%
 
 ```
 
+
+
+Extract by location from full list (end of 2019) and create an NLDAS object for each.
+
+```{r second_extract, eval = FALSE}
+
+for (i in seq_along(full_set_bases)) {
+
+nldas_list_end2019 %>% 
+    lapply(function(x) x[i,]) %>% 
+    bind_rows(., .id = "date_time") %>% 
+  write_rds(., path = paste0("data/base_nldas/", full_set_bases[i], ".rds" ))
+}  
+
+```
+
+
+
+
+
 Review installation NLDAS files.
 ```{r check_saved_files}
 
@@ -135,7 +179,6 @@ read_rds("data/base_nldas/eglin_afb.rds")
 
 df_index <- 
   list.files("data/base_nldas") %>%
-      .[-c(10, 27)] %>% 
     as_tibble() %>% 
     mutate(row_id = row_number(),
            value = stringr::str_replace(value, ".rds", ""))
@@ -144,7 +187,6 @@ df_index <-
 
 nldas_df <-
   list.files("data/base_nldas", full.names = TRUE) %>%
-    .[-c(10, 27)] %>%   # remove West Point and Fort Huachuca
     map_dfr(.x = ., .f = read_rds, .id = "id") %>%
   mutate(id = as.integer(id)) %>% 
   left_join(df_index, by = c("id" = "row_id")) %>% 
@@ -153,7 +195,7 @@ nldas_df <-
 
 nldas_df
 
-# write_rds(nldas_df, path = "data/nldas_df.rds")
+#write_rds(nldas_df_end2019, path = "data/nldas_df_end2019.rds")
 
 ```
 
@@ -181,5 +223,4 @@ duplicates %>%
   
 
 ```
-
 
