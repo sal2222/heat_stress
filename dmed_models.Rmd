@@ -27,7 +27,7 @@ library(naniar)
 library(modelr)
 library(lme4)
 library(ICC) 
-
+library(dotwhisker)
 
 ```
 
@@ -667,4 +667,199 @@ fixed_intercept_nest %>%
 Note: without including `year`, R^2 approx. 52-55%; with `year` R^2 62-63%
 
 With fixed intercepts added, there is very little difference in model fits based on index selection.
+
+
+
+## Random intercepts and slopes
+
+Assume independence across subjects *i* but not within subjects *j*. Account for within subject correlation with a random term.  
+  
+`(1|installation)` designates intercepts only by random factor  
+`(value|installation)`designates slopes only by random factor  
+`(1 + value|installation)` designates intercepts and slopes by random factor  
+
+
+
+```{r random_intercept_slopes, message = FALSE, warning = FALSE, cache = TRUE}
+
+# https://stats.stackexchange.com/questions/13166/rs-lmer-cheat-sheet
+
+# Examine evidence of random intercepts and/or slopes
+
+# Adjusted x axis scales
+joined_rate %>%
+   filter(index %in% "days_wbgt_gt82") %>% 
+  ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.5, color = "black") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_wrap(~ installation, scales = "free_x") +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates and Annual Days with WBGT > 82 deg F",
+      x = "Days WBGT > 82",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() 
+
+# Fixed x axis scales
+joined_rate %>%
+   filter(index %in% "days_wbgt_gt82") %>% 
+  ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.5, color = "black") +
+    geom_smooth(se = FALSE, size = 0.5) +
+    facet_wrap(~ installation) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates and Annual Days with WBGT > 82 deg F",
+      x = "Days WBGT > 82",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() 
+
+
+# Function for linear mixed model (random interceps and slopes)
+
+random_slopes_intercepts_lmer = function(df) {
+  df %>% 
+    lmer(rate ~ value + year + (1 + value|installation), data = .)
+}
+
+# Map regression function over each index
+
+mixed_nest <-
+  joined_rate %>%
+  left_join(dmed_population, by = c("installation" = "location", "year")) %>% 
+    dplyr::select(index, everything()) %>% 
+      nest(data = installation:population) %>% 
+      mutate(linear_models = map(data, random_slopes_intercepts_lmer),
+             glance = map(linear_models, broom::glance),
+             tidy =   map(linear_models, broom::tidy),
+             augment = map(linear_models, broom::augment))
+
+# returns `boundary (singular) fit`: indicates models are overfitted – random effects structure is too complex to be supported by the data
+
+
+mixed_nest %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")  
+
+  # Arranged by effect estimate
+mixed_nest %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>% 
+  filter(term %in% "value") %>% 
+  arrange(desc(estimate)) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")   
+
+
+  # Model fit
+mixed_nest %>% 
+  unnest(glance, .drop = TRUE) %>% 
+   dplyr::select(index, sigma:df.residual) %>%
+    arrange(logLik) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px") 
+
+# https://bbolker.github.io/morelia_2018/notes/mixedlab.html
+# Boxplots of residuals by installation
+map(mixed_nest$augment[1:5], ~
+      ggplot(.x, aes(x = installation, y = .resid))+
+          geom_boxplot() + 
+          coord_flip())
+
+# Plot random effects to look for outliers
+map(mixed_nest$linear_models[1:5], ~dotplot(ranef(.x, condVar = TRUE)))
+
+
+# Coefficient plot
+map(mixed_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
+
+
+
+
+
+
+
+```
+
+## Random intercept only models
+
+```{r random_intercept, message = FALSE, warning = FALSE, cache = TRUE}
+
+
+
+# Function for linear mixed model (random interceps only)
+
+random_intercepts_lmer = function(df) {
+  df %>% 
+    lmer(rate ~ value + year + (1|installation), data = .)
+}
+
+
+
+random_intercepts_nest <-
+  joined_rate %>%
+  left_join(dmed_population, by = c("installation" = "location", "year")) %>% 
+    dplyr::select(index, everything()) %>% 
+      nest(data = installation:population) %>% 
+      mutate(linear_models = map(data, random_intercepts_lmer),
+             glance = map(linear_models, broom::glance),
+             tidy =   map(linear_models, broom::tidy),
+             augment = map(linear_models, broom::augment))
+
+# 2 warnings for `fixed-effect model matrix is rank deficient so dropping 1 column / coefficient`
+
+
+# Model summaries
+
+random_intercepts_nest %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")  
+
+  # Arranged by effect estimate
+random_intercepts_nest %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>% 
+  filter(term %in% "value") %>% 
+  arrange(desc(estimate)) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")   
+
+
+  # Model fit
+random_intercepts_nest %>% 
+  unnest(glance, .drop = TRUE) %>% 
+   dplyr::select(index, sigma:df.residual) %>%
+    arrange(logLik) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")  
+
+
+
+
+
+# Boxplots of residuals by installation
+map(random_intercepts_nest$augment[1:5], ~
+      ggplot(.x, aes(x = installation, y = .resid))+
+          geom_boxplot() + 
+          coord_flip())
+
+# Plot random effects to look for outliers
+map(random_intercepts_nest$linear_models[1:5], ~dotplot(ranef(.x, condVar = TRUE)))
+
+
+# Coefficient plot
+map(random_intercepts_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
+```
 
