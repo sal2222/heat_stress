@@ -69237,7 +69237,8 @@ fixed_intercept_nest &lt;-
       nest(data = installation:population) %&gt;% 
       mutate(linear_models = map(data, fixed_intercept_lm),
              glance = map(linear_models, broom::glance),
-             tidy =   map(linear_models, broom::tidy))
+             tidy =   map(linear_models, broom::tidy),
+             augment =  map(linear_models, broom::augment))
 
 # Model summary tables
   # By model / annual index of heat 
@@ -72804,6 +72805,41 @@ days_tmp_gt90pct_may_sep
 </tbody>
 </table>
 </div>
+<pre class="r"><code># Boxplots of residuals by installation
+map(fixed_intercept_nest$augment[1:5], ~
+      ggplot(.x, aes(x = installation, y = .resid))+
+          geom_boxplot() + 
+          coord_flip())</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-2.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-3.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-4.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-5.png" width="672" /></p>
+<pre class="r"><code># Coefficient plot
+map(fixed_intercept_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-6.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-7.png" width="672" /></p>
+<pre><code>## 
+## [[3]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-8.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-9.png" width="672" /></p>
+<pre><code>## 
+## [[5]]</code></pre>
+<p><img src="dmed_models_files/figure-html/fixed_intercepts-10.png" width="672" /></p>
 <p>Note: without including <code>year</code>, R^2 approx. 52-55%; with <code>year</code> R^2 62-63%</p>
 <p>With fixed intercepts added, there is very little difference in model fits based on index selection.</p>
 </div>

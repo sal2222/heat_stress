@@ -631,7 +631,8 @@ fixed_intercept_nest <-
       nest(data = installation:population) %>% 
       mutate(linear_models = map(data, fixed_intercept_lm),
              glance = map(linear_models, broom::glance),
-             tidy =   map(linear_models, broom::tidy))
+             tidy =   map(linear_models, broom::tidy),
+             augment =  map(linear_models, broom::augment))
 
 # Model summary tables
   # By model / annual index of heat 
@@ -662,6 +663,19 @@ fixed_intercept_nest %>%
   knitr::kable(digits = 4) %>% 
   kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
   scroll_box(height = "400px")  
+
+
+
+# Boxplots of residuals by installation
+map(fixed_intercept_nest$augment[1:5], ~
+      ggplot(.x, aes(x = installation, y = .resid))+
+          geom_boxplot() + 
+          coord_flip())
+
+# Coefficient plot
+map(fixed_intercept_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
+
+
 ```
 
 Note: without including `year`, R^2 approx. 52-55%; with `year` R^2 62-63%
