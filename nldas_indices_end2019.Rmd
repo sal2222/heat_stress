@@ -29,7 +29,7 @@ Expand dataframe with indices and unit conversions
 
 ## Identify timezones for local time conversion
 
-```{r id_timezones}
+```{r id_timezones, eval = FALSE}
 # GMT adjust
 
 time_zones <-
@@ -151,7 +151,7 @@ We will apply a wrapper of the C code developed by Liljegren *et al* to estimate
   
 In addition to the weather variables and time, we will need `lat` and `lon` columns for the WBGT function. 
 
-```{r lat_lon}
+```{r lat_lon, eval = FALSE}
 
 # Add lat/lon to nldas dataframe
 
@@ -231,7 +231,7 @@ nldas_wide_end2019 <-
 
 ## "Wide" NLDAS dataframe
 
-```{r open_nldas_wide}
+```{r open_nldas_wide, eval = FALSE}
 
 # View "wide" NLDAS dataframe
 # 
@@ -316,7 +316,7 @@ nldas_long_end2019
 
 
 
-```{r combine_end2019}
+```{r combine_end2019, eval = FALSE}
 nldas_wide <-
   read_rds("data/nldas_wide.rds")
 
@@ -364,7 +364,7 @@ nldas_nest <-
 
 ```
 
-```{r view_nldas_nest}
+```{r view_nldas_nest, eval = FALSE}
 
 nldas_nest <-
   read_rds("data/nldas_nest.rds")

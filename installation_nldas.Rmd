@@ -156,8 +156,6 @@ nldas_list_end2019 %>%
 
 
 
-
-
 Review installation NLDAS files.
 ```{r check_saved_files}
 
