@@ -453,7 +453,10 @@ div.tocify {
   <ul class="dropdown-menu" role="menu">
     <li class="dropdown-header">Annual</li>
     <li>
-      <a href="dmed_models.html">Annual models</a>
+      <a href="dmed_models.html">Annual models - Outpatient HSI</a>
+    </li>
+    <li>
+      <a href="dmed_models_hospitalization.html">Annual models - Inpatient HSI</a>
     </li>
     <li class="dropdown-header">Daily</li>
     <li>
@@ -536,6 +539,34 @@ second_set_bases </code></pre>
 ## [5] &quot;mcrd_beaufort_parris_island&quot; &quot;mcb_camp_pendleton&quot;         
 ## [7] &quot;eglin_afb&quot;                   &quot;lackland_afb&quot;               
 ## [9] &quot;fort_sam_houston&quot;</code></pre>
+<p>Full set of bases (used in <code>nldas_list_end2019</code>):</p>
+<pre class="r"><code>full_set_bases &lt;- c(
+      &quot;Fort Benning GA&quot;, &quot;Fort Bragg&quot;,&quot;Fort Campbell&quot;,
+      &quot;Fort Jackson&quot;, &quot;Fort Polk&quot;, &quot;Fort Hood&quot;,
+      &quot;Fort Stewart&quot;, &quot;Fort Leonard Wood&quot;, &quot;Fort Riley&quot;,
+      &quot;NTC and Fort Irwin&quot;, &quot;Fort Bliss&quot;, &quot;Fort Lewis&quot;,
+      &quot;Fort Sill&quot;, &quot;Fort Carson&quot;, &quot;Fort Gordon&quot;, &quot;Fort Drum&quot;,
+      &quot;MCB Quantico&quot;, &quot;MCRD San Diego&quot;, &quot;Twentynine Palms Main Base&quot;,
+      &quot;MCB Camp Lejeune&quot;, &quot;MCRD Beaufort Parris Island&quot;, &quot;MCB Camp Pendleton&quot;,
+      &quot;Eglin AFB&quot;, &quot;Lackland AFB&quot;, &quot;Fort Sam Houston&quot;) %&gt;% 
+  stringr::str_replace_all(., &quot; &quot;, &quot;_&quot;) %&gt;%
+  stringr::str_to_lower()
+  
+
+full_set_bases </code></pre>
+<pre><code>##  [1] &quot;fort_benning_ga&quot;             &quot;fort_bragg&quot;                 
+##  [3] &quot;fort_campbell&quot;               &quot;fort_jackson&quot;               
+##  [5] &quot;fort_polk&quot;                   &quot;fort_hood&quot;                  
+##  [7] &quot;fort_stewart&quot;                &quot;fort_leonard_wood&quot;          
+##  [9] &quot;fort_riley&quot;                  &quot;ntc_and_fort_irwin&quot;         
+## [11] &quot;fort_bliss&quot;                  &quot;fort_lewis&quot;                 
+## [13] &quot;fort_sill&quot;                   &quot;fort_carson&quot;                
+## [15] &quot;fort_gordon&quot;                 &quot;fort_drum&quot;                  
+## [17] &quot;mcb_quantico&quot;                &quot;mcrd_san_diego&quot;             
+## [19] &quot;twentynine_palms_main_base&quot;  &quot;mcb_camp_lejeune&quot;           
+## [21] &quot;mcrd_beaufort_parris_island&quot; &quot;mcb_camp_pendleton&quot;         
+## [23] &quot;eglin_afb&quot;                   &quot;lackland_afb&quot;               
+## [25] &quot;fort_sam_houston&quot;</code></pre>
 <p>Extract by location from first list and create an NLDAS object for each.</p>
 <pre class="r"><code>for (i in seq_along(first_set_bases)) {
 
@@ -552,54 +583,61 @@ nldas_list_joint %&gt;%
     bind_rows(., .id = &quot;date_time&quot;) %&gt;% 
   write_rds(., path = paste0(&quot;data/base_nldas/&quot;,  second_set_bases[i], &quot;.rds&quot; ))
 }  </code></pre>
+<p>Extract by location from full list (end of 2019) and create an NLDAS object for each.</p>
+<pre class="r"><code>for (i in seq_along(full_set_bases)) {
+
+nldas_list_end2019 %&gt;% 
+    lapply(function(x) x[i,]) %&gt;% 
+    bind_rows(., .id = &quot;date_time&quot;) %&gt;% 
+  write_rds(., path = paste0(&quot;data/base_nldas/&quot;, full_set_bases[i], &quot;.rds&quot; ))
+}  </code></pre>
 <p>Review installation NLDAS files.</p>
 <pre class="r"><code>list.files(&quot;data/base_nldas&quot;) </code></pre>
 <pre><code>##  [1] &quot;eglin_afb.rds&quot;                   &quot;fort_benning_ga.rds&quot;            
 ##  [3] &quot;fort_bliss.rds&quot;                  &quot;fort_bragg.rds&quot;                 
 ##  [5] &quot;fort_campbell.rds&quot;               &quot;fort_carson.rds&quot;                
 ##  [7] &quot;fort_drum.rds&quot;                   &quot;fort_gordon.rds&quot;                
-##  [9] &quot;fort_hood.rds&quot;                   &quot;fort_huachuca.rds&quot;              
-## [11] &quot;fort_jackson.rds&quot;                &quot;fort_leonard_wood.rds&quot;          
-## [13] &quot;fort_lewis.rds&quot;                  &quot;fort_polk.rds&quot;                  
-## [15] &quot;fort_riley.rds&quot;                  &quot;fort_sam_houston.rds&quot;           
-## [17] &quot;fort_sill.rds&quot;                   &quot;fort_stewart.rds&quot;               
-## [19] &quot;lackland_afb.rds&quot;                &quot;mcb_camp_lejeune.rds&quot;           
-## [21] &quot;mcb_camp_pendleton.rds&quot;          &quot;mcb_quantico.rds&quot;               
-## [23] &quot;mcrd_beaufort_parris_island.rds&quot; &quot;mcrd_san_diego.rds&quot;             
-## [25] &quot;ntc_and_fort_irwin.rds&quot;          &quot;twentynine_palms_main_base.rds&quot; 
-## [27] &quot;west_point_mil_reservation.rds&quot;</code></pre>
+##  [9] &quot;fort_hood.rds&quot;                   &quot;fort_jackson.rds&quot;               
+## [11] &quot;fort_leonard_wood.rds&quot;           &quot;fort_lewis.rds&quot;                 
+## [13] &quot;fort_polk.rds&quot;                   &quot;fort_riley.rds&quot;                 
+## [15] &quot;fort_sam_houston.rds&quot;            &quot;fort_sill.rds&quot;                  
+## [17] &quot;fort_stewart.rds&quot;                &quot;lackland_afb.rds&quot;               
+## [19] &quot;mcb_camp_lejeune.rds&quot;            &quot;mcb_camp_pendleton.rds&quot;         
+## [21] &quot;mcb_quantico.rds&quot;                &quot;mcrd_beaufort_parris_island.rds&quot;
+## [23] &quot;mcrd_san_diego.rds&quot;              &quot;ntc_and_fort_irwin.rds&quot;         
+## [25] &quot;twentynine_palms_main_base.rds&quot;</code></pre>
 <pre class="r"><code># Fort Benning (1st set)
 read_rds(&quot;data/base_nldas/fort_benning_ga.rds&quot;)</code></pre>
-<pre><code>## # A tibble: 258,901 x 7
-##    date_time       TMP    SPFH    PRES  UGRD   VGRD DSWRF
-##    &lt;chr&gt;         &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
-##  1 19900101_0000  290. 0.0116   99900.  3.54  2.63      0
-##  2 19900101_0100  289. 0.0109   99947.  4.66  1.58      0
-##  3 19900101_0200  288. 0.0103   99995.  5.78  0.530     0
-##  4 19900101_0300  288. 0.00959 100042.  6.90 -0.520     0
-##  5 19900101_0400  286. 0.00883 100122.  6.91 -1.19      0
-##  6 19900101_0500  285. 0.00806 100200.  6.93 -1.87      0
-##  7 19900101_0600  284. 0.00730 100279.  6.95 -2.55      0
-##  8 19900101_0700  283. 0.00664 100367.  6.60 -3.04      0
-##  9 19900101_0800  282. 0.00598 100453.  6.24 -3.54      0
-## 10 19900101_0900  281. 0.00532 100541.  5.89 -4.03      0
-## # ... with 258,891 more rows</code></pre>
+<pre><code>## # A tibble: 4,056 x 7
+##    date_time       TMP   SPFH    PRES   UGRD  VGRD DSWRF
+##    &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 20190715_1300  301. 0.0161 100710. -0.200  1.07  396 
+##  2 20190715_1400  303. 0.0163 100724.  0.270  1.67  624.
+##  3 20190715_1500  305. 0.0164 100738.  0.740  2.27  835.
+##  4 20190715_1600  305. 0.0162 100684.  1.52   2.48  986.
+##  5 20190715_1700  306. 0.0160 100631.  2.31   2.69 1058.
+##  6 20190715_1800  307. 0.0158 100577.  3.09   2.90 1038.
+##  7 20190715_1900  307. 0.0159 100553.  3.21   2.55  968.
+##  8 20190715_2000  307. 0.0161 100528.  3.33   2.20  825.
+##  9 20190715_2100  307. 0.0162 100504.  3.45   1.85  640.
+## 10 20190715_2200  307. 0.0168 100485.  3.10   1.64  448.
+## # ... with 4,046 more rows</code></pre>
 <pre class="r"><code>#Eglin AFB (2nd set)
 read_rds(&quot;data/base_nldas/eglin_afb.rds&quot;)</code></pre>
-<pre><code>## # A tibble: 258,901 x 7
-##    date_time       TMP    SPFH    PRES  UGRD  VGRD DSWRF
-##    &lt;chr&gt;         &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-##  1 19900101_0000  291. 0.0121  100808.  3.81 -1.38     0
-##  2 19900101_0100  290. 0.0113  100883.  4.02 -2.18     0
-##  3 19900101_0200  289. 0.0106  100957.  4.23 -2.97     0
-##  4 19900101_0300  288. 0.00982 101033.  4.44 -3.77     0
-##  5 19900101_0400  287. 0.00929 101163.  4.86 -4.20     0
-##  6 19900101_0500  287. 0.00875 101294.  5.29 -4.63     0
-##  7 19900101_0600  286. 0.00822 101424.  5.71 -5.05     0
-##  8 19900101_0700  285. 0.00757 101481.  5.55 -5.25     0
-##  9 19900101_0800  284. 0.00693 101537.  5.40 -5.45     0
-## 10 19900101_0900  283. 0.00629 101593.  5.24 -5.64     0
-## # ... with 258,891 more rows</code></pre>
+<pre><code>## # A tibble: 4,056 x 7
+##    date_time       TMP   SPFH   PRES   UGRD    VGRD DSWRF
+##    &lt;chr&gt;         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+##  1 20190715_1300  299. 0.0166 98573. -1.47  -0.220   233.
+##  2 20190715_1400  301. 0.0166 98556. -1.04   0.0700  406.
+##  3 20190715_1500  303. 0.0167 98540. -0.610  0.360   596.
+##  4 20190715_1600  305. 0.0166 98509. -0.490  0.980   775.
+##  5 20190715_1700  307. 0.0164 98479. -0.370  1.59    912.
+##  6 20190715_1800  308. 0.0163 98448. -0.25   2.20    991.
+##  7 20190715_1900  309. 0.0160 98391. -0.380  2.31    991.
+##  8 20190715_2000  310. 0.0158 98334. -0.510  2.41    929.
+##  9 20190715_2100  311. 0.0156 98277. -0.640  2.51    834.
+## 10 20190715_2200  311. 0.0155 98234. -0.590  3.25    656.
+## # ... with 4,046 more rows</code></pre>
 </div>
 <div id="assemble-master-data-frame-with-core-variables" class="section level2">
 <h2>Assemble master data frame with core variables</h2>
@@ -608,7 +646,6 @@ read_rds(&quot;data/base_nldas/eglin_afb.rds&quot;)</code></pre>
 
 df_index &lt;- 
   list.files(&quot;data/base_nldas&quot;) %&gt;%
-      .[-c(10, 27)] %&gt;% 
     as_tibble() %&gt;% 
     mutate(row_id = row_number(),
            value = stringr::str_replace(value, &quot;.rds&quot;, &quot;&quot;))
@@ -617,7 +654,6 @@ df_index &lt;-
 
 nldas_df &lt;-
   list.files(&quot;data/base_nldas&quot;, full.names = TRUE) %&gt;%
-    .[-c(10, 27)] %&gt;%   # remove West Point and Fort Huachuca
     map_dfr(.x = ., .f = read_rds, .id = &quot;id&quot;) %&gt;%
   mutate(id = as.integer(id)) %&gt;% 
   left_join(df_index, by = c(&quot;id&quot; = &quot;row_id&quot;)) %&gt;% 
@@ -626,7 +662,7 @@ nldas_df &lt;-
 
 nldas_df
 
-# write_rds(nldas_df, path = &quot;data/nldas_df.rds&quot;)</code></pre>
+#write_rds(nldas_df_end2019, path = &quot;data/nldas_df_end2019.rds&quot;)</code></pre>
 <pre class="r"><code>nldas_df &lt;- read_rds(&quot;data/nldas_df.rds&quot;)
 nldas_df</code></pre>
 <pre><code>## # A tibble: 6,472,525 x 8
