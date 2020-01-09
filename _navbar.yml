@@ -52,8 +52,10 @@ left:
       icon: fa-line-chart  
       menu: 
         - text: "Annual"
-        - text: "Annual models"
+        - text: "Annual models - Outpatient HSI"
           href: dmed_models.html
+        - text: "Annual models - Inpatient HSI"
+          href: dmed_models_hospitalization.html
         - text: "Daily"
         - text: "Overview of daily models"
           href: daily_models.html

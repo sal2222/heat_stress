@@ -79,7 +79,9 @@ Do we observe effect estimate changes at defined Heat Category boundaries? Are t
 
 ## Models
 
-- DMED Models (annual) [[here]](dmed_models.html)  
+- DMED Models (annual, out-patient) [[here]](dmed_models.html)
+
+- DMED Models (annual, in-patient) [[here]](dmed_models_hospitalization.html) 
 
 - Overview of daily models [[here]](daily_models.html) 
 
