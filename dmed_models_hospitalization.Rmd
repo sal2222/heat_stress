@@ -301,6 +301,17 @@ annual_lm = function(df) {
     lm(rate ~ value, data = .)
 }
 
+
+# Include year in model
+annual_year_lm = function(df) {
+  df %>% 
+    lm(rate ~ value + year, data = .)
+}
+
+
+
+
+
 # Nest by each installation - index pair
 
 annual_hsi_nest <-
@@ -308,12 +319,20 @@ annual_hsi_nest <-
     nest(data = year:rate) %>% 
     mutate(linear_models = map(data, annual_lm),
            glance = map(linear_models, broom::glance),
-           tidy =   map(linear_models, broom::glance))
+           tidy =   map(linear_models, broom::tidy))
            
   
 
-annual_hsi_nest
+annual_hsi_year_nest <-
+  joined_rate %>% 
+    nest(data = year:rate) %>% 
+    mutate(linear_models = map(data, annual_year_lm),
+           glance = map(linear_models, broom::glance),
+           tidy =   map(linear_models, broom::tidy),
+           augment = map(linear_models, broom::augment))  
 
+annual_hsi_nest
+annual_hsi_year_nest
 
 
 ```
@@ -327,16 +346,22 @@ All models, sorted by R^2^
 
 annual_hsi_nest %>%
   unnest(glance) %>% 
-  unnest(tidy, names_repair = "universal") %>% 
-  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>%
-  rename(statistic = statistic...8,
-         r_squared = r.squared...5,
-         p_value = p.value...9,
-         log_lik = logLik...11) %>%
-  arrange(desc(r_squared), .by_group = FALSE) %>% 
+  dplyr::select(installation, index, r.squared:df.residual) %>%
+  arrange(desc(r.squared)) %>% 
   knitr::kable(digits = 4) %>% 
   kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
   scroll_box(height = "700px")
+
+
+annual_hsi_nest %>%
+  unnest(tidy) %>%
+  dplyr::select(installation, index, term:p.value) %>%
+  filter(term %in% "value") %>% 
+  arrange(p.value) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "700px")
+
 ```
 
 
@@ -346,14 +371,21 @@ annual_hsi_nest %>%
 
 annual_hsi_nest %>%
   unnest(glance) %>% 
-  unnest(tidy, names_repair = "universal") %>% 
-  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>%
-  rename(statistic = statistic...8,
-         r_squared = r.squared...5,
-         p_value = p.value...9,
-         log_lik = logLik...11) %>%
+  dplyr::select(installation, index, r.squared:df.residual) %>%
   group_by(installation, add = TRUE) %>% 
-  arrange(desc(r_squared), .by_group = TRUE) %>% 
+  arrange(desc(r.squared), .by_group = TRUE) %>% 
+  group_split() %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "300px")
+
+
+annual_hsi_nest %>%
+  unnest(tidy) %>% 
+  dplyr::select(installation, index, term:p.value) %>%
+  filter(term %in% "value") %>% 
+  group_by(installation, add = TRUE) %>% 
+  arrange(p.value) %>% 
   group_split() %>% 
   knitr::kable(digits = 4) %>% 
   kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
@@ -362,44 +394,35 @@ annual_hsi_nest %>%
 
 Note: NA's are present for models where the conditions were not met (e.g. no days with HI above 125°F, no days with mean temp above 95th percentile). 
 
-## Rank top performing models across all installations
 
-```{r ranked_models}
-# All models ranked by R^2
-annual_hsi_nest %>%
-  unnest(glance) %>% 
-  unnest(tidy, names_repair = "universal") %>% 
-  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>%
-  rename(statistic = statistic...8,
-         r_squared = r.squared...5,
-         p_value = p.value...9,
-         log_lik = logLik...11) %>% 
-  ungroup() %>% 
-  arrange(desc(r_squared)) %>% 
-    knitr::kable(digits = 4) %>% 
-  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
-  scroll_box(height = "300px")
-  
 
-# Select top models
+### Include `year` in model.
 
-annual_hsi_nest %>%
-  unnest(glance) %>% 
-  unnest(tidy, names_repair = "universal") %>% 
-  dplyr::select(installation, index, statistic...8, r.squared...5, p.value...9, logLik...11) %>%
-  rename(statistic = statistic...8,
-         r_squared = r.squared...5,
-         p_value = p.value...9,
-         log_lik = logLik...11) %>% 
-  ungroup() %>% 
-  arrange(desc(r_squared)) %>% 
-  dplyr::select(index) %>% 
-  slice(1:12) %>% 
-  distinct() %>% 
+```{r  lm_models_year}
+annual_hsi_year_nest %>%
+  unnest(glance) %>%
+  dplyr::select(installation, index, r.squared:df.residual) %>% 
+  arrange(desc(r.squared)) %>% 
   knitr::kable(digits = 4) %>% 
-  kable_styling(bootstrap_options = "striped", font_size = 12)
-  
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "700px")
+
+
+annual_hsi_year_nest %>%
+  unnest(tidy) %>%
+  dplyr::select(installation, index, term:p.value) %>%
+  filter(term %in% "value") %>% 
+  arrange(p.value) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "700px")
+
+
 ```
+
+
+
+
 
 
 ## Full / Pooled Model
