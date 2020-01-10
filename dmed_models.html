@@ -1445,6 +1445,59 @@ bliss
 </tbody>
 </table>
 </div>
+</div>
+<div id="plots-of-hsi-ambulatory-rates" class="section level2">
+<h2>Plots of HSI Ambulatory Rates</h2>
+<pre class="r"><code>dmed_tidy %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_models_files/figure-html/plot_ambulatory_rates-1.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = fct_reorder(location, rate), y = rate)) +
+    geom_boxplot() +
+    coord_flip() +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates, 1997-2018&quot;,
+      x = &quot;Installation&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() </code></pre>
+<p><img src="dmed_models_files/figure-html/plot_ambulatory_rates-2.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = rate, y = fct_reorder(location,rate))) +
+    ggridges::geom_density_ridges(scale = 0.75) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates, 1997-2018&quot;,
+      x = &quot;Installation&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() </code></pre>
+<pre><code>## Picking joint bandwidth of 2.49</code></pre>
+<p><img src="dmed_models_files/figure-html/plot_ambulatory_rates-3.png" width="672" /></p>
 <pre class="r"><code>index_long &lt;- 
   annual_tables_list %&gt;% 
     filter(installation %in% c(&quot;fort_benning_ga&quot;, &quot;fort_bragg&quot;, &quot;fort_campbell&quot;, &quot;fort_jackson&quot;,

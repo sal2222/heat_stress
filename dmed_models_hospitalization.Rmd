@@ -29,6 +29,8 @@ library(lme4)
 library(ICC) 
 library(dotwhisker)
 library(lattice)
+library(ggridges)
+
 
 ```
 
@@ -111,6 +113,67 @@ dmed_tidy %>%
   
 
 ```
+
+## Plots of HSI Hospitalization Rates
+
+```{r plot_hospitalization_rates, cache = TRUE, warning = FALSE}
+dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Hospitalizations",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+ ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Heat Stress Illness Hospitalization Rates",
+      x = "Year",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Hospitalizations",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+ ggplot(aes(x = fct_reorder(location, rate), y = rate)) +
+    geom_boxplot() +
+    coord_flip() +
+    labs(
+      title = "Army Heat Stress Illness Hospitalization Rates, 1990-2018",
+      x = "Installation",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() 
+
+
+dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Hospitalizations",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+ ggplot(aes(x = rate, y = fct_reorder(location,rate))) +
+    ggridges::geom_density_ridges(scale = 0.75) +
+    labs(
+      title = "Army Heat Stress Illness Hospitalization Rates, 1990-2018",
+      x = "Installation",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() 
+
+
+
+
+```
+
+
 
 
 
