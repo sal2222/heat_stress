@@ -30,6 +30,7 @@ library(ICC)
 library(dotwhisker)
 library(broom)
 library(car)
+library(reshape2)
 ```
 
 Annual models from DMED data.
@@ -653,6 +654,41 @@ weighted_nest %>%
 ```
 
 
+### Pooled model with `year`
+
+# Nest by index of heat
+
+```{r pooled_year_nest}
+pooled_year_nest <-
+  joined_rate %>%
+    dplyr::select(index, everything()) %>% 
+    nest(data = installation:rate) %>% 
+    mutate(linear_models = map(data, annual_year_lm),
+           glance = map(linear_models, broom::glance),
+           tidy =   map(linear_models, broom::tidy))
+           
+ 
+pooled_year_nest %>%
+  unnest(glance) %>% 
+  dplyr::select(index, r.squared:df.residual) %>%
+  arrange(desc(r.squared)) %>% 
+   knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 8) %>% 
+  scroll_box(height = "700px")
+
+pooled_year_nest %>%
+  unnest(tidy) %>% 
+  filter(term %in% "value") %>%
+  dplyr::select(index, term:p.value) %>%
+  arrange(desc(estimate)) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "700px")
+
+```
+
+
+
 ## Intra-class correlation (ICC)
 
 How much of the variability is explained by the variability across installations.
@@ -716,7 +752,7 @@ fixed_intercept_nest <-
 fixed_intercept_nest %>% 
   filter(index %in% "tmp_f_mean") %>% 
   unnest(tidy) %>% 
-  select(term:p.value)
+  dplyr::select(term:p.value)
 
 
 
@@ -764,7 +800,7 @@ map(fixed_intercept_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vlin
 
 ```
 
-Note: without including `year`, R^2 approx. 52-55%; with `year` R^2 62-63%
+Note: without including `year`, R^2^ approx. 52-55%; with `year` R^2 62-63%
 
 With fixed intercepts added, there is very little difference in model fits based on index selection.
 
@@ -900,6 +936,103 @@ map(mixed_nest$linear_models[1:3], ~dotwhisker::dwplot(.x) + geom_vline(xinterce
 
 
 ```
+
+
+## Random intercepts and slopes
+
+
+```{r random_intercept_slopes_no_year, message = FALSE, warning = FALSE, cache = TRUE}
+
+# Function for linear mixed model (random interceps and slopes)
+
+random_slopes_intercepts_no_year_lmer = function(df) {
+  df %>% 
+    lmer(rate ~ value + (1 + value|installation), data = .)
+}
+
+# Map regression function over each index
+
+mixed_no_year_nest <-
+  joined_rate %>%
+  left_join(dmed_population, by = c("installation" = "location", "year")) %>% 
+    dplyr::select(index, everything()) %>% 
+      nest(data = installation:population) %>% 
+      mutate(linear_models = map(data, random_slopes_intercepts_no_year_lmer),
+             glance = map(linear_models, broom::glance),
+             tidy =   map(linear_models, broom::tidy),
+             augment = map(linear_models, broom::augment),
+             anova = map(linear_models, car::Anova))
+
+# returns `boundary (singular) fit`: indicates models are overfitted – random effects structure is too complex to be supported by the data
+
+
+mixed_no_year_nest %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")  
+
+  # Arranged by effect estimate
+mixed_no_year_nest %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>% 
+  filter(term %in% "value") %>% 
+  arrange(desc(estimate)) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")   
+
+
+  # Model fit
+mixed_no_year_nest %>% 
+  unnest(glance, .drop = TRUE) %>% 
+   dplyr::select(index, sigma:df.residual) %>%
+    arrange(logLik) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px") 
+
+mixed_no_year_nest %>% 
+  filter(index %in% "tmp_f_min") %>% 
+ pull(linear_models)
+
+mixed_no_year_nest %>% 
+  filter(index %in% "tmp_f_min") %>% 
+  unnest(tidy) %>% 
+  dplyr::select(term:group)
+
+mixed_no_year_nest %>% 
+  filter(index %in% "tmp_f_min") %>% 
+  pull(anova)
+
+# p-values of `value` term from all models 
+map(mixed_no_year_nest$anova, ~pull(.x)) %>% 
+  reshape2::melt() %>% 
+  arrange(value) %>% 
+  as_tibble()
+
+
+map(mixed_no_year_nest$anova, ~pull(.x)) %>% 
+  reshape2::melt() %>% 
+  arrange(value) %>% 
+  as_tibble() %>% 
+  ggplot(., aes(x = "", y = value)) + 
+    geom_boxplot() +
+    labs(
+      title = "p-values of index of heat terms in random slope and intercept models with no year term",
+      x = "",
+      y = "Pr(>Chisq)"
+    ) +
+  coord_flip() +
+  theme_bw()
+```
+
+
+
+
+
+
 
 ## Random intercept only models
 
