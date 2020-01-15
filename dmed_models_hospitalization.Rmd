@@ -30,7 +30,7 @@ library(ICC)
 library(dotwhisker)
 library(lattice)
 library(ggridges)
-
+library(car)
 
 ```
 
@@ -199,17 +199,17 @@ hsi_rates <-
            strata == "gender",
            category == "Total") %>% 
     dplyr::select(location, year, rate) %>% 
-    mutate(location = recode(location, jackson = "fort_jackson"),
-           location = recode(location, benning = "fort_benning_ga"),                 
-           location = recode(location, bragg = "fort_bragg"),
-           location = recode(location, campbell = "fort_campbell"),
-           location = recode(location, polk = "fort_polk"),
-           location = recode(location, hood = "fort_hood"),
-           location = recode(location, stewart = "fort_stewart"),
-           location = recode(location, leonardwood = "fort_leonard_wood"),
-           location = recode(location, riley = "fort_riley"),
-           location = recode(location, irwin = "ntc_and_fort_irwin"),
-           location = recode(location, bliss = "fort_bliss"),
+    mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
            location = as.character(location))
 
 hsi_rates
@@ -517,17 +517,17 @@ dmed_population <-
          strata == "gender",
          category == "Total") %>% 
   dplyr::select(location, year, population) %>% 
-    mutate(location = recode(location, jackson = "fort_jackson"),
-           location = recode(location, benning = "fort_benning_ga"),                 
-           location = recode(location, bragg = "fort_bragg"),
-           location = recode(location, campbell = "fort_campbell"),
-           location = recode(location, polk = "fort_polk"),
-           location = recode(location, hood = "fort_hood"),
-           location = recode(location, stewart = "fort_stewart"),
-           location = recode(location, leonardwood = "fort_leonard_wood"),
-           location = recode(location, riley = "fort_riley"),
-           location = recode(location, irwin = "ntc_and_fort_irwin"),
-           location = recode(location, bliss = "fort_bliss"),
+    mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
            location = as.character(location))
 
 
@@ -689,13 +689,13 @@ fixed_intercept_nest %>%
 
 
 # Boxplots of residuals by installation
-map(fixed_intercept_nest$augment[1:5], ~
+map(fixed_intercept_nest$augment[1:2], ~
       ggplot(.x, aes(x = installation, y = .resid))+
           geom_boxplot() + 
           coord_flip())
 
 # Coefficient plot
-map(fixed_intercept_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
+map(fixed_intercept_nest$linear_models[1:2], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
 
 
 ```
@@ -770,7 +770,8 @@ mixed_nest <-
       mutate(linear_models = map(data, random_slopes_intercepts_lmer),
              glance = map(linear_models, broom::glance),
              tidy =   map(linear_models, broom::tidy),
-             augment = map(linear_models, broom::augment))
+             augment = map(linear_models, broom::augment),
+             anova = map(linear_models, car::Anova))
 
 # returns `boundary (singular) fit`: indicates models are overfitted – random effects structure is too complex to be supported by the data
 
@@ -802,6 +803,23 @@ mixed_nest %>%
   kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
   scroll_box(height = "400px") 
 
+
+# Example model
+
+mixed_nest %>% 
+  filter(index %in% "hours_hi_gt90") %>% 
+ pull(linear_models)
+
+mixed_nest %>% 
+  filter(index %in% "hours_hi_gt90") %>% 
+  unnest(tidy) %>% 
+  dplyr::select(term:group)
+
+mixed_nest %>% 
+  filter(index %in% "hours_hi_gt90") %>% 
+  pull(anova)
+
+
 # https://bbolker.github.io/morelia_2018/notes/mixedlab.html
 # Boxplots of residuals by installation
 map(mixed_nest$augment[1:5], ~
@@ -810,11 +828,11 @@ map(mixed_nest$augment[1:5], ~
           coord_flip())
 
 # Plot random effects to look for outliers
-map(mixed_nest$linear_models[1:5], ~lattice::dotplot(ranef(.x, condVar = TRUE)))
+map(mixed_nest$linear_models[1:2], ~lattice::dotplot(ranef(.x, condVar = TRUE)))
 
 
 # Coefficient plot
-map(mixed_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
+map(mixed_nest$linear_models[1:2], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
 
 
 
@@ -845,7 +863,8 @@ random_intercepts_nest <-
       mutate(linear_models = map(data, random_intercepts_lmer),
              glance = map(linear_models, broom::glance),
              tidy =   map(linear_models, broom::tidy),
-             augment = map(linear_models, broom::augment))
+             augment = map(linear_models, broom::augment),
+             anova = map(linear_models, car::Anova))
 
 # 2 warnings for `fixed-effect model matrix is rank deficient so dropping 1 column / coefficient`
 
@@ -880,6 +899,23 @@ random_intercepts_nest %>%
   scroll_box(height = "400px")  
 
 
+# Example model
+
+random_intercepts_nest %>% 
+  filter(index %in% "hours_hi_gt80") %>% 
+ pull(linear_models)
+
+random_intercepts_nest %>% 
+  filter(index %in% "hours_hi_gt80") %>% 
+  unnest(tidy) %>% 
+  dplyr::select(term:group)
+
+
+random_intercepts_nest %>% 
+  filter(index %in% "hours_hi_gt80") %>% 
+  pull(anova)
+
+
 
 
 
@@ -896,4 +932,82 @@ map(random_intercepts_nest$linear_models[1:5], ~lattice::dotplot(ranef(.x, condV
 # Coefficient plot
 map(random_intercepts_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
 ```
+
+## Random intercept only - without `year`
+
+```{r random_intercept_no_year, message = FALSE, warning = FALSE, cache = TRUE}
+
+
+
+# Function for linear mixed model (random interceps only)
+
+random_intercepts_no_year_lmer = function(df) {
+  df %>% 
+    lmer(rate ~ value + (1|installation), data = .)
+}
+
+
+
+random_intercepts_no_year_nest <-
+  joined_rate %>%
+  left_join(dmed_population, by = c("installation" = "location", "year")) %>% 
+    dplyr::select(index, everything()) %>% 
+      nest(data = installation:population) %>% 
+      mutate(linear_models = map(data, random_intercepts_no_year_lmer),
+             glance = map(linear_models, broom::glance),
+             tidy =   map(linear_models, broom::tidy),
+             augment = map(linear_models, broom::augment),
+             anova = map(linear_models, car::Anova))
+
+
+
+# Model summaries
+
+random_intercepts_no_year_nest %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")  
+
+
+  # Model fit
+random_intercepts_no_year_nest %>% 
+  unnest(glance, .drop = TRUE) %>% 
+   dplyr::select(index, sigma:df.residual) %>%
+    arrange(logLik) %>% 
+  knitr::kable(digits = 4) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(height = "400px")  
+
+
+# Example summary
+  # tmp_f_min
+random_intercepts_no_year_nest %>% 
+  filter(index %in% "hours_hi_gt80") %>% 
+ pull(linear_models)
+
+random_intercepts_no_year_nest %>% 
+  filter(index %in% "hours_hi_gt80") %>% 
+  unnest(tidy) %>% 
+  dplyr::select(term:group)
+
+random_intercepts_no_year_nest %>% 
+  filter(index %in% "hours_hi_gt80") %>% 
+  pull(anova)
+
+
+
+
+# Boxplots of residuals by installation
+map(random_intercepts_no_year_nest$augment[1:2], ~
+      ggplot(.x, aes(x = installation, y = .resid))+
+          geom_boxplot() + 
+          coord_flip())
+
+
+# Coefficient plot
+map(random_intercepts_no_year_nest$linear_models[1:2], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))
+```
+
 

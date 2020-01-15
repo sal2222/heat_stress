@@ -1518,17 +1518,17 @@ hsi_rates &lt;-
            strata == &quot;gender&quot;,
            category == &quot;Total&quot;) %&gt;% 
     dplyr::select(location, year, rate) %&gt;% 
-    mutate(location = recode(location, jackson = &quot;fort_jackson&quot;),
-           location = recode(location, benning = &quot;fort_benning_ga&quot;),                 
-           location = recode(location, bragg = &quot;fort_bragg&quot;),
-           location = recode(location, campbell = &quot;fort_campbell&quot;),
-           location = recode(location, polk = &quot;fort_polk&quot;),
-           location = recode(location, hood = &quot;fort_hood&quot;),
-           location = recode(location, stewart = &quot;fort_stewart&quot;),
-           location = recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
-           location = recode(location, riley = &quot;fort_riley&quot;),
-           location = recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
-           location = recode(location, bliss = &quot;fort_bliss&quot;),
+    dplyr::mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
+           location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
+           location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
+           location = dplyr::recode(location, campbell = &quot;fort_campbell&quot;),
+           location = dplyr::recode(location, polk = &quot;fort_polk&quot;),
+           location = dplyr::recode(location, hood = &quot;fort_hood&quot;),
+           location = dplyr::recode(location, stewart = &quot;fort_stewart&quot;),
+           location = dplyr::recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
+           location = dplyr::recode(location, riley = &quot;fort_riley&quot;),
+           location = dplyr::recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
+           location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
            location = as.character(location))
 
 hsi_rates</code></pre>
@@ -186230,17 +186230,17 @@ dmed_tidy %&gt;%
          strata == &quot;gender&quot;,
          category == &quot;Total&quot;) %&gt;% 
   dplyr::select(location, year, population) %&gt;% 
-    mutate(location = recode(location, jackson = &quot;fort_jackson&quot;),
-           location = recode(location, benning = &quot;fort_benning_ga&quot;),                 
-           location = recode(location, bragg = &quot;fort_bragg&quot;),
-           location = recode(location, campbell = &quot;fort_campbell&quot;),
-           location = recode(location, polk = &quot;fort_polk&quot;),
-           location = recode(location, hood = &quot;fort_hood&quot;),
-           location = recode(location, stewart = &quot;fort_stewart&quot;),
-           location = recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
-           location = recode(location, riley = &quot;fort_riley&quot;),
-           location = recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
-           location = recode(location, bliss = &quot;fort_bliss&quot;),
+    mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
+           location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
+           location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
+           location = dplyr::recode(location, campbell = &quot;fort_campbell&quot;),
+           location = dplyr::recode(location, polk = &quot;fort_polk&quot;),
+           location = dplyr::recode(location, hood = &quot;fort_hood&quot;),
+           location = dplyr::recode(location, stewart = &quot;fort_stewart&quot;),
+           location = dplyr::recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
+           location = dplyr::recode(location, riley = &quot;fort_riley&quot;),
+           location = dplyr::recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
+           location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
            location = as.character(location))
 
 
@@ -191405,7 +191405,30 @@ fixed_intercept_nest &lt;-
              augment =  map(linear_models, broom::augment))
 
 # Model summary tables
-  # By model / annual index of heat 
+
+  # Example summary: tmp_f_mean
+
+fixed_intercept_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_mean&quot;) %&gt;% 
+  unnest(tidy) %&gt;% 
+  select(term:p.value)</code></pre>
+<pre><code>## # A tibble: 13 x 5
+##    term                            estimate std.error statistic  p.value
+##    &lt;chr&gt;                              &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+##  1 (Intercept)                    -1298.     160.         -8.11 3.05e-14
+##  2 value                              0.747    0.454       1.65 1.01e- 1
+##  3 year                               0.635    0.0841      7.55 1.04e-12
+##  4 installationfort_bliss           -11.9      7.75       -1.53 1.26e- 1
+##  5 installationfort_bragg            -5.26     4.02       -1.31 1.92e- 1
+##  6 installationfort_campbell        -16.4      2.80       -5.86 1.57e- 8
+##  7 installationfort_hood            -22.0      2.40       -9.18 2.71e-17
+##  8 installationfort_jackson           8.69     5.20        1.67 9.58e- 2
+##  9 installationfort_leonard_wood    -10.7      5.85       -1.83 6.91e- 2
+## 10 installationfort_polk            -16.6      2.33       -7.14 1.21e-11
+## 11 installationfort_riley           -11.5      7.22       -1.59 1.12e- 1
+## 12 installationfort_stewart         -19.4      2.66       -7.28 5.22e-12
+## 13 installationntc_and_fort_irwin   -19.9      2.88       -6.89 5.36e-11</code></pre>
+<pre class="r"><code># By model / annual index of heat 
 
 fixed_intercept_nest %&gt;% 
   unnest(tidy, .drop = TRUE) %&gt;% 
@@ -221283,7 +221306,8 @@ mixed_nest &lt;-
       mutate(linear_models = map(data, random_slopes_intercepts_lmer),
              glance = map(linear_models, broom::glance),
              tidy =   map(linear_models, broom::tidy),
-             augment = map(linear_models, broom::augment))
+             augment = map(linear_models, broom::augment),
+             anova = map(linear_models, car::Anova))
 
 # returns `boundary (singular) fit`: indicates models are overfitted – random effects structure is too complex to be supported by the data
 
@@ -237076,8 +237100,54 @@ map(mixed_nest$augment[1:5], ~
 <pre><code>## 
 ## [[5]]</code></pre>
 <p><img src="dmed_models_files/figure-html/random_intercept_slopes-7.png" width="672" /></p>
+<pre class="r"><code># Example model summary
+
+mixed_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_min&quot;) %&gt;% 
+ pull(linear_models)</code></pre>
+<pre><code>## [[1]]
+## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: rate ~ value + year + (1 + value | installation)
+##    Data: .
+## REML criterion at convergence: 1712.575
+## Random effects:
+##  Groups       Name        Std.Dev. Corr
+##  installation (Intercept) 9.215173     
+##               value       0.007359 1.00
+##  Residual                 7.704780     
+## Number of obs: 242, groups:  installation, 11
+## Fixed Effects:
+## (Intercept)        value         year  
+##  -1400.1552       0.1445       0.7011  
+## convergence code 0; 1 optimizer warnings; 0 lme4 warnings</code></pre>
+<pre class="r"><code>mixed_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_min&quot;) %&gt;% 
+  unnest(tidy) %&gt;% 
+  dplyr::select(term:group)</code></pre>
+<pre><code>## # A tibble: 7 x 5
+##   term                                  estimate std.error statistic group      
+##   &lt;chr&gt;                                    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;      
+## 1 (Intercept)                        -1400.       159.         -8.83 fixed      
+## 2 value                                  0.144      0.103       1.41 fixed      
+## 3 year                                   0.701      0.0789      8.89 fixed      
+## 4 sd_(Intercept).installation            9.22      NA          NA    installati~
+## 5 sd_value.installation                  0.00736   NA          NA    installati~
+## 6 cor_(Intercept).value.installation     1         NA          NA    installati~
+## 7 sd_Observation.Residual                7.70      NA          NA    Residual</code></pre>
+<pre class="r"><code>mixed_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_min&quot;) %&gt;% 
+  pull(anova)</code></pre>
+<pre><code>## [[1]]
+## Analysis of Deviance Table (Type II Wald chisquare tests)
+## 
+## Response: rate
+##         Chisq Df Pr(&gt;Chisq)    
+## value  1.9783  1     0.1596    
+## year  79.0637  1     &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <pre class="r"><code># Plot random effects to look for outliers
-map(mixed_nest$linear_models[1:5], ~dotplot(ranef(.x, condVar = TRUE)))</code></pre>
+map(mixed_nest$linear_models[1:3], ~dotplot(ranef(.x, condVar = TRUE)))</code></pre>
 <pre><code>## [[1]]
 ## [[1]]$installation</code></pre>
 <p><img src="dmed_models_files/figure-html/random_intercept_slopes-8.png" width="672" /></p>
@@ -237091,32 +237161,16 @@ map(mixed_nest$linear_models[1:5], ~dotplot(ranef(.x, condVar = TRUE)))</code></
 ## [[3]]
 ## [[3]]$installation</code></pre>
 <p><img src="dmed_models_files/figure-html/random_intercept_slopes-10.png" width="672" /></p>
-<pre><code>## 
-## 
-## [[4]]
-## [[4]]$installation</code></pre>
+<pre class="r"><code># Coefficient plot
+map(mixed_nest$linear_models[1:3], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))</code></pre>
+<pre><code>## [[1]]</code></pre>
 <p><img src="dmed_models_files/figure-html/random_intercept_slopes-11.png" width="672" /></p>
 <pre><code>## 
-## 
-## [[5]]
-## [[5]]$installation</code></pre>
-<p><img src="dmed_models_files/figure-html/random_intercept_slopes-12.png" width="672" /></p>
-<pre class="r"><code># Coefficient plot
-map(mixed_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))</code></pre>
-<pre><code>## [[1]]</code></pre>
-<p><img src="dmed_models_files/figure-html/random_intercept_slopes-13.png" width="672" /></p>
-<pre><code>## 
 ## [[2]]</code></pre>
-<p><img src="dmed_models_files/figure-html/random_intercept_slopes-14.png" width="672" /></p>
+<p><img src="dmed_models_files/figure-html/random_intercept_slopes-12.png" width="672" /></p>
 <pre><code>## 
 ## [[3]]</code></pre>
-<p><img src="dmed_models_files/figure-html/random_intercept_slopes-15.png" width="672" /></p>
-<pre><code>## 
-## [[4]]</code></pre>
-<p><img src="dmed_models_files/figure-html/random_intercept_slopes-16.png" width="672" /></p>
-<pre><code>## 
-## [[5]]</code></pre>
-<p><img src="dmed_models_files/figure-html/random_intercept_slopes-17.png" width="672" /></p>
+<p><img src="dmed_models_files/figure-html/random_intercept_slopes-13.png" width="672" /></p>
 </div>
 <div id="random-intercept-only-models" class="section level2">
 <h2>Random intercept only models</h2>
@@ -237137,7 +237191,8 @@ random_intercepts_nest &lt;-
       mutate(linear_models = map(data, random_intercepts_lmer),
              glance = map(linear_models, broom::glance),
              tidy =   map(linear_models, broom::tidy),
-             augment = map(linear_models, broom::augment))
+             augment = map(linear_models, broom::augment),
+             anova = map(linear_models, car::Anova))
 
 # 2 warnings for `fixed-effect model matrix is rank deficient so dropping 1 column / coefficient`
 
@@ -249472,6 +249527,82 @@ days_tmp_gt95pct_may_sep
 </tbody>
 </table>
 </div>
+<pre class="r"><code># Example summary
+
+random_intercepts_nest %&gt;% 
+  filter(index %in% &quot;days_tmp_max_gt85pct&quot;) %&gt;% 
+ pull(linear_models)</code></pre>
+<pre><code>## [[1]]
+## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: rate ~ value + year + (1 | installation)
+##    Data: .
+## REML criterion at convergence: 1716.815
+## Random effects:
+##  Groups       Name        Std.Dev.
+##  installation (Intercept) 8.938   
+##  Residual                 7.737   
+## Number of obs: 242, groups:  installation, 11
+## Fixed Effects:
+## (Intercept)        value         year  
+##  -1303.6163       0.0199       0.6534</code></pre>
+<pre class="r"><code>random_intercepts_nest %&gt;% 
+  filter(index %in% &quot;days_tmp_max_gt85pct&quot;) %&gt;% 
+  unnest(tidy) %&gt;% 
+  dplyr::select(term:group)</code></pre>
+<pre><code>## # A tibble: 5 x 5
+##   term                          estimate std.error statistic group       
+##   &lt;chr&gt;                            &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 (Intercept)                 -1304.      172.        -7.57  fixed       
+## 2 value                           0.0199    0.0216     0.921 fixed       
+## 3 year                            0.653     0.0861     7.59  fixed       
+## 4 sd_(Intercept).installation     8.94     NA         NA     installation
+## 5 sd_Observation.Residual         7.74     NA         NA     Residual</code></pre>
+<pre class="r"><code>random_intercepts_nest %&gt;% 
+  filter(index %in% &quot;days_tmp_max_gt85pct&quot;) %&gt;% 
+  pull(anova)</code></pre>
+<pre><code>## [[1]]
+## Analysis of Deviance Table (Type II Wald chisquare tests)
+## 
+## Response: rate
+##         Chisq Df Pr(&gt;Chisq)    
+## value  0.8481  1     0.3571    
+## year  57.5877  1  3.232e-14 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>#tmp_f_mean
+
+random_intercepts_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_mean&quot;) %&gt;% 
+  unnest(tidy) %&gt;% 
+  dplyr::select(term:group)</code></pre>
+<pre><code>## # A tibble: 5 x 5
+##   term                         estimate std.error statistic group       
+##   &lt;chr&gt;                           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 (Intercept)                 -1326.     159.         -8.35 fixed       
+## 2 value                           0.538    0.333       1.62 fixed       
+## 3 year                            0.649    0.0813      7.98 fixed       
+## 4 sd_(Intercept).installation     9.13    NA          NA    installation
+## 5 sd_Observation.Residual         7.70    NA          NA    Residual</code></pre>
+<pre class="r"><code>random_intercepts_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_mean&quot;) %&gt;% 
+  unnest(glance) %&gt;% 
+  dplyr::select(sigma:df.residual)</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##   sigma logLik   AIC   BIC deviance df.residual
+##   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;       &lt;int&gt;
+## 1  7.70  -855. 1720. 1737.    1710.         237</code></pre>
+<pre class="r"><code>random_intercepts_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_mean&quot;) %&gt;% 
+  pull(anova)</code></pre>
+<pre><code>## [[1]]
+## Analysis of Deviance Table (Type II Wald chisquare tests)
+## 
+## Response: rate
+##         Chisq Df Pr(&gt;Chisq)    
+## value  2.6152  1     0.1058    
+## year  63.7042  1  1.446e-15 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <pre class="r"><code># Boxplots of residuals by installation
 map(random_intercepts_nest$augment[1:5], ~
       ggplot(.x, aes(x = installation, y = .resid))+
@@ -249532,6 +249663,9011 @@ map(random_intercepts_nest$linear_models[1:5], ~dotwhisker::dwplot(.x) + geom_vl
 <pre><code>## 
 ## [[5]]</code></pre>
 <p><img src="dmed_models_files/figure-html/random_intercept-15.png" width="672" /></p>
+</div>
+<div id="random-intercept-only---without-year" class="section level2">
+<h2>Random intercept only - without <code>year</code></h2>
+<pre class="r"><code># Function for linear mixed model (random interceps only)
+
+random_intercepts_no_year_lmer = function(df) {
+  df %&gt;% 
+    lmer(rate ~ value + (1|installation), data = .)
+}
+
+
+
+random_intercepts_no_year_nest &lt;-
+  joined_rate %&gt;%
+  left_join(dmed_population, by = c(&quot;installation&quot; = &quot;location&quot;, &quot;year&quot;)) %&gt;% 
+    dplyr::select(index, everything()) %&gt;% 
+      nest(data = installation:population) %&gt;% 
+      mutate(linear_models = map(data, random_intercepts_no_year_lmer),
+             glance = map(linear_models, broom::glance),
+             tidy =   map(linear_models, broom::tidy),
+             augment = map(linear_models, broom::augment),
+             anova = map(linear_models, car::Anova))
+
+
+
+# Model summaries
+
+random_intercepts_no_year_nest %&gt;% 
+  unnest(tidy, .drop = TRUE) %&gt;% 
+  dplyr::select(index, term:group) %&gt;% 
+  knitr::kable(digits = 4) %&gt;% 
+  kable_styling(bootstrap_options = &quot;striped&quot;, font_size = 10) %&gt;% 
+  scroll_box(height = &quot;400px&quot;)  </code></pre>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; ">
+<table class="table table-striped" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+index
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+term
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+estimate
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+std.error
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+statistic
+</th>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+group
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-71.4844
+</td>
+<td style="text-align:right;">
+22.3515
+</td>
+<td style="text-align:right;">
+-3.1982
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.3467
+</td>
+<td style="text-align:right;">
+0.3682
+</td>
+<td style="text-align:right;">
+3.6579
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+11.0004
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6226
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-75.7728
+</td>
+<td style="text-align:right;">
+22.1315
+</td>
+<td style="text-align:right;">
+-3.4237
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.4340
+</td>
+<td style="text-align:right;">
+0.3684
+</td>
+<td style="text-align:right;">
+3.8921
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+11.1264
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5893
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-47.8458
+</td>
+<td style="text-align:right;">
+22.7977
+</td>
+<td style="text-align:right;">
+-2.0987
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.0293
+</td>
+<td style="text-align:right;">
+0.4069
+</td>
+<td style="text-align:right;">
+2.5295
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.5168
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7867
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-39.5502
+</td>
+<td style="text-align:right;">
+16.2850
+</td>
+<td style="text-align:right;">
+-2.4286
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.4925
+</td>
+<td style="text-align:right;">
+0.1619
+</td>
+<td style="text-align:right;">
+3.0416
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.4432
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7760
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-30.0641
+</td>
+<td style="text-align:right;">
+16.9989
+</td>
+<td style="text-align:right;">
+-1.7686
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3828
+</td>
+<td style="text-align:right;">
+0.1634
+</td>
+<td style="text-align:right;">
+2.3437
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.0634
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.8651
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-38.7603
+</td>
+<td style="text-align:right;">
+17.9121
+</td>
+<td style="text-align:right;">
+-2.1639
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.5028
+</td>
+<td style="text-align:right;">
+0.1854
+</td>
+<td style="text-align:right;">
+2.7115
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+7.9793
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.8347
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_min
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.2018
+</td>
+<td style="text-align:right;">
+3.1904
+</td>
+<td style="text-align:right;">
+2.8842
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_min
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0104
+</td>
+<td style="text-align:right;">
+0.1156
+</td>
+<td style="text-align:right;">
+0.0897
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_min
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9873
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_min
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.9269
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_min
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.2018
+</td>
+<td style="text-align:right;">
+3.1904
+</td>
+<td style="text-align:right;">
+2.8842
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_min
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0104
+</td>
+<td style="text-align:right;">
+0.1156
+</td>
+<td style="text-align:right;">
+0.0897
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_min
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9873
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_min
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.9269
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_min
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.2856
+</td>
+<td style="text-align:right;">
+3.0593
+</td>
+<td style="text-align:right;">
+3.0352
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_min
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0054
+</td>
+<td style="text-align:right;">
+0.1212
+</td>
+<td style="text-align:right;">
+0.0446
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_min
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9748
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_min
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.9275
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-12.5910
+</td>
+<td style="text-align:right;">
+8.9212
+</td>
+<td style="text-align:right;">
+-1.4114
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.2530
+</td>
+<td style="text-align:right;">
+0.4873
+</td>
+<td style="text-align:right;">
+2.5713
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.4524
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.8246
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-18.2988
+</td>
+<td style="text-align:right;">
+9.5177
+</td>
+<td style="text-align:right;">
+-1.9226
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.5092
+</td>
+<td style="text-align:right;">
+0.5011
+</td>
+<td style="text-align:right;">
+3.0118
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.1446
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7939
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-8.9189
+</td>
+<td style="text-align:right;">
+10.5422
+</td>
+<td style="text-align:right;">
+-0.8460
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.1311
+</td>
+<td style="text-align:right;">
+0.6323
+</td>
+<td style="text-align:right;">
+1.7889
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.5154
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.8860
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt80
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-10.1001
+</td>
+<td style="text-align:right;">
+5.3503
+</td>
+<td style="text-align:right;">
+-1.8877
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt80
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1552
+</td>
+<td style="text-align:right;">
+0.0360
+</td>
+<td style="text-align:right;">
+4.3106
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt80
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.3667
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt80
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5747
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt90
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-0.0274
+</td>
+<td style="text-align:right;">
+3.5175
+</td>
+<td style="text-align:right;">
+-0.0078
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt90
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1614
+</td>
+<td style="text-align:right;">
+0.0380
+</td>
+<td style="text-align:right;">
+4.2504
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt90
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9032
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt90
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5997
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt103
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.3466
+</td>
+<td style="text-align:right;">
+2.5778
+</td>
+<td style="text-align:right;">
+2.8500
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt103
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3044
+</td>
+<td style="text-align:right;">
+0.0794
+</td>
+<td style="text-align:right;">
+3.8350
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt103
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.1656
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt103
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6904
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt125
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.3438
+</td>
+<td style="text-align:right;">
+2.7471
+</td>
+<td style="text-align:right;">
+3.4013
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt125
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9109
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt125
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.9109
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt82
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-2.6053
+</td>
+<td style="text-align:right;">
+3.9756
+</td>
+<td style="text-align:right;">
+-0.6553
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt82
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1915
+</td>
+<td style="text-align:right;">
+0.0432
+</td>
+<td style="text-align:right;">
+4.4360
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt82
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.5246
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt82
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5510
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+0.7989
+</td>
+<td style="text-align:right;">
+3.1112
+</td>
+<td style="text-align:right;">
+0.2568
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2311
+</td>
+<td style="text-align:right;">
+0.0438
+</td>
+<td style="text-align:right;">
+5.2718
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.6216
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4466
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt88
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+4.7504
+</td>
+<td style="text-align:right;">
+2.6507
+</td>
+<td style="text-align:right;">
+1.7921
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt88
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3048
+</td>
+<td style="text-align:right;">
+0.0661
+</td>
+<td style="text-align:right;">
+4.6123
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt88
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+7.9391
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt88
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5868
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+6.0154
+</td>
+<td style="text-align:right;">
+2.6195
+</td>
+<td style="text-align:right;">
+2.2964
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.4688
+</td>
+<td style="text-align:right;">
+0.1169
+</td>
+<td style="text-align:right;">
+4.0097
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.0300
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6729
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt80
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-6.5553
+</td>
+<td style="text-align:right;">
+4.5025
+</td>
+<td style="text-align:right;">
+-1.4559
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt80
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0107
+</td>
+<td style="text-align:right;">
+0.0022
+</td>
+<td style="text-align:right;">
+4.8109
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt80
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.9793
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt80
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4799
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt90
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+1.2568
+</td>
+<td style="text-align:right;">
+3.1556
+</td>
+<td style="text-align:right;">
+0.3983
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt90
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0165
+</td>
+<td style="text-align:right;">
+0.0033
+</td>
+<td style="text-align:right;">
+4.9827
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt90
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.7910
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt90
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4891
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt103
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.4775
+</td>
+<td style="text-align:right;">
+2.5266
+</td>
+<td style="text-align:right;">
+2.9595
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt103
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0588
+</td>
+<td style="text-align:right;">
+0.0140
+</td>
+<td style="text-align:right;">
+4.2137
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt103
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.0418
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt103
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6427
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt125
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.3438
+</td>
+<td style="text-align:right;">
+2.7471
+</td>
+<td style="text-align:right;">
+3.4013
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt125
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9109
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt125
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.9109
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt82
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-0.0703
+</td>
+<td style="text-align:right;">
+3.4353
+</td>
+<td style="text-align:right;">
+-0.0205
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt82
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0225
+</td>
+<td style="text-align:right;">
+0.0045
+</td>
+<td style="text-align:right;">
+4.9473
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt82
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.3124
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt82
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4770
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt85
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+3.2312
+</td>
+<td style="text-align:right;">
+2.7949
+</td>
+<td style="text-align:right;">
+1.1561
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt85
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0315
+</td>
+<td style="text-align:right;">
+0.0060
+</td>
+<td style="text-align:right;">
+5.2187
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt85
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.2203
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt85
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4726
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt88
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+6.1227
+</td>
+<td style="text-align:right;">
+2.5482
+</td>
+<td style="text-align:right;">
+2.4027
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt88
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0568
+</td>
+<td style="text-align:right;">
+0.0129
+</td>
+<td style="text-align:right;">
+4.4204
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt88
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+7.8873
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt88
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6195
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt90
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+6.9366
+</td>
+<td style="text-align:right;">
+2.5396
+</td>
+<td style="text-align:right;">
+2.7313
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt90
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1173
+</td>
+<td style="text-align:right;">
+0.0292
+</td>
+<td style="text-align:right;">
+4.0111
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt90
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+7.9727
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt90
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6756
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.9731
+</td>
+<td style="text-align:right;">
+2.7358
+</td>
+<td style="text-align:right;">
+3.2799
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+2.0241
+</td>
+<td style="text-align:right;">
+0.4692
+</td>
+<td style="text-align:right;">
+4.3136
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8823
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5911
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.9763
+</td>
+<td style="text-align:right;">
+2.7395
+</td>
+<td style="text-align:right;">
+3.2767
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+2.1567
+</td>
+<td style="text-align:right;">
+0.4730
+</td>
+<td style="text-align:right;">
+4.5595
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8969
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5532
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.2340
+</td>
+<td style="text-align:right;">
+2.7549
+</td>
+<td style="text-align:right;">
+3.3518
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.6297
+</td>
+<td style="text-align:right;">
+0.5687
+</td>
+<td style="text-align:right;">
+2.8657
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9426
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7739
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.7994
+</td>
+<td style="text-align:right;">
+2.7175
+</td>
+<td style="text-align:right;">
+3.2381
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.7419
+</td>
+<td style="text-align:right;">
+0.3502
+</td>
+<td style="text-align:right;">
+4.9747
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8219
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4893
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.7539
+</td>
+<td style="text-align:right;">
+2.7196
+</td>
+<td style="text-align:right;">
+3.2188
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+2.0423
+</td>
+<td style="text-align:right;">
+0.3724
+</td>
+<td style="text-align:right;">
+5.4846
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8331
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4015
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.1029
+</td>
+<td style="text-align:right;">
+2.7406
+</td>
+<td style="text-align:right;">
+3.3215
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+2.1810
+</td>
+<td style="text-align:right;">
+0.5679
+</td>
+<td style="text-align:right;">
+3.8405
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8976
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6579
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+4.2689
+</td>
+<td style="text-align:right;">
+2.9893
+</td>
+<td style="text-align:right;">
+1.4281
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2330
+</td>
+<td style="text-align:right;">
+0.0535
+</td>
+<td style="text-align:right;">
+4.3520
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9435
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5831
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+6.2536
+</td>
+<td style="text-align:right;">
+2.9372
+</td>
+<td style="text-align:right;">
+2.1291
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3180
+</td>
+<td style="text-align:right;">
+0.0926
+</td>
+<td style="text-align:right;">
+3.4333
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.0855
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7036
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.0717
+</td>
+<td style="text-align:right;">
+2.8829
+</td>
+<td style="text-align:right;">
+2.7998
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.5820
+</td>
+<td style="text-align:right;">
+0.2408
+</td>
+<td style="text-align:right;">
+2.4171
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.2115
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.8076
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+4.4022
+</td>
+<td style="text-align:right;">
+3.0779
+</td>
+<td style="text-align:right;">
+1.4303
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2101
+</td>
+<td style="text-align:right;">
+0.0562
+</td>
+<td style="text-align:right;">
+3.7392
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.0323
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6664
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+5.9675
+</td>
+<td style="text-align:right;">
+2.9870
+</td>
+<td style="text-align:right;">
+1.9978
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3078
+</td>
+<td style="text-align:right;">
+0.0893
+</td>
+<td style="text-align:right;">
+3.4449
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.1725
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6990
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.9049
+</td>
+<td style="text-align:right;">
+2.8858
+</td>
+<td style="text-align:right;">
+2.7392
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.5441
+</td>
+<td style="text-align:right;">
+0.2103
+</td>
+<td style="text-align:right;">
+2.5870
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.2028
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7921
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+6.1138
+</td>
+<td style="text-align:right;">
+2.9811
+</td>
+<td style="text-align:right;">
+2.0508
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2057
+</td>
+<td style="text-align:right;">
+0.0721
+</td>
+<td style="text-align:right;">
+2.8546
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9541
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7746
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.5305
+</td>
+<td style="text-align:right;">
+2.8954
+</td>
+<td style="text-align:right;">
+2.6008
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2548
+</td>
+<td style="text-align:right;">
+0.1184
+</td>
+<td style="text-align:right;">
+2.1530
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9926
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.8384
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.3518
+</td>
+<td style="text-align:right;">
+2.8296
+</td>
+<td style="text-align:right;">
+2.9516
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.5799
+</td>
+<td style="text-align:right;">
+0.2927
+</td>
+<td style="text-align:right;">
+1.9815
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.0419
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.8499
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+3.6085
+</td>
+<td style="text-align:right;">
+3.0736
+</td>
+<td style="text-align:right;">
+1.1740
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0878
+</td>
+<td style="text-align:right;">
+0.0220
+</td>
+<td style="text-align:right;">
+3.9980
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8255
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6389
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+4.8493
+</td>
+<td style="text-align:right;">
+2.9399
+</td>
+<td style="text-align:right;">
+1.6495
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1132
+</td>
+<td style="text-align:right;">
+0.0279
+</td>
+<td style="text-align:right;">
+4.0634
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8448
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6290
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+5.5158
+</td>
+<td style="text-align:right;">
+2.8688
+</td>
+<td style="text-align:right;">
+1.9227
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1440
+</td>
+<td style="text-align:right;">
+0.0346
+</td>
+<td style="text-align:right;">
+4.1621
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8234
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6156
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+1.0391
+</td>
+<td style="text-align:right;">
+3.1894
+</td>
+<td style="text-align:right;">
+0.3258
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1289
+</td>
+<td style="text-align:right;">
+0.0258
+</td>
+<td style="text-align:right;">
+4.9918
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8417
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4857
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+2.7308
+</td>
+<td style="text-align:right;">
+3.0521
+</td>
+<td style="text-align:right;">
+0.8947
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1701
+</td>
+<td style="text-align:right;">
+0.0352
+</td>
+<td style="text-align:right;">
+4.8301
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8633
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5115
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+3.6090
+</td>
+<td style="text-align:right;">
+2.9685
+</td>
+<td style="text-align:right;">
+1.2157
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2214
+</td>
+<td style="text-align:right;">
+0.0453
+</td>
+<td style="text-align:right;">
+4.8847
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8592
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5027
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-0.9257
+</td>
+<td style="text-align:right;">
+3.4275
+</td>
+<td style="text-align:right;">
+-0.2701
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1651
+</td>
+<td style="text-align:right;">
+0.0337
+</td>
+<td style="text-align:right;">
+4.9023
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8131
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5016
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+0.8096
+</td>
+<td style="text-align:right;">
+3.2190
+</td>
+<td style="text-align:right;">
+0.2515
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2274
+</td>
+<td style="text-align:right;">
+0.0462
+</td>
+<td style="text-align:right;">
+4.9221
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8108
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4984
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+1.2480
+</td>
+<td style="text-align:right;">
+3.1616
+</td>
+<td style="text-align:right;">
+0.3947
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0845
+</td>
+<td style="text-align:right;">
+0.0182
+</td>
+<td style="text-align:right;">
+4.6292
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.5431
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5561
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-1.1360
+</td>
+<td style="text-align:right;">
+3.1315
+</td>
+<td style="text-align:right;">
+-0.3628
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1325
+</td>
+<td style="text-align:right;">
+0.0231
+</td>
+<td style="text-align:right;">
+5.7417
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.2484
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.3781
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-1.7085
+</td>
+<td style="text-align:right;">
+3.4196
+</td>
+<td style="text-align:right;">
+-0.4996
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1625
+</td>
+<td style="text-align:right;">
+0.0321
+</td>
+<td style="text-align:right;">
+5.0668
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.5450
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4846
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+5.1834
+</td>
+<td style="text-align:right;">
+2.8486
+</td>
+<td style="text-align:right;">
+1.8196
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1303
+</td>
+<td style="text-align:right;">
+0.0301
+</td>
+<td style="text-align:right;">
+4.3340
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.7044
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5950
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+3.6098
+</td>
+<td style="text-align:right;">
+2.8210
+</td>
+<td style="text-align:right;">
+1.2796
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2827
+</td>
+<td style="text-align:right;">
+0.0500
+</td>
+<td style="text-align:right;">
+5.6575
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.5466
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.3812
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+3.8233
+</td>
+<td style="text-align:right;">
+3.1000
+</td>
+<td style="text-align:right;">
+1.2333
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3418
+</td>
+<td style="text-align:right;">
+0.0806
+</td>
+<td style="text-align:right;">
+4.2388
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.1485
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5926
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.9055
+</td>
+<td style="text-align:right;">
+2.7215
+</td>
+<td style="text-align:right;">
+3.2723
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.5860
+</td>
+<td style="text-align:right;">
+0.3610
+</td>
+<td style="text-align:right;">
+4.3932
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8325
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5811
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.9323
+</td>
+<td style="text-align:right;">
+2.7268
+</td>
+<td style="text-align:right;">
+3.2758
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.6347
+</td>
+<td style="text-align:right;">
+0.3539
+</td>
+<td style="text-align:right;">
+4.6190
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8533
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5455
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.1845
+</td>
+<td style="text-align:right;">
+2.7530
+</td>
+<td style="text-align:right;">
+3.3362
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.7704
+</td>
+<td style="text-align:right;">
+0.5436
+</td>
+<td style="text-align:right;">
+3.2570
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9375
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7304
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.8534
+</td>
+<td style="text-align:right;">
+2.7088
+</td>
+<td style="text-align:right;">
+3.2684
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.1205
+</td>
+<td style="text-align:right;">
+0.2580
+</td>
+<td style="text-align:right;">
+4.3431
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.7873
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5903
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.8085
+</td>
+<td style="text-align:right;">
+2.7092
+</td>
+<td style="text-align:right;">
+3.2513
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.3958
+</td>
+<td style="text-align:right;">
+0.2828
+</td>
+<td style="text-align:right;">
+4.9360
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.7937
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4967
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.0061
+</td>
+<td style="text-align:right;">
+2.7379
+</td>
+<td style="text-align:right;">
+3.2894
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+2.0319
+</td>
+<td style="text-align:right;">
+0.4979
+</td>
+<td style="text-align:right;">
+4.0810
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8883
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6248
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.0944
+</td>
+<td style="text-align:right;">
+2.8131
+</td>
+<td style="text-align:right;">
+2.5219
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.5718
+</td>
+<td style="text-align:right;">
+0.1213
+</td>
+<td style="text-align:right;">
+4.7139
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.0132
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5247
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.8823
+</td>
+<td style="text-align:right;">
+2.8492
+</td>
+<td style="text-align:right;">
+2.7665
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.1634
+</td>
+<td style="text-align:right;">
+0.2794
+</td>
+<td style="text-align:right;">
+4.1646
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.1968
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6017
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.8180
+</td>
+<td style="text-align:right;">
+2.7896
+</td>
+<td style="text-align:right;">
+3.1610
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+3.4393
+</td>
+<td style="text-align:right;">
+1.0671
+</td>
+<td style="text-align:right;">
+3.2230
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.0467
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7302
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.2003
+</td>
+<td style="text-align:right;">
+2.9099
+</td>
+<td style="text-align:right;">
+2.4744
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.4733
+</td>
+<td style="text-align:right;">
+0.1419
+</td>
+<td style="text-align:right;">
+3.3343
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.2276
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7105
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.1118
+</td>
+<td style="text-align:right;">
+2.9264
+</td>
+<td style="text-align:right;">
+2.7720
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.7908
+</td>
+<td style="text-align:right;">
+0.2882
+</td>
+<td style="text-align:right;">
+2.7439
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.4067
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7696
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.0107
+</td>
+<td style="text-align:right;">
+2.8163
+</td>
+<td style="text-align:right;">
+3.1995
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+1.3216
+</td>
+<td style="text-align:right;">
+0.9904
+</td>
+<td style="text-align:right;">
+1.3344
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.1087
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.8880
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+8.1741
+</td>
+<td style="text-align:right;">
+2.8486
+</td>
+<td style="text-align:right;">
+2.8695
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.7569
+</td>
+<td style="text-align:right;">
+0.2796
+</td>
+<td style="text-align:right;">
+2.7069
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.1489
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7824
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.2086
+</td>
+<td style="text-align:right;">
+2.7729
+</td>
+<td style="text-align:right;">
+3.3209
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3375
+</td>
+<td style="text-align:right;">
+0.5545
+</td>
+<td style="text-align:right;">
+0.6087
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.9677
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.9207
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+9.0881
+</td>
+<td style="text-align:right;">
+2.7106
+</td>
+<td style="text-align:right;">
+3.3529
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+6.1886
+</td>
+<td style="text-align:right;">
+2.2100
+</td>
+<td style="text-align:right;">
+2.8002
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.7873
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7870
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+6.6027
+</td>
+<td style="text-align:right;">
+2.8537
+</td>
+<td style="text-align:right;">
+2.3138
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0969
+</td>
+<td style="text-align:right;">
+0.0302
+</td>
+<td style="text-align:right;">
+3.2083
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8360
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7401
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.1590
+</td>
+<td style="text-align:right;">
+2.8023
+</td>
+<td style="text-align:right;">
+2.5547
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1270
+</td>
+<td style="text-align:right;">
+0.0393
+</td>
+<td style="text-align:right;">
+3.2348
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8257
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7374
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+7.4815
+</td>
+<td style="text-align:right;">
+2.7758
+</td>
+<td style="text-align:right;">
+2.6953
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1629
+</td>
+<td style="text-align:right;">
+0.0494
+</td>
+<td style="text-align:right;">
+3.2943
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8189
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7307
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+5.1924
+</td>
+<td style="text-align:right;">
+2.9177
+</td>
+<td style="text-align:right;">
+1.7796
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1513
+</td>
+<td style="text-align:right;">
+0.0378
+</td>
+<td style="text-align:right;">
+4.0007
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8549
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6374
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+5.9813
+</td>
+<td style="text-align:right;">
+2.8629
+</td>
+<td style="text-align:right;">
+2.0893
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2048
+</td>
+<td style="text-align:right;">
+0.0535
+</td>
+<td style="text-align:right;">
+3.8264
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8461
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6618
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+6.3502
+</td>
+<td style="text-align:right;">
+2.8282
+</td>
+<td style="text-align:right;">
+2.2453
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2759
+</td>
+<td style="text-align:right;">
+0.0702
+</td>
+<td style="text-align:right;">
+3.9281
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8429
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6480
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+3.0895
+</td>
+<td style="text-align:right;">
+3.0399
+</td>
+<td style="text-align:right;">
+1.0163
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2374
+</td>
+<td style="text-align:right;">
+0.0518
+</td>
+<td style="text-align:right;">
+4.5834
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8230
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5522
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+4.3838
+</td>
+<td style="text-align:right;">
+2.9899
+</td>
+<td style="text-align:right;">
+1.4662
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3132
+</td>
+<td style="text-align:right;">
+0.0785
+</td>
+<td style="text-align:right;">
+3.9895
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8283
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6400
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+5.3311
+</td>
+<td style="text-align:right;">
+2.9669
+</td>
+<td style="text-align:right;">
+1.7968
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.0863
+</td>
+<td style="text-align:right;">
+0.0254
+</td>
+<td style="text-align:right;">
+3.3931
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8313
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.7182
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+3.7711
+</td>
+<td style="text-align:right;">
+2.9047
+</td>
+<td style="text-align:right;">
+1.2983
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1521
+</td>
+<td style="text-align:right;">
+0.0334
+</td>
+<td style="text-align:right;">
+4.5527
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.5437
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5681
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+2.0302
+</td>
+<td style="text-align:right;">
+3.2121
+</td>
+<td style="text-align:right;">
+0.6321
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.2298
+</td>
+<td style="text-align:right;">
+0.0501
+</td>
+<td style="text-align:right;">
+4.5854
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.0661
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.5431
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+6.5379
+</td>
+<td style="text-align:right;">
+2.8219
+</td>
+<td style="text-align:right;">
+2.3168
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.1476
+</td>
+<td style="text-align:right;">
+0.0386
+</td>
+<td style="text-align:right;">
+3.8207
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.8460
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6626
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+5.3483
+</td>
+<td style="text-align:right;">
+2.7500
+</td>
+<td style="text-align:right;">
+1.9448
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3508
+</td>
+<td style="text-align:right;">
+0.0691
+</td>
+<td style="text-align:right;">
+5.0784
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+8.5504
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.4825
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+5.3462
+</td>
+<td style="text-align:right;">
+3.0938
+</td>
+<td style="text-align:right;">
+1.7280
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+value
+</td>
+<td style="text-align:right;">
+0.3936
+</td>
+<td style="text-align:right;">
+0.1108
+</td>
+<td style="text-align:right;">
+3.5526
+</td>
+<td style="text-align:left;">
+fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_(Intercept).installation
+</td>
+<td style="text-align:right;">
+9.3774
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+installation
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd_may_sep
+</td>
+<td style="text-align:left;">
+sd_Observation.Residual
+</td>
+<td style="text-align:right;">
+8.6785
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+Residual
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>  # Model fit
+random_intercepts_no_year_nest %&gt;% 
+  unnest(glance, .drop = TRUE) %&gt;% 
+   dplyr::select(index, sigma:df.residual) %&gt;%
+    arrange(logLik) %&gt;% 
+  knitr::kable(digits = 4) %&gt;% 
+  kable_styling(bootstrap_options = &quot;striped&quot;, font_size = 10) %&gt;% 
+  scroll_box(height = &quot;400px&quot;)  </code></pre>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:400px; ">
+<table class="table table-striped" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+index
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+sigma
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+logLik
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+AIC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+BIC
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+deviance
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+df.residual
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+tmp_f_min
+</td>
+<td style="text-align:right;">
+8.9269
+</td>
+<td style="text-align:right;">
+-888.7546
+</td>
+<td style="text-align:right;">
+1785.509
+</td>
+<td style="text-align:right;">
+1799.465
+</td>
+<td style="text-align:right;">
+1778.899
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_min
+</td>
+<td style="text-align:right;">
+8.9269
+</td>
+<td style="text-align:right;">
+-888.7546
+</td>
+<td style="text-align:right;">
+1785.509
+</td>
+<td style="text-align:right;">
+1799.465
+</td>
+<td style="text-align:right;">
+1778.899
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_min
+</td>
+<td style="text-align:right;">
+8.9275
+</td>
+<td style="text-align:right;">
+-888.7104
+</td>
+<td style="text-align:right;">
+1785.421
+</td>
+<td style="text-align:right;">
+1799.377
+</td>
+<td style="text-align:right;">
+1778.902
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt125
+</td>
+<td style="text-align:right;">
+8.9109
+</td>
+<td style="text-align:right;">
+-887.5186
+</td>
+<td style="text-align:right;">
+1781.037
+</td>
+<td style="text-align:right;">
+1791.504
+</td>
+<td style="text-align:right;">
+1778.894
+</td>
+<td style="text-align:right;">
+239
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt125
+</td>
+<td style="text-align:right;">
+8.9109
+</td>
+<td style="text-align:right;">
+-887.5186
+</td>
+<td style="text-align:right;">
+1781.037
+</td>
+<td style="text-align:right;">
+1791.504
+</td>
+<td style="text-align:right;">
+1778.894
+</td>
+<td style="text-align:right;">
+239
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct_may_sep
+</td>
+<td style="text-align:right;">
+8.9207
+</td>
+<td style="text-align:right;">
+-887.0048
+</td>
+<td style="text-align:right;">
+1782.010
+</td>
+<td style="text-align:right;">
+1795.965
+</td>
+<td style="text-align:right;">
+1778.531
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90pct
+</td>
+<td style="text-align:right;">
+8.8384
+</td>
+<td style="text-align:right;">
+-886.4321
+</td>
+<td style="text-align:right;">
+1780.864
+</td>
+<td style="text-align:right;">
+1794.820
+</td>
+<td style="text-align:right;">
+1774.302
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct
+</td>
+<td style="text-align:right;">
+8.8499
+</td>
+<td style="text-align:right;">
+-885.8780
+</td>
+<td style="text-align:right;">
+1779.756
+</td>
+<td style="text-align:right;">
+1793.712
+</td>
+<td style="text-align:right;">
+1775.014
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max
+</td>
+<td style="text-align:right;">
+8.8651
+</td>
+<td style="text-align:right;">
+-885.7683
+</td>
+<td style="text-align:right;">
+1779.537
+</td>
+<td style="text-align:right;">
+1793.492
+</td>
+<td style="text-align:right;">
+1773.411
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct_may_sep
+</td>
+<td style="text-align:right;">
+8.8880
+</td>
+<td style="text-align:right;">
+-885.7248
+</td>
+<td style="text-align:right;">
+1779.450
+</td>
+<td style="text-align:right;">
+1793.405
+</td>
+<td style="text-align:right;">
+1777.161
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_sd
+</td>
+<td style="text-align:right;">
+8.8860
+</td>
+<td style="text-align:right;">
+-885.4791
+</td>
+<td style="text-align:right;">
+1778.958
+</td>
+<td style="text-align:right;">
+1792.914
+</td>
+<td style="text-align:right;">
+1775.643
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct
+</td>
+<td style="text-align:right;">
+8.7746
+</td>
+<td style="text-align:right;">
+-885.2111
+</td>
+<td style="text-align:right;">
+1778.422
+</td>
+<td style="text-align:right;">
+1792.378
+</td>
+<td style="text-align:right;">
+1770.858
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct
+</td>
+<td style="text-align:right;">
+8.8076
+</td>
+<td style="text-align:right;">
+-885.1436
+</td>
+<td style="text-align:right;">
+1778.287
+</td>
+<td style="text-align:right;">
+1792.243
+</td>
+<td style="text-align:right;">
+1773.191
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct_may_sep
+</td>
+<td style="text-align:right;">
+8.7401
+</td>
+<td style="text-align:right;">
+-885.0417
+</td>
+<td style="text-align:right;">
+1778.083
+</td>
+<td style="text-align:right;">
+1792.039
+</td>
+<td style="text-align:right;">
+1768.754
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt95pct
+</td>
+<td style="text-align:right;">
+8.7921
+</td>
+<td style="text-align:right;">
+-884.8635
+</td>
+<td style="text-align:right;">
+1777.727
+</td>
+<td style="text-align:right;">
+1791.683
+</td>
+<td style="text-align:right;">
+1772.358
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max
+</td>
+<td style="text-align:right;">
+8.8347
+</td>
+<td style="text-align:right;">
+-884.7453
+</td>
+<td style="text-align:right;">
+1777.491
+</td>
+<td style="text-align:right;">
+1791.446
+</td>
+<td style="text-align:right;">
+1771.598
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct_may_sep
+</td>
+<td style="text-align:right;">
+8.7374
+</td>
+<td style="text-align:right;">
+-884.6963
+</td>
+<td style="text-align:right;">
+1777.393
+</td>
+<td style="text-align:right;">
+1791.348
+</td>
+<td style="text-align:right;">
+1768.587
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd_may_sep
+</td>
+<td style="text-align:right;">
+8.7182
+</td>
+<td style="text-align:right;">
+-884.6278
+</td>
+<td style="text-align:right;">
+1777.256
+</td>
+<td style="text-align:right;">
+1791.211
+</td>
+<td style="text-align:right;">
+1767.581
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean
+</td>
+<td style="text-align:right;">
+8.7867
+</td>
+<td style="text-align:right;">
+-884.3831
+</td>
+<td style="text-align:right;">
+1776.766
+</td>
+<td style="text-align:right;">
+1790.722
+</td>
+<td style="text-align:right;">
+1772.782
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct_may_sep
+</td>
+<td style="text-align:right;">
+8.7307
+</td>
+<td style="text-align:right;">
+-884.2792
+</td>
+<td style="text-align:right;">
+1776.558
+</td>
+<td style="text-align:right;">
+1790.514
+</td>
+<td style="text-align:right;">
+1768.211
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85pct_may_sep
+</td>
+<td style="text-align:right;">
+8.7824
+</td>
+<td style="text-align:right;">
+-884.2654
+</td>
+<td style="text-align:right;">
+1776.531
+</td>
+<td style="text-align:right;">
+1790.486
+</td>
+<td style="text-align:right;">
+1771.720
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct_may_sep
+</td>
+<td style="text-align:right;">
+8.7696
+</td>
+<td style="text-align:right;">
+-884.1643
+</td>
+<td style="text-align:right;">
+1776.329
+</td>
+<td style="text-align:right;">
+1790.284
+</td>
+<td style="text-align:right;">
+1771.632
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_sd
+</td>
+<td style="text-align:right;">
+8.8246
+</td>
+<td style="text-align:right;">
+-884.0615
+</td>
+<td style="text-align:right;">
+1776.123
+</td>
+<td style="text-align:right;">
+1790.079
+</td>
+<td style="text-align:right;">
+1772.272
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max
+</td>
+<td style="text-align:right;">
+8.7760
+</td>
+<td style="text-align:right;">
+-883.8770
+</td>
+<td style="text-align:right;">
+1775.754
+</td>
+<td style="text-align:right;">
+1789.710
+</td>
+<td style="text-align:right;">
+1769.697
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt90pct
+</td>
+<td style="text-align:right;">
+8.6990
+</td>
+<td style="text-align:right;">
+-883.2242
+</td>
+<td style="text-align:right;">
+1774.448
+</td>
+<td style="text-align:right;">
+1788.404
+</td>
+<td style="text-align:right;">
+1767.360
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct
+</td>
+<td style="text-align:right;">
+8.7036
+</td>
+<td style="text-align:right;">
+-883.2183
+</td>
+<td style="text-align:right;">
+1774.437
+</td>
+<td style="text-align:right;">
+1788.392
+</td>
+<td style="text-align:right;">
+1767.402
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct_may_sep
+</td>
+<td style="text-align:right;">
+8.7105
+</td>
+<td style="text-align:right;">
+-883.1246
+</td>
+<td style="text-align:right;">
+1774.249
+</td>
+<td style="text-align:right;">
+1788.205
+</td>
+<td style="text-align:right;">
+1768.098
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean
+</td>
+<td style="text-align:right;">
+8.7739
+</td>
+<td style="text-align:right;">
+-883.1141
+</td>
+<td style="text-align:right;">
+1774.228
+</td>
+<td style="text-align:right;">
+1788.184
+</td>
+<td style="text-align:right;">
+1770.793
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_sd
+</td>
+<td style="text-align:right;">
+8.7939
+</td>
+<td style="text-align:right;">
+-882.8748
+</td>
+<td style="text-align:right;">
+1773.750
+</td>
+<td style="text-align:right;">
+1787.705
+</td>
+<td style="text-align:right;">
+1769.883
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd_may_sep
+</td>
+<td style="text-align:right;">
+8.6626
+</td>
+<td style="text-align:right;">
+-882.7428
+</td>
+<td style="text-align:right;">
+1773.486
+</td>
+<td style="text-align:right;">
+1787.441
+</td>
+<td style="text-align:right;">
+1764.651
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd_may_sep
+</td>
+<td style="text-align:right;">
+8.6785
+</td>
+<td style="text-align:right;">
+-882.6755
+</td>
+<td style="text-align:right;">
+1773.351
+</td>
+<td style="text-align:right;">
+1787.307
+</td>
+<td style="text-align:right;">
+1766.735
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_gt85pct
+</td>
+<td style="text-align:right;">
+8.6664
+</td>
+<td style="text-align:right;">
+-882.6715
+</td>
+<td style="text-align:right;">
+1773.343
+</td>
+<td style="text-align:right;">
+1787.299
+</td>
+<td style="text-align:right;">
+1765.297
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt85pct
+</td>
+<td style="text-align:right;">
+8.6389
+</td>
+<td style="text-align:right;">
+-882.6536
+</td>
+<td style="text-align:right;">
+1773.307
+</td>
+<td style="text-align:right;">
+1787.263
+</td>
+<td style="text-align:right;">
+1763.338
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct_may_sep
+</td>
+<td style="text-align:right;">
+8.6618
+</td>
+<td style="text-align:right;">
+-882.3968
+</td>
+<td style="text-align:right;">
+1772.794
+</td>
+<td style="text-align:right;">
+1786.749
+</td>
+<td style="text-align:right;">
+1764.610
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt90
+</td>
+<td style="text-align:right;">
+8.6756
+</td>
+<td style="text-align:right;">
+-882.3791
+</td>
+<td style="text-align:right;">
+1772.758
+</td>
+<td style="text-align:right;">
+1786.714
+</td>
+<td style="text-align:right;">
+1763.168
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt103
+</td>
+<td style="text-align:right;">
+8.6427
+</td>
+<td style="text-align:right;">
+-882.3189
+</td>
+<td style="text-align:right;">
+1772.638
+</td>
+<td style="text-align:right;">
+1786.594
+</td>
+<td style="text-align:right;">
+1761.585
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt90pct
+</td>
+<td style="text-align:right;">
+8.6290
+</td>
+<td style="text-align:right;">
+-882.1695
+</td>
+<td style="text-align:right;">
+1772.339
+</td>
+<td style="text-align:right;">
+1786.295
+</td>
+<td style="text-align:right;">
+1762.849
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct_may_sep
+</td>
+<td style="text-align:right;">
+8.6374
+</td>
+<td style="text-align:right;">
+-882.1015
+</td>
+<td style="text-align:right;">
+1772.203
+</td>
+<td style="text-align:right;">
+1786.159
+</td>
+<td style="text-align:right;">
+1763.327
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:right;">
+8.7304
+</td>
+<td style="text-align:right;">
+-882.0034
+</td>
+<td style="text-align:right;">
+1772.007
+</td>
+<td style="text-align:right;">
+1785.963
+</td>
+<td style="text-align:right;">
+1768.480
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt103
+</td>
+<td style="text-align:right;">
+8.6904
+</td>
+<td style="text-align:right;">
+-882.0028
+</td>
+<td style="text-align:right;">
+1772.005
+</td>
+<td style="text-align:right;">
+1785.961
+</td>
+<td style="text-align:right;">
+1764.458
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt95pct_may_sep
+</td>
+<td style="text-align:right;">
+8.7870
+</td>
+<td style="text-align:right;">
+-881.9336
+</td>
+<td style="text-align:right;">
+1771.867
+</td>
+<td style="text-align:right;">
+1785.823
+</td>
+<td style="text-align:right;">
+1771.114
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt80
+</td>
+<td style="text-align:right;">
+8.4799
+</td>
+<td style="text-align:right;">
+-881.8279
+</td>
+<td style="text-align:right;">
+1771.656
+</td>
+<td style="text-align:right;">
+1785.612
+</td>
+<td style="text-align:right;">
+1757.345
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct_may_sep
+</td>
+<td style="text-align:right;">
+8.6480
+</td>
+<td style="text-align:right;">
+-881.7527
+</td>
+<td style="text-align:right;">
+1771.505
+</td>
+<td style="text-align:right;">
+1785.461
+</td>
+<td style="text-align:right;">
+1763.865
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt88
+</td>
+<td style="text-align:right;">
+8.6195
+</td>
+<td style="text-align:right;">
+-881.5954
+</td>
+<td style="text-align:right;">
+1771.191
+</td>
+<td style="text-align:right;">
+1785.147
+</td>
+<td style="text-align:right;">
+1759.935
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt95pct
+</td>
+<td style="text-align:right;">
+8.6156
+</td>
+<td style="text-align:right;">
+-881.5714
+</td>
+<td style="text-align:right;">
+1771.143
+</td>
+<td style="text-align:right;">
+1785.099
+</td>
+<td style="text-align:right;">
+1762.082
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean
+</td>
+<td style="text-align:right;">
+8.6226
+</td>
+<td style="text-align:right;">
+-881.5232
+</td>
+<td style="text-align:right;">
+1771.046
+</td>
+<td style="text-align:right;">
+1785.002
+</td>
+<td style="text-align:right;">
+1767.141
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt95pct_may_sep
+</td>
+<td style="text-align:right;">
+8.7302
+</td>
+<td style="text-align:right;">
+-881.4407
+</td>
+<td style="text-align:right;">
+1770.881
+</td>
+<td style="text-align:right;">
+1784.837
+</td>
+<td style="text-align:right;">
+1768.727
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct_may_sep
+</td>
+<td style="text-align:right;">
+8.6400
+</td>
+<td style="text-align:right;">
+-881.4118
+</td>
+<td style="text-align:right;">
+1770.824
+</td>
+<td style="text-align:right;">
+1784.779
+</td>
+<td style="text-align:right;">
+1763.403
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt90
+</td>
+<td style="text-align:right;">
+8.5997
+</td>
+<td style="text-align:right;">
+-881.1364
+</td>
+<td style="text-align:right;">
+1770.273
+</td>
+<td style="text-align:right;">
+1784.229
+</td>
+<td style="text-align:right;">
+1761.415
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt2sd
+</td>
+<td style="text-align:right;">
+8.5950
+</td>
+<td style="text-align:right;">
+-881.0265
+</td>
+<td style="text-align:right;">
+1770.053
+</td>
+<td style="text-align:right;">
+1784.009
+</td>
+<td style="text-align:right;">
+1760.685
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_hi_gt80
+</td>
+<td style="text-align:right;">
+8.5747
+</td>
+<td style="text-align:right;">
+-881.0047
+</td>
+<td style="text-align:right;">
+1770.009
+</td>
+<td style="text-align:right;">
+1783.965
+</td>
+<td style="text-align:right;">
+1761.142
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt90
+</td>
+<td style="text-align:right;">
+8.6729
+</td>
+<td style="text-align:right;">
+-880.9874
+</td>
+<td style="text-align:right;">
+1769.975
+</td>
+<td style="text-align:right;">
+1783.930
+</td>
+<td style="text-align:right;">
+1763.170
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean
+</td>
+<td style="text-align:right;">
+8.5893
+</td>
+<td style="text-align:right;">
+-880.7398
+</td>
+<td style="text-align:right;">
+1769.480
+</td>
+<td style="text-align:right;">
+1783.435
+</td>
+<td style="text-align:right;">
+1765.598
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_hi_gt90
+</td>
+<td style="text-align:right;">
+8.4891
+</td>
+<td style="text-align:right;">
+-880.4624
+</td>
+<td style="text-align:right;">
+1768.925
+</td>
+<td style="text-align:right;">
+1782.880
+</td>
+<td style="text-align:right;">
+1755.157
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt2sd
+</td>
+<td style="text-align:right;">
+8.5926
+</td>
+<td style="text-align:right;">
+-880.4524
+</td>
+<td style="text-align:right;">
+1768.905
+</td>
+<td style="text-align:right;">
+1782.861
+</td>
+<td style="text-align:right;">
+1761.605
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct
+</td>
+<td style="text-align:right;">
+8.5831
+</td>
+<td style="text-align:right;">
+-880.3894
+</td>
+<td style="text-align:right;">
+1768.779
+</td>
+<td style="text-align:right;">
+1782.735
+</td>
+<td style="text-align:right;">
+1760.617
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt82
+</td>
+<td style="text-align:right;">
+8.4770
+</td>
+<td style="text-align:right;">
+-880.3668
+</td>
+<td style="text-align:right;">
+1768.734
+</td>
+<td style="text-align:right;">
+1782.689
+</td>
+<td style="text-align:right;">
+1755.715
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt82
+</td>
+<td style="text-align:right;">
+8.5510
+</td>
+<td style="text-align:right;">
+-880.3441
+</td>
+<td style="text-align:right;">
+1768.688
+</td>
+<td style="text-align:right;">
+1782.644
+</td>
+<td style="text-align:right;">
+1760.216
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_max_gt1sd
+</td>
+<td style="text-align:right;">
+8.5561
+</td>
+<td style="text-align:right;">
+-880.2986
+</td>
+<td style="text-align:right;">
+1768.597
+</td>
+<td style="text-align:right;">
+1782.553
+</td>
+<td style="text-align:right;">
+1758.194
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd_may_sep
+</td>
+<td style="text-align:right;">
+8.5681
+</td>
+<td style="text-align:right;">
+-880.0182
+</td>
+<td style="text-align:right;">
+1768.036
+</td>
+<td style="text-align:right;">
+1781.992
+</td>
+<td style="text-align:right;">
+1758.843
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean
+</td>
+<td style="text-align:right;">
+8.6579
+</td>
+<td style="text-align:right;">
+-879.9860
+</td>
+<td style="text-align:right;">
+1767.972
+</td>
+<td style="text-align:right;">
+1781.928
+</td>
+<td style="text-align:right;">
+1764.524
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt90pct_may_sep
+</td>
+<td style="text-align:right;">
+8.6017
+</td>
+<td style="text-align:right;">
+-879.5060
+</td>
+<td style="text-align:right;">
+1767.012
+</td>
+<td style="text-align:right;">
+1780.968
+</td>
+<td style="text-align:right;">
+1762.208
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd_may_sep
+</td>
+<td style="text-align:right;">
+8.5431
+</td>
+<td style="text-align:right;">
+-879.5045
+</td>
+<td style="text-align:right;">
+1767.009
+</td>
+<td style="text-align:right;">
+1780.965
+</td>
+<td style="text-align:right;">
+1758.740
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct_may_sep
+</td>
+<td style="text-align:right;">
+8.5522
+</td>
+<td style="text-align:right;">
+-879.4581
+</td>
+<td style="text-align:right;">
+1766.916
+</td>
+<td style="text-align:right;">
+1780.872
+</td>
+<td style="text-align:right;">
+1758.661
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+wbgt_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:right;">
+8.6248
+</td>
+<td style="text-align:right;">
+-879.2214
+</td>
+<td style="text-align:right;">
+1766.443
+</td>
+<td style="text-align:right;">
+1780.399
+</td>
+<td style="text-align:right;">
+1762.729
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt88
+</td>
+<td style="text-align:right;">
+8.5868
+</td>
+<td style="text-align:right;">
+-879.1399
+</td>
+<td style="text-align:right;">
+1766.280
+</td>
+<td style="text-align:right;">
+1780.236
+</td>
+<td style="text-align:right;">
+1758.311
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:right;">
+8.5903
+</td>
+<td style="text-align:right;">
+-878.8431
+</td>
+<td style="text-align:right;">
+1765.686
+</td>
+<td style="text-align:right;">
+1779.642
+</td>
+<td style="text-align:right;">
+1760.635
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt90pct
+</td>
+<td style="text-align:right;">
+8.5115
+</td>
+<td style="text-align:right;">
+-878.7824
+</td>
+<td style="text-align:right;">
+1765.565
+</td>
+<td style="text-align:right;">
+1779.521
+</td>
+<td style="text-align:right;">
+1756.547
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hours_wbgt_gt85
+</td>
+<td style="text-align:right;">
+8.4726
+</td>
+<td style="text-align:right;">
+-878.7666
+</td>
+<td style="text-align:right;">
+1765.533
+</td>
+<td style="text-align:right;">
+1779.489
+</td>
+<td style="text-align:right;">
+1752.843
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt85pct
+</td>
+<td style="text-align:right;">
+8.5016
+</td>
+<td style="text-align:right;">
+-878.5029
+</td>
+<td style="text-align:right;">
+1765.006
+</td>
+<td style="text-align:right;">
+1778.962
+</td>
+<td style="text-align:right;">
+1755.888
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean
+</td>
+<td style="text-align:right;">
+8.5911
+</td>
+<td style="text-align:right;">
+-878.3692
+</td>
+<td style="text-align:right;">
+1764.738
+</td>
+<td style="text-align:right;">
+1778.694
+</td>
+<td style="text-align:right;">
+1760.904
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt85pct
+</td>
+<td style="text-align:right;">
+8.4857
+</td>
+<td style="text-align:right;">
+-878.3685
+</td>
+<td style="text-align:right;">
+1764.737
+</td>
+<td style="text-align:right;">
+1778.693
+</td>
+<td style="text-align:right;">
+1755.093
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:right;">
+8.5811
+</td>
+<td style="text-align:right;">
+-878.3063
+</td>
+<td style="text-align:right;">
+1764.613
+</td>
+<td style="text-align:right;">
+1778.568
+</td>
+<td style="text-align:right;">
+1760.243
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt95pct
+</td>
+<td style="text-align:right;">
+8.5027
+</td>
+<td style="text-align:right;">
+-878.2882
+</td>
+<td style="text-align:right;">
+1764.576
+</td>
+<td style="text-align:right;">
+1778.532
+</td>
+<td style="text-align:right;">
+1756.062
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt90pct
+</td>
+<td style="text-align:right;">
+8.4984
+</td>
+<td style="text-align:right;">
+-878.0985
+</td>
+<td style="text-align:right;">
+1764.197
+</td>
+<td style="text-align:right;">
+1778.153
+</td>
+<td style="text-align:right;">
+1755.710
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_tmp_gt85pct_may_sep
+</td>
+<td style="text-align:right;">
+8.5247
+</td>
+<td style="text-align:right;">
+-878.0663
+</td>
+<td style="text-align:right;">
+1764.133
+</td>
+<td style="text-align:right;">
+1778.088
+</td>
+<td style="text-align:right;">
+1757.620
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_max_gt1sd
+</td>
+<td style="text-align:right;">
+8.4846
+</td>
+<td style="text-align:right;">
+-877.7949
+</td>
+<td style="text-align:right;">
+1763.590
+</td>
+<td style="text-align:right;">
+1777.546
+</td>
+<td style="text-align:right;">
+1754.314
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean_may_sep
+</td>
+<td style="text-align:right;">
+8.5455
+</td>
+<td style="text-align:right;">
+-877.3878
+</td>
+<td style="text-align:right;">
+1762.775
+</td>
+<td style="text-align:right;">
+1776.731
+</td>
+<td style="text-align:right;">
+1758.371
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_mean_anomaly_mean
+</td>
+<td style="text-align:right;">
+8.5532
+</td>
+<td style="text-align:right;">
+-877.3524
+</td>
+<td style="text-align:right;">
+1762.705
+</td>
+<td style="text-align:right;">
+1776.660
+</td>
+<td style="text-align:right;">
+1758.890
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd_may_sep
+</td>
+<td style="text-align:right;">
+8.4825
+</td>
+<td style="text-align:right;">
+-876.9743
+</td>
+<td style="text-align:right;">
+1761.949
+</td>
+<td style="text-align:right;">
+1775.904
+</td>
+<td style="text-align:right;">
+1754.209
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_wbgt_gt85
+</td>
+<td style="text-align:right;">
+8.4466
+</td>
+<td style="text-align:right;">
+-876.5280
+</td>
+<td style="text-align:right;">
+1761.056
+</td>
+<td style="text-align:right;">
+1775.012
+</td>
+<td style="text-align:right;">
+1752.423
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean_may_sep
+</td>
+<td style="text-align:right;">
+8.4967
+</td>
+<td style="text-align:right;">
+-876.2229
+</td>
+<td style="text-align:right;">
+1760.446
+</td>
+<td style="text-align:right;">
+1774.401
+</td>
+<td style="text-align:right;">
+1755.579
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+tmp_f_max_anomaly_mean
+</td>
+<td style="text-align:right;">
+8.4893
+</td>
+<td style="text-align:right;">
+-875.8373
+</td>
+<td style="text-align:right;">
+1759.675
+</td>
+<td style="text-align:right;">
+1773.630
+</td>
+<td style="text-align:right;">
+1755.241
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt1sd
+</td>
+<td style="text-align:right;">
+8.3781
+</td>
+<td style="text-align:right;">
+-874.8618
+</td>
+<td style="text-align:right;">
+1757.724
+</td>
+<td style="text-align:right;">
+1771.679
+</td>
+<td style="text-align:right;">
+1747.721
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+days_heat_index_max_gt2sd
+</td>
+<td style="text-align:right;">
+8.3812
+</td>
+<td style="text-align:right;">
+-874.5151
+</td>
+<td style="text-align:right;">
+1757.030
+</td>
+<td style="text-align:right;">
+1770.986
+</td>
+<td style="text-align:right;">
+1748.641
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+heat_index_max_anomaly_mean
+</td>
+<td style="text-align:right;">
+8.4015
+</td>
+<td style="text-align:right;">
+-873.3811
+</td>
+<td style="text-align:right;">
+1754.762
+</td>
+<td style="text-align:right;">
+1768.718
+</td>
+<td style="text-align:right;">
+1750.453
+</td>
+<td style="text-align:right;">
+238
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code># Example summary
+  # tmp_f_min
+random_intercepts_no_year_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_min&quot;) %&gt;% 
+ pull(linear_models)</code></pre>
+<pre><code>## [[1]]
+## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: rate ~ value + (1 | installation)
+##    Data: .
+## REML criterion at convergence: 1777.509
+## Random effects:
+##  Groups       Name        Std.Dev.
+##  installation (Intercept) 8.987   
+##  Residual                 8.927   
+## Number of obs: 242, groups:  installation, 11
+## Fixed Effects:
+## (Intercept)        value  
+##     9.20180      0.01037</code></pre>
+<pre class="r"><code>random_intercepts_no_year_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_min&quot;) %&gt;% 
+  unnest(tidy) %&gt;% 
+  dplyr::select(term:group)</code></pre>
+<pre><code>## # A tibble: 4 x 5
+##   term                        estimate std.error statistic group       
+##   &lt;chr&gt;                          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 (Intercept)                   9.20       3.19     2.88   fixed       
+## 2 value                         0.0104     0.116    0.0897 fixed       
+## 3 sd_(Intercept).installation   8.99      NA       NA      installation
+## 4 sd_Observation.Residual       8.93      NA       NA      Residual</code></pre>
+<pre class="r"><code>random_intercepts_no_year_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_min&quot;) %&gt;% 
+  pull(anova)</code></pre>
+<pre><code>## [[1]]
+## Analysis of Deviance Table (Type II Wald chisquare tests)
+## 
+## Response: rate
+##       Chisq Df Pr(&gt;Chisq)
+## value 0.008  1     0.9285</code></pre>
+<pre class="r"><code>  # tmp_f_mean
+
+random_intercepts_no_year_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_mean&quot;) %&gt;% 
+  unnest(tidy) %&gt;% 
+  dplyr::select(term:group)</code></pre>
+<pre><code>## # A tibble: 4 x 5
+##   term                        estimate std.error statistic group       
+##   &lt;chr&gt;                          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;       
+## 1 (Intercept)                   -71.5     22.4       -3.20 fixed       
+## 2 value                           1.35     0.368      3.66 fixed       
+## 3 sd_(Intercept).installation    11.0     NA         NA    installation
+## 4 sd_Observation.Residual         8.62    NA         NA    Residual</code></pre>
+<pre class="r"><code>random_intercepts_no_year_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_mean&quot;) %&gt;% 
+  unnest(glance) %&gt;% 
+  dplyr::select(sigma:df.residual)</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##   sigma logLik   AIC   BIC deviance df.residual
+##   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;       &lt;int&gt;
+## 1  8.62  -882. 1771. 1785.    1767.         238</code></pre>
+<pre class="r"><code>random_intercepts_no_year_nest %&gt;% 
+  filter(index %in% &quot;tmp_f_mean&quot;) %&gt;% 
+  pull(anova)</code></pre>
+<pre><code>## [[1]]
+## Analysis of Deviance Table (Type II Wald chisquare tests)
+## 
+## Response: rate
+##       Chisq Df Pr(&gt;Chisq)    
+## value 13.38  1  0.0002543 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code># Boxplots of residuals by installation
+map(random_intercepts_no_year_nest$augment[1:2], ~
+      ggplot(.x, aes(x = installation, y = .resid))+
+          geom_boxplot() + 
+          coord_flip())</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="dmed_models_files/figure-html/random_intercept_no_year-1.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="dmed_models_files/figure-html/random_intercept_no_year-2.png" width="672" /></p>
+<pre class="r"><code># Coefficient plot
+map(random_intercepts_no_year_nest$linear_models[1:2], ~dotwhisker::dwplot(.x) + geom_vline(xintercept = 0, lty = 2))</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="dmed_models_files/figure-html/random_intercept_no_year-3.png" width="672" /></p>
+<pre><code>## 
+## [[2]]</code></pre>
+<p><img src="dmed_models_files/figure-html/random_intercept_no_year-4.png" width="672" /></p>
 </div>
 
 
