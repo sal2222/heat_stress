@@ -511,28 +511,14 @@ Extract date and hour from file name.</p>
          hour = value %&gt;% 
            stringr::str_extract(&quot;[0-2][0-9][0]{2}&quot;) %&gt;% as_factor(),
          path = paste0(&quot;D:/nldas_end2019/&quot;, value)) %&gt;% 
-  dplyr::select(value, path, date, hour) </code></pre>
-<pre><code>## Warning: Calling `as_tibble()` on a vector is discouraged, because the behavior is likely to change in the future. Use `tibble::enframe(name = NULL)` instead.
-## This warning is displayed once per session.</code></pre>
-<pre class="r"><code># saveRDS(file_list, &quot;data/file_list.rds&quot;)
+  dplyr::select(value, path, date, hour) 
+
+# saveRDS(file_list, &quot;data/file_list.rds&quot;)
 
 #file_list &lt;- readRDS(&quot;data/file_list.rds&quot;)
-file_list </code></pre>
-<pre><code>## # A tibble: 4,056 x 4
-##    value                      path                              date       hour 
-##    &lt;chr&gt;                      &lt;chr&gt;                             &lt;date&gt;     &lt;fct&gt;
-##  1 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 1300 
-##  2 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 1400 
-##  3 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 1500 
-##  4 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 1600 
-##  5 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 1700 
-##  6 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 1800 
-##  7 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 1900 
-##  8 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 2000 
-##  9 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 2100 
-## 10 NLDAS_FORA0125_H.A2019071~ D:/nldas_end2019/NLDAS_FORA0125_~ 2019-07-15 2200 
-## # ... with 4,046 more rows</code></pre>
-<pre class="r"><code># Vector of NLDAS-2 file names
+file_list 
+
+# Vector of NLDAS-2 file names
 
 file_names &lt;-
   file_list$value %&gt;%
@@ -549,38 +535,9 @@ nldas_variables &lt;- c(&quot;TMP&quot;, &quot;SPFH&quot;, &quot;PRES&quot;, &qu
 <pre class="r"><code># Load list of locations (object saved in shapefiles.Rmd)
 
 select_bases &lt;- readRDS(&quot;data/select_bases.rds&quot;)
-select_bases</code></pre>
-<pre><code>## Simple feature collection with 25 features and 3 fields
-## Active geometry column: geometry
-## geometry type:  GEOMETRY
-## dimension:      XY
-## bbox:           xmin: -122.8021 ymin: 29.36673 xmax: -75.38405 ymax: 47.15951
-## epsg (SRID):    4326
-## proj4string:    +proj=longlat +datum=WGS84 +no_defs
-## First 10 features:
-##      component                  site_name state_terr
-## 1  Army Active            Fort Benning GA    Georgia
-## 2  Army Active              Fort Campbell   Kentucky
-## 3    MC Active               MCB Quantico   Virginia
-## 4    MC Active             MCRD San Diego California
-## 5  Army Active                 Fort Riley     Kansas
-## 6  Army Active         NTC and Fort Irwin California
-## 7  Army Active                Fort Gordon    Georgia
-## 8    MC Active Twentynine Palms Main Base California
-## 9  Army Active                  Fort Sill   Oklahoma
-## 10 Army Active                Fort Carson   Colorado
-##                          geometry                   centroid
-## 1  POLYGON ((-84.8882 32.25929...  POINT (-84.81164 32.3917)
-## 2  MULTIPOLYGON (((-87.65135 3...  POINT (-87.62461 36.6222)
-## 3  MULTIPOLYGON (((-77.4884 38...  POINT (-77.4572 38.55207)
-## 4  MULTIPOLYGON (((-117.2036 3... POINT (-117.1977 32.74017)
-## 5  MULTIPOLYGON (((-96.93518 3... POINT (-96.82482 39.20675)
-## 6  MULTIPOLYGON (((-116.389 35... POINT (-116.6333 35.37432)
-## 7  MULTIPOLYGON (((-82.11816 3... POINT (-82.23727 33.35667)
-## 8  MULTIPOLYGON (((-116.3095 3... POINT (-116.1387 34.45805)
-## 9  MULTIPOLYGON (((-98.64978 3... POINT (-98.52759 34.69519)
-## 10 MULTIPOLYGON (((-104.7321 3...  POINT (-104.853 38.47304)</code></pre>
-<pre class="r"><code># Matrix of centroid X, Y coordinates
+select_bases
+
+# Matrix of centroid X, Y coordinates
 
 coordinates_matrix &lt;- st_coordinates(select_bases$centroid)
 
@@ -598,18 +555,10 @@ single_raster &lt;- raster(file_list$path[1], varname = &quot;TMP&quot;, quick =
 # saveRDS(single_raster, file = &quot;data/single_raster.rds&quot;)
 
 single_raster &lt;- readRDS(&quot;data/single_raster.rds&quot;)
-single_raster</code></pre>
-<pre><code>## class      : RasterLayer 
-## dimensions : 224, 464, 103936  (nrow, ncol, ncell)
-## resolution : 0.125, 0.125  (x, y)
-## extent     : -125.0005, -67.0005, 25.0005, 53.0005  (xmin, xmax, ymin, ymax)
-## crs        : +proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0 
-## source     : D:/nldas/NLDAS_FORA0125_H.A19900101.0000.002.grb.SUB.nc4 
-## names      : X2.m.above.ground.Temperature 
-## z-value    : 1990-01-01 
-## zvar       : TMP 
-## level      : 1</code></pre>
-<pre class="r"><code>#cells &lt;- tabularaster::cellnumbers(single_raster, coordinates_matrix) %&gt;% 
+single_raster
+
+
+#cells &lt;- tabularaster::cellnumbers(single_raster, coordinates_matrix) %&gt;% 
 #    dplyr::select(cell_)
 
 rm(single_raster)
@@ -627,32 +576,6 @@ cells &lt;- readRDS(&quot;data/cells.rds&quot;)
 
 cell_key &lt;- readRDS(&quot;data/cell_key.rds&quot;)
 cell_key</code></pre>
-<pre><code>##                      site_name cell_
-## 1              Fort Benning GA 76418
-## 2                Fort Campbell 61084
-## 3                 MCB Quantico 53741
-## 4               MCRD San Diego 75231
-## 5                   Fort Riley 51266
-## 6           NTC and Fort Irwin 65491
-## 7                  Fort Gordon 73191
-## 8   Twentynine Palms Main Base 68743
-## 9                    Fort Sill 67956
-## 10                 Fort Carson 53986
-## 11                  Fort Lewis 21828
-## 12            MCB Camp Lejeune 68126
-## 13 MCRD Beaufort Parris Island 76915
-## 14          MCB Camp Pendleton 72909
-## 15                  Fort Bragg 66255
-## 16                   Eglin AFB 83364
-## 17                Lackland AFB 87444
-## 18            Fort Sam Houston 87445
-## 19                   Fort Polk 80992
-## 20                Fort Jackson 70418
-## 21           Fort Leonard Wood 56871
-## 22                  Fort Bliss 76712
-## 23                   Fort Hood 80955
-## 24                   Fort Drum 33340
-## 25                Fort Stewart 78300</code></pre>
 </div>
 <div id="extract-selected-variables-from-selected-cells" class="section level2">
 <h2>Extract selected variables from selected cells</h2>
@@ -809,53 +732,10 @@ nldas_list_joint_2 &lt;-
 <pre class="r"><code>nldas_list &lt;- read_rds(&quot;data/nldas_list.rds&quot;)
 
 # Review first element
-nldas_list[1]</code></pre>
-<pre><code>## $`19900101_0000`
-## # A tibble: 18 x 6
-##      TMP    SPFH    PRES   UGRD   VGRD DSWRF
-##    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;
-##  1  290. 0.0116   99900.  3.54   2.63   0   
-##  2  277. 0.00411  99214.  4.91  -0.860  0   
-##  3  281. 0.00279  85903. -1.68  -1.52  38.0 
-##  4  272. 0.00207  97015.  3.5   -2.20   0   
-##  5  287. 0.00209  91889. -0.570  1.04  68.1 
-##  6  290. 0.0112   99640.  2.04   5.05   0   
-##  7  278. 0.00179  96697.  3.18  -2.46   0   
-##  8  271. 0.00245  83031.  2.97   0.110  0   
-##  9  280. 0.00564 100232.  3.38   6.54   8.97
-## 10  286. 0.00815  99994.  3.45   6.88   0   
-## 11  275. 0.00434  97379.  0.590  3.86   0   
-## 12  281. 0.00520 100950.  3.07  -2.55   0   
-## 13  288. 0.0102   99866.  2.45   5.43   0   
-## 14  275. 0.00293  97527.  3.28  -0.210  0   
-## 15  280. 0.00296  87678.  0.370 -1.84   5.49
-## 16  281. 0.00317  99299.  1.89  -3.08   0   
-## 17  274. 0.00406  97167.  2.96   7.12   0   
-## 18  290. 0.0115  101103.  2.93   5.42   0</code></pre>
-<pre class="r"><code># Review list structure
+nldas_list[1]
+
+# Review list structure
 nldas_list[1:3] %&gt;% str</code></pre>
-<pre><code>## List of 3
-##  $ 19900101_0000:Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:   18 obs. of  6 variables:
-##   ..$ TMP  : num [1:18] 290 277 281 272 287 ...
-##   ..$ SPFH : num [1:18] 0.01157 0.00411 0.00279 0.00207 0.00209 ...
-##   ..$ PRES : num [1:18] 99900 99214 85903 97015 91889 ...
-##   ..$ UGRD : num [1:18] 3.54 4.91 -1.68 3.5 -0.57 ...
-##   ..$ VGRD : num [1:18] 2.63 -0.86 -1.52 -2.2 1.04 ...
-##   ..$ DSWRF: num [1:18] 0 0 38 0 68.1 ...
-##  $ 19900101_0100:Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:   18 obs. of  6 variables:
-##   ..$ TMP  : num [1:18] 289 276 280 271 285 ...
-##   ..$ SPFH : num [1:18] 0.01091 0.00395 0.00268 0.00207 0.00205 ...
-##   ..$ PRES : num [1:18] 99947 99323 85987 97115 91910 ...
-##   ..$ UGRD : num [1:18] 4.66 5.21 -2.28 3.17 -0.91 ...
-##   ..$ VGRD : num [1:18] 1.58 -0.85 -1.35 -2.47 1.18 ...
-##   ..$ DSWRF: num [1:18] 0 0 0 0 0 0 0 0 0 0 ...
-##  $ 19900101_0200:Classes &#39;tbl_df&#39;, &#39;tbl&#39; and &#39;data.frame&#39;:   18 obs. of  6 variables:
-##   ..$ TMP  : num [1:18] 288 275 278 270 284 ...
-##   ..$ SPFH : num [1:18] 0.01025 0.00379 0.00257 0.00207 0.00201 ...
-##   ..$ PRES : num [1:18] 99995 99432 86071 97214 91930 ...
-##   ..$ UGRD : num [1:18] 5.78 5.52 -2.88 2.83 -1.25 ...
-##   ..$ VGRD : num [1:18] 0.53 -0.83 -1.17 -2.74 1.32 ...
-##   ..$ DSWRF: num [1:18] 0 0 0 0 0 0 0 0 0 0 ...</code></pre>
 </div>
 </div>
 

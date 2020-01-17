@@ -43,7 +43,7 @@ This code extracts variables from NLDAS-2 netCDF files by converting .nc4 to ras
 List NLDAS-2 .nc4 files from 1990 - present.  
 Extract date and hour from file name.
 
-```{r extract_variable_names}
+```{r extract_variable_names, eval = FALSE}
 
 file_list <-  
   list.files(path = "D:/nldas_end2019", pattern = "^.*\\.(nc4|NC4|Nc4|Nc4)$",
@@ -78,7 +78,7 @@ nldas_variables <- c("TMP", "SPFH", "PRES", "UGRD", "VGRD", "DSWRF")
 
 Open a single .nc4 file and identify raster cell numbers from centroid coordinates.
 
-```{r id_raster_cells, warning = FALSE}
+```{r id_raster_cells, warning = FALSE, eval = FALSE}
 
 # Load list of locations (object saved in shapefiles.Rmd)
 
@@ -310,7 +310,7 @@ nldas_list_joint_2 <-
 ```
 
 ## List structure
-```{r examine_list}
+```{r examine_list, eval = FALSE}
 
 nldas_list <- read_rds("data/nldas_list.rds")
 

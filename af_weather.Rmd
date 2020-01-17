@@ -176,7 +176,7 @@ af_nldas_compare <-
     mutate(location = 
              str_to_lower(location, locale = "en"),
              location = str_replace_all(location, " ", "_"),
-             location = recode(location, fort_benning = "fort_benning_ga", 
+             location = dplyr::recode(location, fort_benning = "fort_benning_ga", 
                                          fort_irwin = "ntc_and_fort_irwin",
                                          jb_san_antonio = "fort_sam_houston")) %>% 
     left_join(nldas_wide, by = c("location" = "installation", "dttm" = "utc_dttm")) %>% 
@@ -414,7 +414,7 @@ select_bases
 af_station_coords <-
   read_rds("data/af_station_coords.rds") %>% 
   janitor::clean_names() %>%
-  mutate(name = recode(name, `Fort Benning` = "Fort Benning GA", 
+  mutate(name = dplyr::recode(name, `Fort Benning` = "Fort Benning GA", 
                              `Fort Irwin` = "NTC and Fort Irwin",
                              `JB San Antonio` = "Fort Sam Houston",
                               `JB Lewis McChord` = "Fort Lewis"))

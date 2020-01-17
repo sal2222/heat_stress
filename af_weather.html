@@ -714,7 +714,7 @@ nldas_wide </code></pre>
     mutate(location = 
              str_to_lower(location, locale = &quot;en&quot;),
              location = str_replace_all(location, &quot; &quot;, &quot;_&quot;),
-             location = recode(location, fort_benning = &quot;fort_benning_ga&quot;, 
+             location = dplyr::recode(location, fort_benning = &quot;fort_benning_ga&quot;, 
                                          fort_irwin = &quot;ntc_and_fort_irwin&quot;,
                                          jb_san_antonio = &quot;fort_sam_houston&quot;)) %&gt;% 
     left_join(nldas_wide, by = c(&quot;location&quot; = &quot;installation&quot;, &quot;dttm&quot; = &quot;utc_dttm&quot;)) %&gt;% 
@@ -3392,7 +3392,7 @@ select_bases </code></pre>
 af_station_coords &lt;-
   read_rds(&quot;data/af_station_coords.rds&quot;) %&gt;% 
   janitor::clean_names() %&gt;%
-  mutate(name = recode(name, `Fort Benning` = &quot;Fort Benning GA&quot;, 
+  mutate(name = dplyr::recode(name, `Fort Benning` = &quot;Fort Benning GA&quot;, 
                              `Fort Irwin` = &quot;NTC and Fort Irwin&quot;,
                              `JB San Antonio` = &quot;Fort Sam Houston&quot;,
                               `JB Lewis McChord` = &quot;Fort Lewis&quot;))
