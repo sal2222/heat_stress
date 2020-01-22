@@ -1,0 +1,380 @@
+---
+title: "mixed_models"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(viridis)
+library(knitr)
+library(kableExtra)
+library(zoo)
+library(purrr)
+library(furrr)
+library(table1)
+library(furniture)
+library(kableExtra)
+library(visdat)
+library(naniar)
+library(modelr)
+library(lme4)
+library(ICC) 
+library(dotwhisker)
+library(broom)
+library(car)
+library(reshape2)
+library(sjPlot)
+```
+
+Annual models from DMED data.
+
+
+Scope:
+
+  CONUS Army Installations:  
+  
+    Fort Jackson, SC     
+    Fort Benning, GA    
+    Fort Bragg, NC  
+    Fort Campbell, KY  
+    Fort Polk, LA  
+    Fort Hood, TX  
+    Fort Stewart, GA  
+    Fort Leonard Wood, MO
+    Fort Riley, KS  
+    Fort Irwin, CA  
+    Fort Bliss, TX  
+      
+Population: Active-duty Army service members  
+
+**Outcome**:
+  Ambulatory (Out-patient)  
+  Annual Rate of Heat Stress Illness (any type, primary diagnosis)  
+  1997 - 2018
+  
+**Exposure indices**:  
+*“Absolute” indices*  
+  Annual mean (full-year): temperature, heat index, WBGT  
+  Annual heat risk days / hours - Heat index above 80 / 90 / 103 / 125 °F - WBGT above 82 / 85 / 88 / 90 °F  
+  
+*“Relative” indices* (averaged over full-year and heat season months) 
+Annual mean daily anomaly: temperature, heat index, WBGT  
+Annual maximum daily anomaly: temperature, heat index, WBGT  
+Days mean temperature index above daily climate normal percentile (averaged over all hours of day)  
+  - temperature, heat index, WBGT above 85th / 90th / 95th percentiles  
+Days maximum temperature index above daily climate normal maximum percentile  
+  - temperature, heat index, WBGT above 85th / 90th / 95th percentiles  
+Days mean temperature index above Standard Deviation(s) of mean daily temperature climate normal  
+  - temperature, heat index, WBGT above 1 or 2 standard deviations of daily normal  
+Days maximum temperature index above Standard Deviation(s) of max daily temperature climate normal  
+  - temperature, heat index, WBGT above 1 or 2 standard deviations of maximum daily normal  
+
+```{r read_data}
+
+# Outcomes
+dmed_tidy <- 
+  read_rds("data/dmed_tidy.rds")
+
+dmed_tidy
+
+# Exposures
+annual_tables_list <-
+  read_rds("data/annual_tables_list.rds")
+
+annual_tables_list
+
+```
+
+
+```{r joined_rate_population}
+
+dmed_population <-
+  dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+  dplyr::select(location, year, population) %>% 
+    mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
+           location = as.character(location))
+
+
+index_long <- 
+  annual_tables_list %>% 
+    filter(installation %in% c("fort_benning_ga", "fort_bragg", "fort_campbell", "fort_jackson",
+                               "fort_polk", "fort_hood", "fort_stewart", "fort_leonard_wood", "fort_riley",
+                               "ntc_and_fort_irwin", "fort_bliss")) %>% 
+    unnest(data) %>% 
+    pivot_longer(., cols = `1990`:`2019`, names_to = "year", values_to = "value") %>% 
+    mutate(year = as.integer(year)) 
+
+
+hsi_rates <-
+  dmed_tidy %>% 
+    filter(location %in% c("benning", "bragg", "campbell", "jackson",
+                           "polk", "hood", "stewart", "leonardwood", 
+                           "riley", "irwin", "bliss"),
+           type == "Ambulatory Data",
+           hsi == "all",
+           strata == "gender",
+           category == "Total") %>% 
+    dplyr::select(location, year, rate) %>% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
+           location = as.character(location))
+
+joined_rate <-
+  index_long %>% 
+    left_join(hsi_rates, by = c("installation" = "location", "year" = "year")) %>% 
+    drop_na(rate)
+
+
+joined_rate_pop <-
+  joined_rate %>%
+    left_join(dmed_population, by = c("installation" = "location", "year"))
+
+```
+
+
+## Plots of HSI Ambulatory Rates
+
+```{r plot_ambulatory_rates, cache = TRUE, warning = FALSE}
+
+dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+ ggplot(aes(x = rate, y = fct_reorder(location,rate))) +
+    ggridges::geom_density_ridges(scale = 0.75) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates, 1997-2018",
+      x = "Installation",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() 
+
+```
+
+## Examine single index of heat (out of 80+ indices)  
+
+Annual hours WBGT greater than 85 deg F
+```{r}
+
+joined_rate_pop %>% 
+  filter(index %in% "hours_wbgt_gt85") %>% 
+  ggplot(aes(x = year, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates",
+      x = "Year",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() 
+
+
+joined_rate_pop %>% 
+  filter(index %in% "hours_wbgt_gt85") %>% 
+  ggplot(aes(x = year, y = value)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "WBGT Hours Exceeding 85 deg F",
+      x = "Year",
+      y = "Hours WBGT > 85 deg F"
+    ) +
+    theme_bw() 
+
+joined_rate_pop %>% 
+  filter(index %in% "hours_wbgt_gt85") %>% 
+  ggplot(aes(x = year, y = rate, color = installation, shape = installation)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates",
+      x = "Year",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+     scale_shape_manual(values = 0:11) +
+    theme_bw() 
+
+
+joined_rate_pop %>% 
+  filter(index %in% "hours_wbgt_gt85") %>% 
+  ggplot(aes(x = year, y = value, color = installation, shape = installation)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "WBGT Hours Exceeding 85 deg F",
+      x = "Year",
+      y = "Hours WBGT > 85 deg F"
+    ) +
+     scale_shape_manual(values = 0:11) +
+    theme_bw() 
+
+
+
+joined_rate_pop %>% 
+  filter(index %in% "hours_wbgt_gt85") %>% 
+  ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates",
+      x = "Hours WBGT > 85 deg F",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() 
+
+
+
+joined_rate_pop %>% 
+  filter(index %in% "hours_wbgt_gt85") %>% 
+  ggplot(aes(x = value, y = rate, color = installation, shape = installation)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates at 11 Installations (1997-2018)",
+      x = "Hours WBGT > 85 deg F",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() 
+```
+
+
+1. Ambulatory HSI rates increased over time.
+2. WBGT temperatures increased over time.
+3. Slopes of HSI rate change vary by installation.
+4. Slopes of WBGT increase are consistent by installation (clusters below 100 hours/year and above 200 hours/year).
+5. HSI rates increase with the number of hours of WBGT exceeding 85 deg F.
+6. Slopes of HSI rate increases with hours WBGT > 85 vary by installation (among installations with the highest HSI rates). 
+
+## Models
+
+```{r }
+
+# Assign dataset; center and scale predictor value
+
+data_hours_wbgt_gt85 <-
+  joined_rate_pop %>% 
+    filter(index %in% "hours_wbgt_gt85") %>% 
+    mutate(value = scale(value, center = TRUE, scale = TRUE))
+
+data_hours_wbgt_gt85 %>% 
+  ggplot(aes(x = value, y = rate, color = installation, shape = installation)) +
+      geom_point() +
+      geom_smooth(method = lm, se = FALSE, size = 0.8) +
+      labs(
+        title = "Army Heat Stress Illness Ambulatory Rates at 11 Installations (1997-2018)",
+        x = "Centered and Scaled Hours WBGT > 85 deg F",
+        y = "HSI rate (per 1,000 persons per year)"
+      ) +
+      scale_shape_manual(values = 0:11) +
+      theme_bw() 
+
+
+# Fitting ‘installation’ as a fixed effect in model M1 assumes 
+# the 11 ‘installation’ means are all independent of one another, 
+# and share a common residual variance
+
+mod1_fixed_effect <- lm(rate ~ installation, data = data_hours_wbgt_gt85)
+
+
+# Fitting installation as a random intercept model in model M2 assumes that the 1 measured
+# installation means are only a subset of the realised possibilities drawn from a ‘global’ set of
+# population means that follow a Normal distribution with its own mean and variance.
+
+mod2_random_intercept <- lmer(rate ~ 1 + (1|installation), data = data_hours_wbgt_gt85)
+
+# Fitting only a random intercept allows group means to vary, 
+# but assumes all groups have a common slope for a fitted covariate (fixed effect)
+
+mod3_random_intercept <- lmer(rate ~ value + (1|installation), data = data_hours_wbgt_gt85)
+
+# Fitting random intercepts and slopes allows the slope of a 
+# predictor to vary based on a separate grouping variable.
+
+mod4_random_intercept_slope <- lmer(rate ~ value + (value|installation), data = data_hours_wbgt_gt85)
+
+mod5_random_intercept_yr <- lmer(rate ~ year + (1|installation), data = data_hours_wbgt_gt85)
+
+
+mod6_random_intercept_yr <- lmer(rate ~ value + year + (1|installation), data = data_hours_wbgt_gt85)
+
+mod7_random_intercept_slope_yr <- lmer(rate ~ value + year + (value|installation), data = data_hours_wbgt_gt85)
+# boundary (singular) fit
+isSingular(mod7_random_intercept_slope_yr, tol = 1e-05)
+
+```
+
+
+## Model Evaluation
+
+```{r}
+sjPlot::tab_model(mod2_random_intercept, mod3_random_intercept, mod4_random_intercept_slope, p.val = "kr", show.df = TRUE)
+
+
+# with year in model
+sjPlot::tab_model(mod5_random_intercept_yr, mod6_random_intercept_yr, mod7_random_intercept_slope_yr, p.val = "kr", show.df = TRUE)
+
+
+```
+
+## Plot models
+
+```{r}
+
+sjPlot::plot_model(mod1_fixed_effect)
+sjPlot::plot_model(mod2_random_intercept)
+sjPlot::plot_model(mod3_random_intercept)
+sjPlot::plot_model(mod4_random_intercept_slope)
+sjPlot::plot_model(mod5_random_intercept_yr)
+sjPlot::plot_model(mod6_random_intercept_yr)
+sjPlot::plot_model(mod7_random_intercept_slope_yr)
+
+```
+
+## Predicted values
+```{r}
+
+sjPlot::plot_model(mod3_random_intercept, type = "pred", terms = "value")
+
+sjPlot::plot_model(mod6_random_intercept_yr, type = "pred", terms = "value")
+sjPlot::plot_model(mod6_random_intercept_yr, type = "pred", terms = "year")
+```
+
+
+
+
+

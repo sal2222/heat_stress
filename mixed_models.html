@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>mixed_models</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<link rel="shortcut icon" href="favicon.ico">
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Heat Stress Research</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
+    <li>
+      <a href="shapefiles.html">Installation Shapefiles</a>
+    </li>
+    <li>
+      <a href="nldas_wget.html">Download NLDAS-2 Data</a>
+    </li>
+    <li>
+      <a href="extract_cells.html">Extract from NLDAS netCDF Files</a>
+    </li>
+    <li>
+      <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
+    </li>
+    <li>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-thermometer"></span>
+     
+    Meteorology
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
+    </li>
+    <li>
+      <a href="nldas_fable.html">Time series (Fable)</a>
+    </li>
+    <li>
+      <a href="nldas_averaged.html">Aggregate over calendar periods</a>
+    </li>
+    <li>
+      <a href="climatology.html">Climatologies / Anomalies</a>
+    </li>
+    <li>
+      <a href="annual_tables.html">Annual index tables</a>
+    </li>
+    <li>
+      <a href="af_weather.html">Air Force weather station data</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_models.html">Annual models - Outpatient HSI</a>
+    </li>
+    <li>
+      <a href="dmed_models_hospitalization.html">Annual models - Inpatient HSI</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="daily_models.html">Overview of daily models</a>
+    </li>
+    <li>
+      <a href="case_crossover.html">Case-crossover models</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:sal2222@cumc.columbia.edu">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/sal2222/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">mixed_models</h1>
+
+</div>
+
+
+<p>Annual models from DMED data.</p>
+<p>Scope:</p>
+<p>CONUS Army Installations:</p>
+<pre><code>Fort Jackson, SC     
+Fort Benning, GA    
+Fort Bragg, NC  
+Fort Campbell, KY  
+Fort Polk, LA  
+Fort Hood, TX  
+Fort Stewart, GA  
+Fort Leonard Wood, MO
+Fort Riley, KS  
+Fort Irwin, CA  
+Fort Bliss, TX  
+  </code></pre>
+<p>Population: Active-duty Army service members</p>
+<p><strong>Outcome</strong>: Ambulatory (Out-patient)<br />
+Annual Rate of Heat Stress Illness (any type, primary diagnosis)<br />
+1997 - 2018</p>
+<p><strong>Exposure indices</strong>:<br />
+<em>“Absolute” indices</em><br />
+Annual mean (full-year): temperature, heat index, WBGT<br />
+Annual heat risk days / hours - Heat index above 80 / 90 / 103 / 125 °F - WBGT above 82 / 85 / 88 / 90 °F</p>
+<p><em>“Relative” indices</em> (averaged over full-year and heat season months) Annual mean daily anomaly: temperature, heat index, WBGT<br />
+Annual maximum daily anomaly: temperature, heat index, WBGT<br />
+Days mean temperature index above daily climate normal percentile (averaged over all hours of day)<br />
+- temperature, heat index, WBGT above 85th / 90th / 95th percentiles<br />
+Days maximum temperature index above daily climate normal maximum percentile<br />
+- temperature, heat index, WBGT above 85th / 90th / 95th percentiles<br />
+Days mean temperature index above Standard Deviation(s) of mean daily temperature climate normal<br />
+- temperature, heat index, WBGT above 1 or 2 standard deviations of daily normal<br />
+Days maximum temperature index above Standard Deviation(s) of max daily temperature climate normal<br />
+- temperature, heat index, WBGT above 1 or 2 standard deviations of maximum daily normal</p>
+<pre class="r"><code># Outcomes
+dmed_tidy &lt;- 
+  read_rds(&quot;data/dmed_tidy.rds&quot;)
+
+dmed_tidy</code></pre>
+<pre><code>## # A tibble: 11,955 x 9
+##    type            category  year count population  rate location strata hsi    
+##    &lt;fct&gt;           &lt;fct&gt;    &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;  &lt;fct&gt;  
+##  1 Ambulatory Data Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  2 Ambulatory Data Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  3 Ambulatory Data Total     1997     0      8806.     0 jackson  gender hexhsa~
+##  4 Hospitalizatio~ Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  5 Hospitalizatio~ Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  6 Hospitalizatio~ Total     1997     0      8806.     0 jackson  gender hexhsa~
+##  7 Reportable Eve~ Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  8 Reportable Eve~ Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  9 Reportable Eve~ Total     1997     0      8806.     0 jackson  gender hexhsa~
+## 10 Ambulatory Data Male      1998     0      6456.     0 jackson  gender hexhsa~
+## # ... with 11,945 more rows</code></pre>
+<pre class="r"><code># Exposures
+annual_tables_list &lt;-
+  read_rds(&quot;data/annual_tables_list.rds&quot;)
+
+annual_tables_list</code></pre>
+<pre><code>## # A tibble: 25 x 2
+## # Groups:   installation [25]
+##    installation               data
+##    &lt;chr&gt;           &lt;list&lt;df[,31]&gt;&gt;
+##  1 eglin_afb             [86 x 31]
+##  2 fort_benning_ga       [86 x 31]
+##  3 fort_bliss            [86 x 31]
+##  4 fort_bragg            [86 x 31]
+##  5 fort_campbell         [86 x 31]
+##  6 fort_carson           [86 x 31]
+##  7 fort_drum             [86 x 31]
+##  8 fort_gordon           [86 x 31]
+##  9 fort_hood             [86 x 31]
+## 10 fort_jackson          [86 x 31]
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code>dmed_population &lt;-
+  dmed_tidy %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+  dplyr::select(location, year, population) %&gt;% 
+    mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
+           location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
+           location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
+           location = dplyr::recode(location, campbell = &quot;fort_campbell&quot;),
+           location = dplyr::recode(location, polk = &quot;fort_polk&quot;),
+           location = dplyr::recode(location, hood = &quot;fort_hood&quot;),
+           location = dplyr::recode(location, stewart = &quot;fort_stewart&quot;),
+           location = dplyr::recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
+           location = dplyr::recode(location, riley = &quot;fort_riley&quot;),
+           location = dplyr::recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
+           location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
+           location = as.character(location))
+
+
+index_long &lt;- 
+  annual_tables_list %&gt;% 
+    filter(installation %in% c(&quot;fort_benning_ga&quot;, &quot;fort_bragg&quot;, &quot;fort_campbell&quot;, &quot;fort_jackson&quot;,
+                               &quot;fort_polk&quot;, &quot;fort_hood&quot;, &quot;fort_stewart&quot;, &quot;fort_leonard_wood&quot;, &quot;fort_riley&quot;,
+                               &quot;ntc_and_fort_irwin&quot;, &quot;fort_bliss&quot;)) %&gt;% 
+    unnest(data) %&gt;% 
+    pivot_longer(., cols = `1990`:`2019`, names_to = &quot;year&quot;, values_to = &quot;value&quot;) %&gt;% 
+    mutate(year = as.integer(year)) 
+
+
+hsi_rates &lt;-
+  dmed_tidy %&gt;% 
+    filter(location %in% c(&quot;benning&quot;, &quot;bragg&quot;, &quot;campbell&quot;, &quot;jackson&quot;,
+                           &quot;polk&quot;, &quot;hood&quot;, &quot;stewart&quot;, &quot;leonardwood&quot;, 
+                           &quot;riley&quot;, &quot;irwin&quot;, &quot;bliss&quot;),
+           type == &quot;Ambulatory Data&quot;,
+           hsi == &quot;all&quot;,
+           strata == &quot;gender&quot;,
+           category == &quot;Total&quot;) %&gt;% 
+    dplyr::select(location, year, rate) %&gt;% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
+           location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
+           location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
+           location = dplyr::recode(location, campbell = &quot;fort_campbell&quot;),
+           location = dplyr::recode(location, polk = &quot;fort_polk&quot;),
+           location = dplyr::recode(location, hood = &quot;fort_hood&quot;),
+           location = dplyr::recode(location, stewart = &quot;fort_stewart&quot;),
+           location = dplyr::recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
+           location = dplyr::recode(location, riley = &quot;fort_riley&quot;),
+           location = dplyr::recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
+           location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
+           location = as.character(location))
+
+joined_rate &lt;-
+  index_long %&gt;% 
+    left_join(hsi_rates, by = c(&quot;installation&quot; = &quot;location&quot;, &quot;year&quot; = &quot;year&quot;)) %&gt;% 
+    drop_na(rate)
+
+
+joined_rate_pop &lt;-
+  joined_rate %&gt;%
+    left_join(dmed_population, by = c(&quot;installation&quot; = &quot;location&quot;, &quot;year&quot;))</code></pre>
+<div id="plots-of-hsi-ambulatory-rates" class="section level2">
+<h2>Plots of HSI Ambulatory Rates</h2>
+<pre class="r"><code>dmed_tidy %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = rate, y = fct_reorder(location,rate))) +
+    ggridges::geom_density_ridges(scale = 0.75) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates, 1997-2018&quot;,
+      x = &quot;Installation&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() </code></pre>
+<pre><code>## Picking joint bandwidth of 2.49</code></pre>
+<p><img src="mixed_models_files/figure-html/plot_ambulatory_rates-1.png" width="672" /></p>
+</div>
+<div id="examine-single-index-of-heat-out-of-80-indices" class="section level2">
+<h2>Examine single index of heat (out of 80+ indices)</h2>
+<p>Annual hours WBGT greater than 85 deg F</p>
+<pre class="r"><code>joined_rate_pop %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = year, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() </code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>joined_rate_pop %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = year, y = value)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;WBGT Hours Exceeding 85 deg F&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Hours WBGT &gt; 85 deg F&quot;
+    ) +
+    theme_bw() </code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
+<pre class="r"><code>joined_rate_pop %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = year, y = rate, color = installation, shape = installation)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+     scale_shape_manual(values = 0:11) +
+    theme_bw() </code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-1-3.png" width="672" /></p>
+<pre class="r"><code>joined_rate_pop %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = year, y = value, color = installation, shape = installation)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;WBGT Hours Exceeding 85 deg F&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;Hours WBGT &gt; 85 deg F&quot;
+    ) +
+     scale_shape_manual(values = 0:11) +
+    theme_bw() </code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-1-4.png" width="672" /></p>
+<pre class="r"><code>joined_rate_pop %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates&quot;,
+      x = &quot;Hours WBGT &gt; 85 deg F&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() </code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-1-5.png" width="672" /></p>
+<pre class="r"><code>joined_rate_pop %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = value, y = rate, color = installation, shape = installation)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates at 11 Installations (1997-2018)&quot;,
+      x = &quot;Hours WBGT &gt; 85 deg F&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() </code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-1-6.png" width="672" /></p>
+<ol style="list-style-type: decimal">
+<li>Ambulatory HSI rates increased over time.</li>
+<li>WBGT temperatures increased over time.</li>
+<li>Slopes of HSI rate change vary by installation.</li>
+<li>Slopes of WBGT increase are consistent by installation (clusters below 100 hours/year and above 200 hours/year).</li>
+<li>HSI rates increase with the number of hours of WBGT exceeding 85 deg F.</li>
+<li>Slopes of HSI rate increases with hours WBGT &gt; 85 vary by installation (among installations with the highest HSI rates).</li>
+</ol>
+</div>
+<div id="models" class="section level2">
+<h2>Models</h2>
+<pre class="r"><code># Assign dataset; center and scale predictor value
+
+data_hours_wbgt_gt85 &lt;-
+  joined_rate_pop %&gt;% 
+    filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+    mutate(value = scale(value, center = TRUE, scale = TRUE))
+
+data_hours_wbgt_gt85 %&gt;% 
+  ggplot(aes(x = value, y = rate, color = installation, shape = installation)) +
+      geom_point() +
+      geom_smooth(method = lm, se = FALSE, size = 0.8) +
+      labs(
+        title = &quot;Army Heat Stress Illness Ambulatory Rates at 11 Installations (1997-2018)&quot;,
+        x = &quot;Centered and Scaled Hours WBGT &gt; 85 deg F&quot;,
+        y = &quot;HSI rate (per 1,000 persons per year)&quot;
+      ) +
+      scale_shape_manual(values = 0:11) +
+      theme_bw() </code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code># Fitting ‘installation’ as a fixed effect in model M1 assumes 
+# the 11 ‘installation’ means are all independent of one another, 
+# and share a common residual variance
+
+mod1_fixed_effect &lt;- lm(rate ~ installation, data = data_hours_wbgt_gt85)
+
+
+# Fitting installation as a random intercept model in model M2 assumes that the 1 measured
+# installation means are only a subset of the realised possibilities drawn from a ‘global’ set of
+# population means that follow a Normal distribution with its own mean and variance.
+
+mod2_random_intercept &lt;- lmer(rate ~ 1 + (1|installation), data = data_hours_wbgt_gt85)
+
+# Fitting only a random intercept allows group means to vary, 
+# but assumes all groups have a common slope for a fitted covariate (fixed effect)
+
+mod3_random_intercept &lt;- lmer(rate ~ value + (1|installation), data = data_hours_wbgt_gt85)
+
+# Fitting random intercepts and slopes allows the slope of a 
+# predictor to vary based on a separate grouping variable.
+
+mod4_random_intercept_slope &lt;- lmer(rate ~ value + (value|installation), data = data_hours_wbgt_gt85)
+
+mod5_random_intercept_yr &lt;- lmer(rate ~ year + (1|installation), data = data_hours_wbgt_gt85)
+
+
+mod6_random_intercept_yr &lt;- lmer(rate ~ value + year + (1|installation), data = data_hours_wbgt_gt85)
+
+mod7_random_intercept_slope_yr &lt;- lmer(rate ~ value + year + (value|installation), data = data_hours_wbgt_gt85)</code></pre>
+<pre><code>## boundary (singular) fit: see ?isSingular</code></pre>
+</div>
+<div id="model-evaluation" class="section level2">
+<h2>Model Evaluation</h2>
+<pre class="r"><code>sjPlot::tab_model(mod2_random_intercept, mod3_random_intercept, mod4_random_intercept_slope, p.val = &quot;kr&quot;, show.df = TRUE)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+df
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col7">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col8">
+p
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col9">
+df
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  0">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  1">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  2">
+p
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  3">
+df
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+(Intercept)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+9.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+3.96 – 14.73
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>0.007</strong>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+10.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+9.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+3.96 – 14.73
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+<strong>0.007</strong>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+10.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+9.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+3.95 – 14.74
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+<strong>0.007</strong>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">
+10.00
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+value
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+2.46
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+1.36 – 3.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+230.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+2.46
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+-0.00 – 4.93
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+0.079
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">
+10.00
+</td>
+</tr>
+<tr>
+<td colspan="13" style="font-weight:bold; text-align:left; padding-top:.8em;">
+Random Effects
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+σ<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+79.40
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+73.65
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+60.21
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>00</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+79.40 <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+79.67 <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+80.52 <sub>installation</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>11</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+14.53 <sub>installation.value</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ρ<sub>01</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+1.00 <sub>installation</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ICC
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.50
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.52
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.61
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+N
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+11 <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+11 <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+11 <sub>installation</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+242
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+242
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+242
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.000 / 0.500
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.037 / 0.537
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.036 / 0.625
+</td>
+</tr>
+</table>
+<pre class="r"><code># with year in model
+sjPlot::tab_model(mod5_random_intercept_yr, mod6_random_intercept_yr, mod7_random_intercept_slope_yr, p.val = &quot;kr&quot;, show.df = TRUE)</code></pre>
+<pre><code>## Warning: Can&#39;t compute random effect variances. Some variance components equal zero.
+##   Solution: Respecify random structure!</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
+<th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+df
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col7">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col8">
+p
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col9">
+df
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  0">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  1">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  2">
+p
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  3">
+df
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+(Intercept)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1368.13
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1676.50 – -1059.77
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+230.14
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-1254.81
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+-1579.85 – -929.78
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+229.13
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+-1244.37
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+-1531.39 – -957.35
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">
+227.15
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+year
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.69
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.53 – 0.84
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+230.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.63
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+0.47 – 0.79
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+229.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+0.62
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+0.48 – 0.77
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">
+226.99
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+value
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.09
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+0.04 – 2.15
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+<strong>0.042</strong>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+229.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+1.11
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+-1.31 – 3.52
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+0.391
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">
+10.33
+</td>
+</tr>
+<tr>
+<td colspan="13" style="font-weight:bold; text-align:left; padding-top:.8em;">
+Random Effects
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+σ<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+59.81
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+59.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+45.82
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>00</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+80.29 <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+80.33 <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+81.05 <sub>installation</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>11</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+14.30 <sub>installation.value</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ρ<sub>01</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+1.00 <sub>installation</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ICC
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.58
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+ 
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+N
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+11 <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+11 <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+11 <sub>installation</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+242
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+242
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+242
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.120 / 0.624
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.126 / 0.630
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.302 / NA
+</td>
+</tr>
+</table>
+</div>
+<div id="plot-models" class="section level2">
+<h2>Plot models</h2>
+<pre class="r"><code>sjPlot::plot_model(mod1_fixed_effect)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod2_random_intercept)</code></pre>
+<pre><code>## Warning in min(new_value, na.rm = T): no non-missing arguments to min; returning
+## Inf</code></pre>
+<pre><code>## Warning in min(dat$conf.low): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in min(dat$estimate): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(dat$conf.high): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning in max(dat$estimate): no non-missing arguments to max; returning -Inf</code></pre>
+<pre><code>## Warning in min(ticks): no non-missing arguments to min; returning Inf</code></pre>
+<pre><code>## Warning in max(ticks): no non-missing arguments to max; returning -Inf</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod3_random_intercept)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-3.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-4.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod5_random_intercept_yr)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-5.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-6.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod7_random_intercept_slope_yr)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-7.png" width="672" /></p>
+</div>
+<div id="predicted-values" class="section level2">
+<h2>Predicted values</h2>
+<pre class="r"><code>sjPlot::plot_model(mod3_random_intercept, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr, type = &quot;pred&quot;, terms = &quot;year&quot;)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
