@@ -16,6 +16,7 @@ library(viridis)
 library(rvest)
 library(rnaturalearth)
 library(rnaturalearthdata)
+library(rnaturalearthhires)
 library(rgeos)
 library(lwgeom)
 library(cowplot)
@@ -252,6 +253,44 @@ base_grid_plots <-
   map(select_bases$site_name, ~base_grid_plot_function(.x))
 
 base_grid_plots
+```
+
+## Locations for Annual DMED
+```{r}
+dmed_bases <-
+  select_bases %>%
+    dplyr::filter(.$site_name %in% c("Fort Benning GA", "Fort Bragg","Fort Campbell",
+                              "Fort Jackson", "Fort Polk", "Fort Hood",
+                              "Fort Stewart", "Fort Leonard Wood", "Fort Riley",
+                              "NTC and Fort Irwin", "Fort Bliss"))
+
+
+
+rnaturalearth::ne_countries(country = "united states of america", scale = "medium") %>% 
+      group_by(region) %>% 
+  summarise() 
+
+
+us_states <-
+  rnaturalearth::ne_states("united states of america", returnclass = "sf") %>%
+    filter(!(postal %in% c("AK", "HI"))) 
+
+
+
+dmed_bases %>% 
+ ggplot() +
+     geom_sf(data = us_states, alpha = 0.5) +
+     geom_sf() +
+     stat_sf_coordinates(color = "blue", size = 3) +
+     geom_sf_text(aes(label = site_name), size = 3, nudge_y = -0.5, fontface = "bold") +
+     theme_bw() +
+     theme(axis.text.x = element_text(size = rel(1)),
+           axis.text.y = element_text(size = rel(1)),
+           axis.title.x = element_blank(),
+           axis.title.y = element_blank()) 
+
+
+  
 ```
 
 

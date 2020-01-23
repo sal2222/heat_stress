@@ -32,6 +32,9 @@ library(broom)
 library(car)
 library(reshape2)
 library(sjPlot)
+library(ggridges)
+
+
 ```
 
 Annual models from DMED data.
@@ -178,10 +181,53 @@ dmed_tidy %>%
     ggridges::geom_density_ridges(scale = 0.75) +
     labs(
       title = "Army Heat Stress Illness Ambulatory Rates, 1997-2018",
-      x = "Installation",
-      y = "HSI rate (per 1,000 persons per year)"
+      y = "Installation",
+      x = "HSI rate (per 1,000 persons per year)"
     ) +
     theme_bw() 
+
+
+dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+ ggplot(aes(x = rate, y = fct_reorder(location,rate), fill = location)) +
+    ggridges::geom_density_ridges(
+       jittered_points = TRUE,
+       aes(point_color = location, point_fill = location), 
+       alpha = 0.5,
+       point_alpha = 1) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates, 1997-2018",
+      y = "Installation",
+      x = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() + 
+    theme(legend.position = "none")
+
+dmed_tidy %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         hsi == "all",
+         strata == "gender",
+         category == "Total") %>% 
+ ggplot(aes(x = rate, y = fct_reorder(location,rate), fill = location)) +
+    ggridges::stat_density_ridges(
+       quantile_lines = TRUE,
+       jittered_points = TRUE,
+       aes(point_color = location, point_fill = location), 
+       alpha = 0.5,
+       point_alpha = 1) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Rates, 1997-2018",
+      y = "Installation",
+      x = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() + 
+    theme(legend.position = "none")
+
 
 ```
 
@@ -310,6 +356,7 @@ data_hours_wbgt_gt85 %>%
 
 mod1_fixed_effect <- lm(rate ~ installation, data = data_hours_wbgt_gt85)
 
+mod1a_fixed_effect <- lm(rate ~ value + installation, data = data_hours_wbgt_gt85)
 
 # Fitting installation as a random intercept model in model M2 assumes that the 1 measured
 # installation means are only a subset of the realised possibilities drawn from a ‘global’ set of
@@ -342,7 +389,11 @@ isSingular(mod7_random_intercept_slope_yr, tol = 1e-05)
 ## Model Evaluation
 
 ```{r}
-sjPlot::tab_model(mod2_random_intercept, mod3_random_intercept, mod4_random_intercept_slope, p.val = "kr", show.df = TRUE)
+
+sjPlot::tab_model(mod1_fixed_effect, mod2_random_intercept, p.val = "kr", show.df = TRUE)
+
+sjPlot::tab_model(mod1a_fixed_effect, mod3_random_intercept, mod4_random_intercept_slope, p.val = "kr", show.df = TRUE, show.aic = TRUE, show.ngroups = TRUE
+)
 
 
 # with year in model
@@ -354,13 +405,36 @@ sjPlot::tab_model(mod5_random_intercept_yr, mod6_random_intercept_yr, mod7_rando
 ## Plot models
 
 ```{r}
+# Mod 1
+plot(mod1_fixed_effect)
+
+par(mfrow = c(2,2))
+plot(mod1_fixed_effect, which = 1:4)
+par(mfrow = c(1,1))
+
+par(mfrow = c(2,2))
+plot(mod1a_fixed_effect, which = 1:4)
+par(mfrow = c(1,1))
 
 sjPlot::plot_model(mod1_fixed_effect)
-sjPlot::plot_model(mod2_random_intercept)
+sjPlot::plot_model(mod1a_fixed_effect)
+
+# Mod 2
+
+plot(mod2_random_intercept)
+par(mfrow = c(1,1))
+
+# Mod 3
 sjPlot::plot_model(mod3_random_intercept)
+# Mod 4
 sjPlot::plot_model(mod4_random_intercept_slope)
+
+
+# Mod 5
 sjPlot::plot_model(mod5_random_intercept_yr)
+#Mod 6
 sjPlot::plot_model(mod6_random_intercept_yr)
+# Mod 7
 sjPlot::plot_model(mod7_random_intercept_slope_yr)
 
 ```
@@ -369,6 +443,12 @@ sjPlot::plot_model(mod7_random_intercept_slope_yr)
 ```{r}
 
 sjPlot::plot_model(mod3_random_intercept, type = "pred", terms = "value")
+sjPlot::plot_model(mod3_random_intercept, type = "re", terms = "value")
+
+sjPlot::plot_model(mod4_random_intercept_slope, type = "pred", terms = "value")
+sjPlot::plot_model(mod4_random_intercept_slope, type = "re", terms = "value")
+sjPlot::plot_model(mod4_random_intercept_slope, type = "resid", terms = "value")
+sjPlot::plot_model(mod4_random_intercept_slope, type = "diag", terms = "value")
 
 sjPlot::plot_model(mod6_random_intercept_yr, type = "pred", terms = "value")
 sjPlot::plot_model(mod6_random_intercept_yr, type = "pred", terms = "year")

@@ -458,6 +458,9 @@ div.tocify {
     <li>
       <a href="dmed_models_hospitalization.html">Annual models - Inpatient HSI</a>
     </li>
+    <li>
+      <a href="mixed_models.html">Mixed models</a>
+    </li>
     <li class="dropdown-header">Daily</li>
     <li>
       <a href="daily_models.html">Overview of daily models</a>
@@ -643,12 +646,55 @@ joined_rate_pop &lt;-
     ggridges::geom_density_ridges(scale = 0.75) +
     labs(
       title = &quot;Army Heat Stress Illness Ambulatory Rates, 1997-2018&quot;,
-      x = &quot;Installation&quot;,
-      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+      y = &quot;Installation&quot;,
+      x = &quot;HSI rate (per 1,000 persons per year)&quot;
     ) +
     theme_bw() </code></pre>
 <pre><code>## Picking joint bandwidth of 2.49</code></pre>
 <p><img src="mixed_models_files/figure-html/plot_ambulatory_rates-1.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = rate, y = fct_reorder(location,rate), fill = location)) +
+    ggridges::geom_density_ridges(
+       jittered_points = TRUE,
+       aes(point_color = location, point_fill = location), 
+       alpha = 0.5,
+       point_alpha = 1) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates, 1997-2018&quot;,
+      y = &quot;Installation&quot;,
+      x = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() + 
+    theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>## Picking joint bandwidth of 2.49</code></pre>
+<p><img src="mixed_models_files/figure-html/plot_ambulatory_rates-2.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = rate, y = fct_reorder(location,rate), fill = location)) +
+    ggridges::stat_density_ridges(
+       quantile_lines = TRUE,
+       jittered_points = TRUE,
+       aes(point_color = location, point_fill = location), 
+       alpha = 0.5,
+       point_alpha = 1) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates, 1997-2018&quot;,
+      y = &quot;Installation&quot;,
+      x = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() + 
+    theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>## Picking joint bandwidth of 2.49</code></pre>
+<p><img src="mixed_models_files/figure-html/plot_ambulatory_rates-3.png" width="672" /></p>
 </div>
 <div id="examine-single-index-of-heat-out-of-80-indices" class="section level2">
 <h2>Examine single index of heat (out of 80+ indices)</h2>
@@ -764,6 +810,7 @@ data_hours_wbgt_gt85 %&gt;%
 
 mod1_fixed_effect &lt;- lm(rate ~ installation, data = data_hours_wbgt_gt85)
 
+mod1a_fixed_effect &lt;- lm(rate ~ value + installation, data = data_hours_wbgt_gt85)
 
 # Fitting installation as a random intercept model in model M2 assumes that the 1 measured
 # installation means are only a subset of the realised possibilities drawn from a ‘global’ set of
@@ -788,16 +835,373 @@ mod6_random_intercept_yr &lt;- lmer(rate ~ value + year + (1|installation), data
 
 mod7_random_intercept_slope_yr &lt;- lmer(rate ~ value + year + (value|installation), data = data_hours_wbgt_gt85)</code></pre>
 <pre><code>## boundary (singular) fit: see ?isSingular</code></pre>
+<pre class="r"><code># boundary (singular) fit
+isSingular(mod7_random_intercept_slope_yr, tol = 1e-05)</code></pre>
+<pre><code>## [1] TRUE</code></pre>
 </div>
 <div id="model-evaluation" class="section level2">
 <h2>Model Evaluation</h2>
-<pre class="r"><code>sjPlot::tab_model(mod2_random_intercept, mod3_random_intercept, mod4_random_intercept_slope, p.val = &quot;kr&quot;, show.df = TRUE)</code></pre>
+<pre class="r"><code>sjPlot::tab_model(mod1_fixed_effect, mod2_random_intercept, p.val = &quot;kr&quot;, show.df = TRUE)</code></pre>
 <table style="border-collapse:collapse; border:none;">
 <tr>
 <th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
  
 </th>
+<th colspan="3" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
 <th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col7">
+p
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col8">
+df
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+(Intercept)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+25.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+21.83 – 29.31
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+9.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+3.96 – 14.73
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+<strong>0.007</strong>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+10.00
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_bliss]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-24.07
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-29.36 – -18.77
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_bragg]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-10.67
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-15.96 – -5.37
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[fort_campbell]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-18.96
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-24.25 – -13.67
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_hood]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-22.97
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-28.26 – -17.68
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[fort_jackson]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.04
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-4.25 – 6.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.699
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[fort_leonard_wood]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-19.53
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-24.82 – -14.23
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_polk]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-16.38
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-21.67 – -11.08
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_riley]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-22.76
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-28.06 – -17.47
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[fort_stewart]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-21.53
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-26.83 – -16.24
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[ntc_and_fort_irwin]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-22.67
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-27.97 – -17.38
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+</tr>
+<tr>
+<td colspan="8" style="font-weight:bold; text-align:left; padding-top:.8em;">
+Random Effects
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+σ<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+79.40
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>00</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+79.40 <sub>installation</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ICC
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.50
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+N
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+ 
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+11 <sub>installation</sub>
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="3">
+242
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+242
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+R<sup>2</sup> / R<sup>2</sup> adjusted
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.499 / 0.477
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+0.000 / 0.500
+</td>
+</tr>
+</table>
+<pre class="r"><code>sjPlot::tab_model(mod1a_fixed_effect, mod3_random_intercept, mod4_random_intercept_slope, p.val = &quot;kr&quot;, show.df = TRUE, show.aic = TRUE, show.ngroups = TRUE
+)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="3" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
 rate
 </th>
 <th colspan="4" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
@@ -821,30 +1225,27 @@ CI
 p
 </td>
 <td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
-df
+Estimates
 </td>
 <td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
-Estimates
+CI
 </td>
 <td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col7">
-CI
+p
 </td>
 <td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col8">
-p
-</td>
-<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col9">
 df
 </td>
-<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  0">
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  col9">
 Estimates
 </td>
-<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  1">
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  0">
 CI
 </td>
-<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  2">
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  1">
 p
 </td>
-<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  3">
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  2">
 df
 </td>
 </tr>
@@ -853,39 +1254,36 @@ df
 (Intercept)
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+25.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+21.97 – 29.18
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 9.34
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 3.96 – 14.73
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-<strong>0.007</strong>
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-10.00
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-9.34
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
-3.96 – 14.73
+<strong>0.007</strong>
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
-<strong>0.007</strong>
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
 10.00
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
 9.34
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
 3.95 – 14.74
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
 <strong>0.007</strong>
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
 10.00
 </td>
 </tr>
@@ -894,40 +1292,341 @@ df
 value
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 2.46
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
-1.36 – 3.57
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.35 – 3.58
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 <strong>&lt;0.001
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
-230.00
-</td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
 2.46
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.36 – 3.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+230.00
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+2.46
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
 -0.00 – 4.93
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
 0.079
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  3">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
 10.00
 </td>
 </tr>
 <tr>
-<td colspan="13" style="font-weight:bold; text-align:left; padding-top:.8em;">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_bliss]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-24.07
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-29.16 – -18.97
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_bragg]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-10.67
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-15.77 – -5.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[fort_campbell]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-18.96
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-24.06 – -13.86
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_hood]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-22.97
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-28.07 – -17.87
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[fort_jackson]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.04
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-4.06 – 6.14
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.688
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[fort_leonard_wood]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-19.53
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-24.63 – -14.43
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_polk]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-16.38
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-21.47 – -11.28
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation [fort_riley]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-22.76
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-27.86 – -17.67
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[fort_stewart]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-21.53
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-26.63 – -16.43
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+installation<br>[ntc_and_fort_irwin]
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-22.67
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+-27.77 – -17.57
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col7">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col8">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  col9">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  0">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  1">
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  2">
+</td>
+</tr>
+<tr>
+<td colspan="12" style="font-weight:bold; text-align:left; padding-top:.8em;">
 Random Effects
 </td>
 </tr>
@@ -935,8 +1634,8 @@ Random Effects
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
 σ<sup>2</sup>
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
-79.40
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+ 
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
 73.65
@@ -948,8 +1647,8 @@ Random Effects
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
 τ<sub>00</sub>
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
-79.40 <sub>installation</sub>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+ 
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
 79.67 <sub>installation</sub>
@@ -961,7 +1660,7 @@ Random Effects
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
 τ<sub>11</sub>
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
  
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
@@ -974,7 +1673,7 @@ Random Effects
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
 ρ<sub>01</sub>
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
  
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
@@ -987,8 +1686,8 @@ Random Effects
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
 ICC
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
-0.50
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+ 
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
 0.52
@@ -1000,8 +1699,8 @@ ICC
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
 N
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
-11 <sub>installation</sub>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+ 
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
 11 <sub>installation</sub>
@@ -1013,7 +1712,7 @@ N
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
 Observations
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="3">
 242
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="4">
@@ -1025,16 +1724,30 @@ Observations
 </tr>
 <tr>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
-Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
+R<sup>2</sup> / R<sup>2</sup> adjusted
 </td>
-<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
-0.000 / 0.500
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.537 / 0.515
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
 0.037 / 0.537
 </td>
 <td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
 0.036 / 0.625
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+AIC
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+1740.898
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+1763.970
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="4">
+1723.214
 </td>
 </tr>
 </table>
@@ -1332,37 +2045,78 @@ Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
 </div>
 <div id="plot-models" class="section level2">
 <h2>Plot models</h2>
-<pre class="r"><code>sjPlot::plot_model(mod1_fixed_effect)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<pre class="r"><code>sjPlot::plot_model(mod2_random_intercept)</code></pre>
-<pre><code>## Warning in min(new_value, na.rm = T): no non-missing arguments to min; returning
-## Inf</code></pre>
-<pre><code>## Warning in min(dat$conf.low): no non-missing arguments to min; returning Inf</code></pre>
-<pre><code>## Warning in min(dat$estimate): no non-missing arguments to min; returning Inf</code></pre>
-<pre><code>## Warning in max(dat$conf.high): no non-missing arguments to max; returning -Inf</code></pre>
-<pre><code>## Warning in max(dat$estimate): no non-missing arguments to max; returning -Inf</code></pre>
-<pre><code>## Warning in min(ticks): no non-missing arguments to min; returning Inf</code></pre>
-<pre><code>## Warning in max(ticks): no non-missing arguments to max; returning -Inf</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
-<pre class="r"><code>sjPlot::plot_model(mod3_random_intercept)</code></pre>
+<pre class="r"><code># Mod 1
+plot(mod1_fixed_effect)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-1.png" width="672" /><img src="mixed_models_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+<pre><code>## hat values (leverages) are all = 0.04545455
+##  and there are no factor predictors; no plot no. 5</code></pre>
 <p><img src="mixed_models_files/figure-html/unnamed-chunk-4-3.png" width="672" /></p>
-<pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope)</code></pre>
+<pre class="r"><code>par(mfrow = c(2,2))
+plot(mod1_fixed_effect, which = 1:4)</code></pre>
 <p><img src="mixed_models_files/figure-html/unnamed-chunk-4-4.png" width="672" /></p>
-<pre class="r"><code>sjPlot::plot_model(mod5_random_intercept_yr)</code></pre>
+<pre class="r"><code>par(mfrow = c(1,1))
+
+par(mfrow = c(2,2))
+plot(mod1a_fixed_effect, which = 1:4)</code></pre>
 <p><img src="mixed_models_files/figure-html/unnamed-chunk-4-5.png" width="672" /></p>
-<pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr)</code></pre>
+<pre class="r"><code>par(mfrow = c(1,1))
+
+sjPlot::plot_model(mod1_fixed_effect)</code></pre>
 <p><img src="mixed_models_files/figure-html/unnamed-chunk-4-6.png" width="672" /></p>
-<pre class="r"><code>sjPlot::plot_model(mod7_random_intercept_slope_yr)</code></pre>
+<pre class="r"><code>sjPlot::plot_model(mod1a_fixed_effect)</code></pre>
 <p><img src="mixed_models_files/figure-html/unnamed-chunk-4-7.png" width="672" /></p>
+<pre class="r"><code># Mod 2
+
+plot(mod2_random_intercept)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-8.png" width="672" /></p>
+<pre class="r"><code>par(mfrow = c(1,1))
+
+# Mod 3
+sjPlot::plot_model(mod3_random_intercept)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-9.png" width="672" /></p>
+<pre class="r"><code># Mod 4
+sjPlot::plot_model(mod4_random_intercept_slope)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-10.png" width="672" /></p>
+<pre class="r"><code># Mod 5
+sjPlot::plot_model(mod5_random_intercept_yr)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-11.png" width="672" /></p>
+<pre class="r"><code>#Mod 6
+sjPlot::plot_model(mod6_random_intercept_yr)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-12.png" width="672" /></p>
+<pre class="r"><code># Mod 7
+sjPlot::plot_model(mod7_random_intercept_slope_yr)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-13.png" width="672" /></p>
 </div>
 <div id="predicted-values" class="section level2">
 <h2>Predicted values</h2>
 <pre class="r"><code>sjPlot::plot_model(mod3_random_intercept, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
 <p><img src="mixed_models_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
-<pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
+<pre class="r"><code>sjPlot::plot_model(mod3_random_intercept, type = &quot;re&quot;, terms = &quot;value&quot;)</code></pre>
 <p><img src="mixed_models_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
-<pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr, type = &quot;pred&quot;, terms = &quot;year&quot;)</code></pre>
+<pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
 <p><img src="mixed_models_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope, type = &quot;re&quot;, terms = &quot;value&quot;)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-4.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope, type = &quot;resid&quot;, terms = &quot;value&quot;)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-5.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope, type = &quot;diag&quot;, terms = &quot;value&quot;)</code></pre>
+<pre><code>## [[1]]</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-6.png" width="672" /></p>
+<pre><code>## 
+## [[2]]
+## [[2]]$installation</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-7.png" width="672" /></p>
+<pre><code>## 
+## 
+## [[3]]</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-8.png" width="672" /></p>
+<pre><code>## 
+## [[4]]</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-9.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-10.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr, type = &quot;pred&quot;, terms = &quot;year&quot;)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-11.png" width="672" /></p>
 </div>
 
 
