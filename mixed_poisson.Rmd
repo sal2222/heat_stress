@@ -1,5 +1,5 @@
 ---
-title: "mixed_models"
+title: "mixed_models_poisson"
 output:
   html_document:
     toc: true
@@ -154,6 +154,31 @@ hsi_rates <-
            location = dplyr::recode(location, bliss = "fort_bliss"),
            location = as.character(location))
 
+
+hsi_counts <-
+  dmed_tidy %>% 
+    filter(location %in% c("benning", "bragg", "campbell", "jackson",
+                           "polk", "hood", "stewart", "leonardwood", 
+                           "riley", "irwin", "bliss"),
+           type == "Ambulatory Data",
+           hsi == "all",
+           strata == "gender",
+           category == "Total") %>% 
+    dplyr::select(location, year, count, population) %>% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
+           location = as.character(location))
+
+
 joined_rate <-
   index_long %>% 
     left_join(hsi_rates, by = c("installation" = "location", "year" = "year")) %>% 
@@ -164,69 +189,29 @@ joined_rate_pop <-
   joined_rate %>%
     left_join(dmed_population, by = c("installation" = "location", "year"))
 
+joined_counts <-
+  index_long %>% 
+    left_join(hsi_counts, by = c("installation" = "location", "year" = "year")) %>% 
+      drop_na(count)
+
+
 ```
 
 
-## Plots of HSI Ambulatory Rates
+## Plots of HSI Ambulatory Counts
 
 ```{r plot_ambulatory_rates, cache = TRUE, warning = FALSE}
 
-dmed_tidy %>% 
-  filter(!location %in% c("us", "overseas"),
-         type == "Ambulatory Data",
-         hsi == "all",
-         strata == "gender",
-         category == "Total") %>% 
- ggplot(aes(x = rate, y = fct_reorder(location,rate))) +
-    ggridges::geom_density_ridges(scale = 0.75) +
+joined_counts %>% 
+ ggplot(aes(x = count)) +
+    geom_histogram(color = "darkblue", fill = "lightblue") +
+    facet_wrap(installation ~ .) +
     labs(
-      title = "Army Heat Stress Illness Ambulatory Rates, 1997-2018",
+      title = "Army Heat Stress Illness Ambulatory Counts, 1997-2018",
       y = "Installation",
-      x = "HSI rate (per 1,000 persons per year)"
+      x = "HSI count"
     ) +
     theme_bw() 
-
-
-dmed_tidy %>% 
-  filter(!location %in% c("us", "overseas"),
-         type == "Ambulatory Data",
-         hsi == "all",
-         strata == "gender",
-         category == "Total") %>% 
- ggplot(aes(x = rate, y = fct_reorder(location,rate), fill = location)) +
-    ggridges::geom_density_ridges(
-       jittered_points = TRUE,
-       aes(point_color = location, point_fill = location), 
-       alpha = 0.5,
-       point_alpha = 1) +
-    labs(
-      title = "Army Heat Stress Illness Ambulatory Rates, 1997-2018",
-      y = "Installation",
-      x = "HSI rate (per 1,000 persons per year)"
-    ) +
-    theme_bw() + 
-    theme(legend.position = "none")
-
-dmed_tidy %>% 
-  filter(!location %in% c("us", "overseas"),
-         type == "Ambulatory Data",
-         hsi == "all",
-         strata == "gender",
-         category == "Total") %>% 
- ggplot(aes(x = rate, y = fct_reorder(location,rate), fill = location)) +
-    ggridges::stat_density_ridges(
-       quantile_lines = TRUE,
-       jittered_points = TRUE,
-       aes(point_color = location, point_fill = location), 
-       alpha = 0.5,
-       point_alpha = 1) +
-    labs(
-      title = "Army Heat Stress Illness Ambulatory Rates, 1997-2018",
-      y = "Installation",
-      x = "HSI rate (per 1,000 persons per year)"
-    ) +
-    theme_bw() + 
-    theme(legend.position = "none")
 
 
 ```
@@ -236,83 +221,41 @@ dmed_tidy %>%
 Annual hours WBGT greater than 85 deg F
 ```{r}
 
-joined_rate_pop %>% 
+joined_counts %>% 
   filter(index %in% "hours_wbgt_gt85") %>% 
-  ggplot(aes(x = year, y = rate)) +
+  ggplot(aes(x = year, y = count)) +
     geom_point() +
     geom_smooth(method = lm, se = FALSE, size = 0.8) +
     labs(
-      title = "Army Heat Stress Illness Ambulatory Rates",
+      title = "Army Heat Stress Illness Ambulatory Counts",
       x = "Year",
-      y = "HSI rate (per 1,000 persons per year)"
+      y = "HSI count"
     ) +
     theme_bw() 
 
 
-joined_rate_pop %>% 
+joined_counts %>% 
   filter(index %in% "hours_wbgt_gt85") %>% 
-  ggplot(aes(x = year, y = value)) +
+  ggplot(aes(x = year, y = count, color = installation, shape = installation)) +
     geom_point() +
     geom_smooth(method = lm, se = FALSE, size = 0.8) +
     labs(
-      title = "WBGT Hours Exceeding 85 deg F",
+      title = "Army Heat Stress Illness Ambulatory Counts",
       x = "Year",
-      y = "Hours WBGT > 85 deg F"
+      y = "HSI count"
     ) +
     theme_bw() 
 
-joined_rate_pop %>% 
+
+joined_counts %>% 
   filter(index %in% "hours_wbgt_gt85") %>% 
-  ggplot(aes(x = year, y = rate, color = installation, shape = installation)) +
+  ggplot(aes(x = value, y = count, color = installation, shape = installation)) +
     geom_point() +
     geom_smooth(method = lm, se = FALSE, size = 0.8) +
     labs(
-      title = "Army Heat Stress Illness Ambulatory Rates",
-      x = "Year",
-      y = "HSI rate (per 1,000 persons per year)"
-    ) +
-     scale_shape_manual(values = 0:11) +
-    theme_bw() 
-
-
-joined_rate_pop %>% 
-  filter(index %in% "hours_wbgt_gt85") %>% 
-  ggplot(aes(x = year, y = value, color = installation, shape = installation)) +
-    geom_point() +
-    geom_smooth(method = lm, se = FALSE, size = 0.8) +
-    labs(
-      title = "WBGT Hours Exceeding 85 deg F",
-      x = "Year",
-      y = "Hours WBGT > 85 deg F"
-    ) +
-     scale_shape_manual(values = 0:11) +
-    theme_bw() 
-
-
-
-joined_rate_pop %>% 
-  filter(index %in% "hours_wbgt_gt85") %>% 
-  ggplot(aes(x = value, y = rate)) +
-    geom_point() +
-    geom_smooth(method = lm, se = FALSE, size = 0.8) +
-    labs(
-      title = "Army Heat Stress Illness Ambulatory Rates",
+      title = "Army Heat Stress Illness Ambulatory Counts at 11 Installations (1997-2018)",
       x = "Hours WBGT > 85 deg F",
-      y = "HSI rate (per 1,000 persons per year)"
-    ) +
-    theme_bw() 
-
-
-
-joined_rate_pop %>% 
-  filter(index %in% "hours_wbgt_gt85") %>% 
-  ggplot(aes(x = value, y = rate, color = installation, shape = installation)) +
-    geom_point() +
-    geom_smooth(method = lm, se = FALSE, size = 0.8) +
-    labs(
-      title = "Army Heat Stress Illness Ambulatory Rates at 11 Installations (1997-2018)",
-      x = "Hours WBGT > 85 deg F",
-      y = "HSI rate (per 1,000 persons per year)"
+      y = "HSI count"
     ) +
     scale_shape_manual(values = 0:11) +
     theme_bw() 
@@ -332,76 +275,42 @@ joined_rate_pop %>%
 
 # Assign dataset; center and scale predictor value
 
-data_hours_wbgt_gt85 <-
-  joined_rate_pop %>% 
+data_hours_wbgt_gt85_counts <-
+  joined_counts %>% 
     filter(index %in% "hours_wbgt_gt85") %>% 
-    mutate(value = scale(value, center = TRUE, scale = TRUE))
-
-data_hours_wbgt_gt85 %>% 
-  ggplot(aes(x = value, y = rate, color = installation, shape = installation)) +
-      geom_point() +
-      geom_smooth(method = lm, se = FALSE, size = 0.8) +
-      labs(
-        title = "Army Heat Stress Illness Ambulatory Rates at 11 Installations (1997-2018)",
-        x = "Centered and Scaled Hours WBGT > 85 deg F",
-        y = "HSI rate (per 1,000 persons per year)"
-      ) +
-      scale_shape_manual(values = 0:11) +
-      theme_bw() 
+    mutate(value_scaled = scale(value, center = TRUE, scale = TRUE))
 
 
 ```
-
-```{r plot_scaled}
-
-data_hours_wbgt_gt85 %>% 
-  ggplot(aes(x = value, y = rate)) +
-    geom_point() +
-    geom_smooth(method = lm, se = FALSE, size = 0.8) +
-    labs(
-      title = "Army Heat Stress Illness Ambulatory Rates",
-      x = "Hours WBGT > 85 deg F (Centered/Scaled)",
-      y = "HSI rate (per 1,000 persons per year)"
-    ) +
-    theme_bw()
-```
-
 
 ```{r models}
 # Fitting ‘installation’ as a fixed effect in model M1 assumes 
 # the 11 ‘installation’ means are all independent of one another, 
 # and share a common residual variance
 
-mod0_pooled <- lm(rate ~ value, data = data_hours_wbgt_gt85)
+pooled <- glm(count ~ value + installation, data = data_hours_wbgt_gt85_counts)
+summary(pooled)
 
-mod1_fixed_effect <- lm(rate ~ installation, data = data_hours_wbgt_gt85)
 
-mod1a_fixed_effect <- lm(rate ~ value + installation, data = data_hours_wbgt_gt85)
+pooled_offset <- glm(count ~ value + installation, data = data_hours_wbgt_gt85_counts, offset = log(population))
+summary(pooled_offset)
+
 
 # Fitting installation as a random intercept model in model M2 assumes that the 1 measured
 # installation means are only a subset of the realised possibilities drawn from a ‘global’ set of
 # population means that follow a Normal distribution with its own mean and variance.
 
-mod2_random_intercept <- lmer(rate ~ 1 + (1|installation), data = data_hours_wbgt_gt85)
-
-# Fitting only a random intercept allows group means to vary, 
-# but assumes all groups have a common slope for a fitted covariate (fixed effect)
-
-mod3_random_intercept <- lmer(rate ~ value + (1|installation), data = data_hours_wbgt_gt85)
+random_intercept <- glmer(count ~ value_scaled + (1|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
 
 # Fitting random intercepts and slopes allows the slope of a 
 # predictor to vary based on a separate grouping variable.
 
-mod4_random_intercept_slope <- lmer(rate ~ value + (value|installation), data = data_hours_wbgt_gt85)
 
-mod5_random_intercept_yr <- lmer(rate ~ year + (1|installation), data = data_hours_wbgt_gt85)
+random_intercept_slope <- glmer(count ~ value_scaled + (value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
+
+summary(random_intercept_slope)
 
 
-mod6_random_intercept_yr <- lmer(rate ~ value + year + (1|installation), data = data_hours_wbgt_gt85)
-
-mod7_random_intercept_slope_yr <- lmer(rate ~ value + year + (value|installation), data = data_hours_wbgt_gt85)
-# boundary (singular) fit
-isSingular(mod7_random_intercept_slope_yr, tol = 1e-05)
 ```
 
 
@@ -411,16 +320,7 @@ isSingular(mod7_random_intercept_slope_yr, tol = 1e-05)
 
 ```{r}
 
-sjPlot::tab_model(mod0_pooled)
-
-sjPlot::tab_model(mod1_fixed_effect, mod2_random_intercept, p.val = "kr", show.df = TRUE)
-
-sjPlot::tab_model(mod1a_fixed_effect, mod3_random_intercept, mod4_random_intercept_slope, p.val = "kr", show.df = TRUE, show.aic = TRUE, show.ngroups = TRUE
-)
-
-
-# with year in model
-sjPlot::tab_model(mod5_random_intercept_yr, mod6_random_intercept_yr, mod7_random_intercept_slope_yr, p.val = "kr", show.df = TRUE)
+sjPlot::tab_model(random_intercept_slope, p.val = "kr", show.df = TRUE)
 
 
 ```
@@ -429,55 +329,15 @@ sjPlot::tab_model(mod5_random_intercept_yr, mod6_random_intercept_yr, mod7_rando
 
 ```{r}
 # Mod 1
-plot(mod0_pooled)
+plot(random_intercept_slope)
 
+sjPlot::plot_model(random_intercept_slope)
 
-plot(mod1_fixed_effect)
+sjPlot::plot_model(random_intercept_slope, type = "pred", terms = "value_scaled")
+sjPlot::plot_model(random_intercept_slope, type = "re", terms = "value_scaled")
+sjPlot::plot_model(random_intercept_slope, type = "resid", terms = "value_scaled")
+sjPlot::plot_model(random_intercept_slope, type = "diag", terms = "value_scaled")
 
-par(mfrow = c(2,2))
-plot(mod1_fixed_effect, which = 1:4)
-par(mfrow = c(1,1))
-
-par(mfrow = c(2,2))
-plot(mod1a_fixed_effect, which = 1:4)
-par(mfrow = c(1,1))
-
-sjPlot::plot_model(mod1_fixed_effect)
-sjPlot::plot_model(mod1a_fixed_effect)
-
-# Mod 2
-
-plot(mod2_random_intercept)
-par(mfrow = c(1,1))
-
-# Mod 3
-sjPlot::plot_model(mod3_random_intercept)
-# Mod 4
-sjPlot::plot_model(mod4_random_intercept_slope)
-
-
-# Mod 5
-sjPlot::plot_model(mod5_random_intercept_yr)
-#Mod 6
-sjPlot::plot_model(mod6_random_intercept_yr)
-# Mod 7
-sjPlot::plot_model(mod7_random_intercept_slope_yr)
-
-```
-
-## Predicted values
-```{r}
-
-sjPlot::plot_model(mod3_random_intercept, type = "pred", terms = "value")
-sjPlot::plot_model(mod3_random_intercept, type = "re", terms = "value")
-
-sjPlot::plot_model(mod4_random_intercept_slope, type = "pred", terms = "value")
-sjPlot::plot_model(mod4_random_intercept_slope, type = "re", terms = "value")
-sjPlot::plot_model(mod4_random_intercept_slope, type = "resid", terms = "value")
-sjPlot::plot_model(mod4_random_intercept_slope, type = "diag", terms = "value")
-
-sjPlot::plot_model(mod6_random_intercept_yr, type = "pred", terms = "value")
-sjPlot::plot_model(mod6_random_intercept_yr, type = "pred", terms = "year")
 ```
 
 

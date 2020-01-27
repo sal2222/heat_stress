@@ -83,7 +83,9 @@ Do we observe effect estimate changes at defined Heat Category boundaries? Are t
 
 - DMED Models (annual, in-patient) [[here]](dmed_models_hospitalization.html)
 
-- Mixed Models (explatory) [[here]](mixed_models.html)
+- Mixed Models (exploratory) [[here]](mixed_models.html)
+
+- Mixed Models - Poisson  [[here]](mixed_poisson.html)
 
 - Overview of daily models [[here]](daily_models.html) 
 

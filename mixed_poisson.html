@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>mixed_models_poisson</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<link rel="shortcut icon" href="favicon.ico">
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Heat Stress Research</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
+    <li>
+      <a href="shapefiles.html">Installation Shapefiles</a>
+    </li>
+    <li>
+      <a href="nldas_wget.html">Download NLDAS-2 Data</a>
+    </li>
+    <li>
+      <a href="extract_cells.html">Extract from NLDAS netCDF Files</a>
+    </li>
+    <li>
+      <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
+    </li>
+    <li>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-thermometer"></span>
+     
+    Meteorology
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
+    </li>
+    <li>
+      <a href="nldas_fable.html">Time series (Fable)</a>
+    </li>
+    <li>
+      <a href="nldas_averaged.html">Aggregate over calendar periods</a>
+    </li>
+    <li>
+      <a href="climatology.html">Climatologies / Anomalies</a>
+    </li>
+    <li>
+      <a href="annual_tables.html">Annual index tables</a>
+    </li>
+    <li>
+      <a href="af_weather.html">Air Force weather station data</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_models.html">Annual models - Outpatient HSI</a>
+    </li>
+    <li>
+      <a href="dmed_models_hospitalization.html">Annual models - Inpatient HSI</a>
+    </li>
+    <li>
+      <a href="mixed_models.html">Mixed models</a>
+    </li>
+    <li>
+      <a href="mixed_poisson.html">Mixed models - Poisson</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="daily_models.html">Overview of daily models</a>
+    </li>
+    <li>
+      <a href="case_crossover.html">Case-crossover models</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:sal2222@cumc.columbia.edu">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/sal2222/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">mixed_models_poisson</h1>
+
+</div>
+
+
+<p>Annual models from DMED data.</p>
+<p>Scope:</p>
+<p>CONUS Army Installations:</p>
+<pre><code>Fort Jackson, SC     
+Fort Benning, GA    
+Fort Bragg, NC  
+Fort Campbell, KY  
+Fort Polk, LA  
+Fort Hood, TX  
+Fort Stewart, GA  
+Fort Leonard Wood, MO
+Fort Riley, KS  
+Fort Irwin, CA  
+Fort Bliss, TX  
+  </code></pre>
+<p>Population: Active-duty Army service members</p>
+<p><strong>Outcome</strong>: Ambulatory (Out-patient)<br />
+Annual Rate of Heat Stress Illness (any type, primary diagnosis)<br />
+1997 - 2018</p>
+<p><strong>Exposure indices</strong>:<br />
+<em>“Absolute” indices</em><br />
+Annual mean (full-year): temperature, heat index, WBGT<br />
+Annual heat risk days / hours - Heat index above 80 / 90 / 103 / 125 °F - WBGT above 82 / 85 / 88 / 90 °F</p>
+<p><em>“Relative” indices</em> (averaged over full-year and heat season months) Annual mean daily anomaly: temperature, heat index, WBGT<br />
+Annual maximum daily anomaly: temperature, heat index, WBGT<br />
+Days mean temperature index above daily climate normal percentile (averaged over all hours of day)<br />
+- temperature, heat index, WBGT above 85th / 90th / 95th percentiles<br />
+Days maximum temperature index above daily climate normal maximum percentile<br />
+- temperature, heat index, WBGT above 85th / 90th / 95th percentiles<br />
+Days mean temperature index above Standard Deviation(s) of mean daily temperature climate normal<br />
+- temperature, heat index, WBGT above 1 or 2 standard deviations of daily normal<br />
+Days maximum temperature index above Standard Deviation(s) of max daily temperature climate normal<br />
+- temperature, heat index, WBGT above 1 or 2 standard deviations of maximum daily normal</p>
+<pre class="r"><code># Outcomes
+dmed_tidy &lt;- 
+  read_rds(&quot;data/dmed_tidy.rds&quot;)
+
+dmed_tidy</code></pre>
+<pre><code>## # A tibble: 11,955 x 9
+##    type            category  year count population  rate location strata hsi    
+##    &lt;fct&gt;           &lt;fct&gt;    &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;  &lt;fct&gt;  
+##  1 Ambulatory Data Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  2 Ambulatory Data Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  3 Ambulatory Data Total     1997     0      8806.     0 jackson  gender hexhsa~
+##  4 Hospitalizatio~ Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  5 Hospitalizatio~ Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  6 Hospitalizatio~ Total     1997     0      8806.     0 jackson  gender hexhsa~
+##  7 Reportable Eve~ Male      1997     0      6057.     0 jackson  gender hexhsa~
+##  8 Reportable Eve~ Female    1997     0      2749.     0 jackson  gender hexhsa~
+##  9 Reportable Eve~ Total     1997     0      8806.     0 jackson  gender hexhsa~
+## 10 Ambulatory Data Male      1998     0      6456.     0 jackson  gender hexhsa~
+## # ... with 11,945 more rows</code></pre>
+<pre class="r"><code># Exposures
+annual_tables_list &lt;-
+  read_rds(&quot;data/annual_tables_list.rds&quot;)
+
+annual_tables_list</code></pre>
+<pre><code>## # A tibble: 25 x 2
+## # Groups:   installation [25]
+##    installation               data
+##    &lt;chr&gt;           &lt;list&lt;df[,31]&gt;&gt;
+##  1 eglin_afb             [86 x 31]
+##  2 fort_benning_ga       [86 x 31]
+##  3 fort_bliss            [86 x 31]
+##  4 fort_bragg            [86 x 31]
+##  5 fort_campbell         [86 x 31]
+##  6 fort_carson           [86 x 31]
+##  7 fort_drum             [86 x 31]
+##  8 fort_gordon           [86 x 31]
+##  9 fort_hood             [86 x 31]
+## 10 fort_jackson          [86 x 31]
+## # ... with 15 more rows</code></pre>
+<pre class="r"><code>dmed_population &lt;-
+  dmed_tidy %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         hsi == &quot;all&quot;,
+         strata == &quot;gender&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+  dplyr::select(location, year, population) %&gt;% 
+    mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
+           location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
+           location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
+           location = dplyr::recode(location, campbell = &quot;fort_campbell&quot;),
+           location = dplyr::recode(location, polk = &quot;fort_polk&quot;),
+           location = dplyr::recode(location, hood = &quot;fort_hood&quot;),
+           location = dplyr::recode(location, stewart = &quot;fort_stewart&quot;),
+           location = dplyr::recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
+           location = dplyr::recode(location, riley = &quot;fort_riley&quot;),
+           location = dplyr::recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
+           location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
+           location = as.character(location))
+
+
+index_long &lt;- 
+  annual_tables_list %&gt;% 
+    filter(installation %in% c(&quot;fort_benning_ga&quot;, &quot;fort_bragg&quot;, &quot;fort_campbell&quot;, &quot;fort_jackson&quot;,
+                               &quot;fort_polk&quot;, &quot;fort_hood&quot;, &quot;fort_stewart&quot;, &quot;fort_leonard_wood&quot;, &quot;fort_riley&quot;,
+                               &quot;ntc_and_fort_irwin&quot;, &quot;fort_bliss&quot;)) %&gt;% 
+    unnest(data) %&gt;% 
+    pivot_longer(., cols = `1990`:`2019`, names_to = &quot;year&quot;, values_to = &quot;value&quot;) %&gt;% 
+    mutate(year = as.integer(year)) 
+
+
+hsi_rates &lt;-
+  dmed_tidy %&gt;% 
+    filter(location %in% c(&quot;benning&quot;, &quot;bragg&quot;, &quot;campbell&quot;, &quot;jackson&quot;,
+                           &quot;polk&quot;, &quot;hood&quot;, &quot;stewart&quot;, &quot;leonardwood&quot;, 
+                           &quot;riley&quot;, &quot;irwin&quot;, &quot;bliss&quot;),
+           type == &quot;Ambulatory Data&quot;,
+           hsi == &quot;all&quot;,
+           strata == &quot;gender&quot;,
+           category == &quot;Total&quot;) %&gt;% 
+    dplyr::select(location, year, rate) %&gt;% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
+           location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
+           location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
+           location = dplyr::recode(location, campbell = &quot;fort_campbell&quot;),
+           location = dplyr::recode(location, polk = &quot;fort_polk&quot;),
+           location = dplyr::recode(location, hood = &quot;fort_hood&quot;),
+           location = dplyr::recode(location, stewart = &quot;fort_stewart&quot;),
+           location = dplyr::recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
+           location = dplyr::recode(location, riley = &quot;fort_riley&quot;),
+           location = dplyr::recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
+           location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
+           location = as.character(location))
+
+
+hsi_counts &lt;-
+  dmed_tidy %&gt;% 
+    filter(location %in% c(&quot;benning&quot;, &quot;bragg&quot;, &quot;campbell&quot;, &quot;jackson&quot;,
+                           &quot;polk&quot;, &quot;hood&quot;, &quot;stewart&quot;, &quot;leonardwood&quot;, 
+                           &quot;riley&quot;, &quot;irwin&quot;, &quot;bliss&quot;),
+           type == &quot;Ambulatory Data&quot;,
+           hsi == &quot;all&quot;,
+           strata == &quot;gender&quot;,
+           category == &quot;Total&quot;) %&gt;% 
+    dplyr::select(location, year, count, population) %&gt;% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
+           location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
+           location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
+           location = dplyr::recode(location, campbell = &quot;fort_campbell&quot;),
+           location = dplyr::recode(location, polk = &quot;fort_polk&quot;),
+           location = dplyr::recode(location, hood = &quot;fort_hood&quot;),
+           location = dplyr::recode(location, stewart = &quot;fort_stewart&quot;),
+           location = dplyr::recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
+           location = dplyr::recode(location, riley = &quot;fort_riley&quot;),
+           location = dplyr::recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
+           location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
+           location = as.character(location))
+
+
+joined_rate &lt;-
+  index_long %&gt;% 
+    left_join(hsi_rates, by = c(&quot;installation&quot; = &quot;location&quot;, &quot;year&quot; = &quot;year&quot;)) %&gt;% 
+    drop_na(rate)
+
+
+joined_rate_pop &lt;-
+  joined_rate %&gt;%
+    left_join(dmed_population, by = c(&quot;installation&quot; = &quot;location&quot;, &quot;year&quot;))
+
+joined_counts &lt;-
+  index_long %&gt;% 
+    left_join(hsi_counts, by = c(&quot;installation&quot; = &quot;location&quot;, &quot;year&quot; = &quot;year&quot;)) %&gt;% 
+      drop_na(count)</code></pre>
+<div id="plots-of-hsi-ambulatory-counts" class="section level2">
+<h2>Plots of HSI Ambulatory Counts</h2>
+<pre class="r"><code>joined_counts %&gt;% 
+ ggplot(aes(x = count)) +
+    geom_histogram(color = &quot;darkblue&quot;, fill = &quot;lightblue&quot;) +
+    facet_wrap(installation ~ .) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Counts, 1997-2018&quot;,
+      y = &quot;Installation&quot;,
+      x = &quot;HSI count&quot;
+    ) +
+    theme_bw() </code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="mixed_poisson_files/figure-html/plot_ambulatory_rates-1.png" width="672" /></p>
+</div>
+<div id="examine-single-index-of-heat-out-of-80-indices" class="section level2">
+<h2>Examine single index of heat (out of 80+ indices)</h2>
+<p>Annual hours WBGT greater than 85 deg F</p>
+<pre class="r"><code>joined_counts %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = year, y = count)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Counts&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI count&quot;
+    ) +
+    theme_bw() </code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>joined_counts %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = year, y = count, color = installation, shape = installation)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Counts&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI count&quot;
+    ) +
+    theme_bw() </code></pre>
+<pre><code>## Warning: The shape palette can deal with a maximum of 6 discrete values because
+## more than 6 becomes difficult to discriminate; you have 11. Consider
+## specifying shapes manually if you must have them.</code></pre>
+<pre><code>## Warning: Removed 110 rows containing missing values (geom_point).</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
+<pre class="r"><code>joined_counts %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+  ggplot(aes(x = value, y = count, color = installation, shape = installation)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Counts at 11 Installations (1997-2018)&quot;,
+      x = &quot;Hours WBGT &gt; 85 deg F&quot;,
+      y = &quot;HSI count&quot;
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() </code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-1-3.png" width="672" /></p>
+<ol style="list-style-type: decimal">
+<li>Ambulatory HSI rates increased over time.</li>
+<li>WBGT temperatures increased over time.</li>
+<li>Slopes of HSI rate change vary by installation.</li>
+<li>Slopes of WBGT increase are consistent by installation (clusters below 100 hours/year and above 200 hours/year).</li>
+<li>HSI rates increase with the number of hours of WBGT exceeding 85 deg F.</li>
+<li>Slopes of HSI rate increases with hours WBGT &gt; 85 vary by installation (among installations with the highest HSI rates).</li>
+</ol>
+</div>
+<div id="models" class="section level2">
+<h2>Models</h2>
+<pre class="r"><code># Assign dataset; center and scale predictor value
+
+data_hours_wbgt_gt85_counts &lt;-
+  joined_counts %&gt;% 
+    filter(index %in% &quot;hours_wbgt_gt85&quot;) %&gt;% 
+    mutate(value_scaled = scale(value, center = TRUE, scale = TRUE))</code></pre>
+<pre class="r"><code># Fitting ‘installation’ as a fixed effect in model M1 assumes 
+# the 11 ‘installation’ means are all independent of one another, 
+# and share a common residual variance
+
+pooled &lt;- glm(count ~ value + installation, data = data_hours_wbgt_gt85_counts)
+summary(pooled)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = count ~ value + installation, data = data_hours_wbgt_gt85_counts)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -573.43   -35.83    -6.68    42.02   562.77  
+## 
+## Coefficients:
+##                                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                     227.1550    59.5106   3.817 0.000174 ***
+## value                             0.6049     0.1082   5.590 6.39e-08 ***
+## installationfort_bliss         -217.1102    64.1732  -3.383 0.000842 ***
+## installationfort_bragg          256.0720    45.4519   5.634 5.12e-08 ***
+## installationfort_campbell       -48.3634    65.5825  -0.737 0.461604    
+## installationfort_hood          -374.4408    42.4198  -8.827 2.77e-16 ***
+## installationfort_jackson       -117.4389    49.3075  -2.382 0.018045 *  
+## installationfort_leonard_wood  -178.3547    65.2658  -2.733 0.006769 ** 
+## installationfort_polk          -178.4525    63.0099  -2.832 0.005034 ** 
+## installationfort_riley         -199.0327    64.7140  -3.076 0.002355 ** 
+## installationfort_stewart       -331.3373    46.9620  -7.055 2.01e-11 ***
+## installationntc_and_fort_irwin -385.7919    46.9620  -8.215 1.54e-14 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for gaussian family taken to be 19401.72)
+## 
+##     Null deviance: 15567885  on 241  degrees of freedom
+## Residual deviance:  4462396  on 230  degrees of freedom
+## AIC: 3089.8
+## 
+## Number of Fisher Scoring iterations: 2</code></pre>
+<pre class="r"><code>pooled_offset &lt;- glm(count ~ value + installation, data = data_hours_wbgt_gt85_counts, offset = log(population))
+summary(pooled_offset)</code></pre>
+<pre><code>## 
+## Call:
+## glm(formula = count ~ value + installation, data = data_hours_wbgt_gt85_counts, 
+##     offset = log(population))
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -573.32   -35.64    -6.62    42.06   562.83  
+## 
+## Coefficients:
+##                                 Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                     217.2800    59.5001   3.652 0.000322 ***
+## value                             0.6048     0.1082   5.591 6.38e-08 ***
+## installationfort_bliss         -216.9093    64.1619  -3.381 0.000850 ***
+## installationfort_bragg          255.2695    45.4440   5.617 5.58e-08 ***
+## installationfort_campbell       -48.7217    65.5711  -0.743 0.458217    
+## installationfort_hood          -375.1997    42.4124  -8.846 2.43e-16 ***
+## installationfort_jackson       -116.7337    49.2989  -2.368 0.018719 *  
+## installationfort_leonard_wood  -177.6329    65.2543  -2.722 0.006982 ** 
+## installationfort_polk          -177.5914    62.9989  -2.819 0.005238 ** 
+## installationfort_riley         -198.6647    64.7027  -3.070 0.002395 ** 
+## installationfort_stewart       -331.1488    46.9538  -7.053 2.04e-11 ***
+## installationntc_and_fort_irwin -384.2574    46.9538  -8.184 1.88e-14 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## (Dispersion parameter for gaussian family taken to be 19394.93)
+## 
+##     Null deviance: 15528925  on 241  degrees of freedom
+## Residual deviance:  4460835  on 230  degrees of freedom
+## AIC: 3089.7
+## 
+## Number of Fisher Scoring iterations: 2</code></pre>
+<pre class="r"><code># Fitting installation as a random intercept model in model M2 assumes that the 1 measured
+# installation means are only a subset of the realised possibilities drawn from a ‘global’ set of
+# population means that follow a Normal distribution with its own mean and variance.
+
+random_intercept &lt;- glmer(count ~ value_scaled + (1|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
+
+# Fitting random intercepts and slopes allows the slope of a 
+# predictor to vary based on a separate grouping variable.
+
+
+random_intercept_slope &lt;- glmer(count ~ value_scaled + (value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
+
+summary(random_intercept_slope)</code></pre>
+<pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: count ~ value_scaled + (value_scaled | installation)
+##    Data: data_hours_wbgt_gt85_counts
+##  Offset: log(population)
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##  13315.3  13332.8  -6652.7  13305.3      237 
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -20.8693  -3.5040  -0.5983   3.0067  29.6118 
+## 
+## Random effects:
+##  Groups       Name         Variance Std.Dev. Corr
+##  installation (Intercept)  0.79939  0.8941       
+##               value_scaled 0.01221  0.1105   0.69
+## Number of obs: 242, groups:  installation, 11
+## 
+## Fixed effects:
+##              Estimate Std. Error z value Pr(&gt;|z|)    
+## (Intercept)  -5.10465    0.26973 -18.925  &lt; 2e-16 ***
+## value_scaled  0.14545    0.03437   4.231 2.32e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr)
+## value_scald 0.666</code></pre>
+</div>
+<div id="model-evaluation" class="section level2">
+<h2>Model Evaluation</h2>
+<pre class="r"><code>sjPlot::tab_model(random_intercept_slope, p.val = &quot;kr&quot;, show.df = TRUE)</code></pre>
+<pre><code>## Warning: mu of 0.0 is too close to zero, estimate of random effect variances may be unreliable.</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="3" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+count
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Incidence Rate Ratios
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+(Intercept)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.01
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.00 – 0.01
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+value_scaled
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.16
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.08 – 1.24
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td colspan="4" style="font-weight:bold; text-align:left; padding-top:.8em;">
+Random Effects
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+σ<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+5.88
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>00</sub> <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.80
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>11</sub> <sub>installation.value_scaled</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.01
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ρ<sub>01</sub> <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.69
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ICC
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.12
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+N <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+11
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="3">
+242
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.003 / 0.124
+</td>
+</tr>
+</table>
+</div>
+<div id="plot-models" class="section level2">
+<h2>Plot models</h2>
+<pre class="r"><code># Mod 1
+plot(random_intercept_slope)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(random_intercept_slope)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(random_intercept_slope, type = &quot;pred&quot;, terms = &quot;value_scaled&quot;)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-3-3.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(random_intercept_slope, type = &quot;re&quot;, terms = &quot;value_scaled&quot;)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-3-4.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(random_intercept_slope, type = &quot;resid&quot;, terms = &quot;value_scaled&quot;)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-3-5.png" width="672" /></p>
+<pre class="r"><code>sjPlot::plot_model(random_intercept_slope, type = &quot;diag&quot;, terms = &quot;value_scaled&quot;)</code></pre>
+<pre><code>## $installation</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-3-6.png" width="672" /></p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
