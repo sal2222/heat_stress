@@ -90,3 +90,7 @@ Do we observe effect estimate changes at defined Heat Category boundaries? Are t
 - Overview of daily models [[here]](daily_models.html) 
 
 - Case-crossover Models (daily) [[here]](case_crossover.html)
+
+## Shiny Interactive Application
+
+Link: [[https://sal2222.shinyapps.io/annual_heat/]](https://sal2222.shinyapps.io/annual_heat/)
