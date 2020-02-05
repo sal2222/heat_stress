@@ -179,6 +179,11 @@ hsi_counts <-
            location = as.character(location))
 
 
+
+# Function to assign Basic Combat Training (BCT) category
+
+
+
 joined_rate <-
   index_long %>% 
     left_join(hsi_rates, by = c("installation" = "location", "year" = "year")) %>% 
@@ -192,7 +197,9 @@ joined_rate_pop <-
 joined_counts <-
   index_long %>% 
     left_join(hsi_counts, by = c("installation" = "location", "year" = "year")) %>% 
-      drop_na(count)
+      drop_na(count) %>% 
+  mutate(bct = case_when(installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
+                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0))
 
 
 ```
@@ -201,6 +208,19 @@ joined_counts <-
 ## Plots of HSI Ambulatory Counts
 
 ```{r plot_ambulatory_rates, cache = TRUE, warning = FALSE}
+
+joined_counts %>% 
+ ggplot(aes(x = year, y = population, color = installation, shape = installation)) +
+    geom_line() +
+    geom_point() +
+    labs(
+      title = "Population",
+      y = "Population",
+      x = "Year"
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() 
+
 
 joined_counts %>% 
  ggplot(aes(x = count)) +
@@ -220,6 +240,7 @@ joined_counts %>%
 
 Annual hours WBGT greater than 85 deg F
 ```{r}
+
 
 joined_counts %>% 
   filter(index %in% "hours_wbgt_gt85") %>% 
@@ -259,6 +280,24 @@ joined_counts %>%
     ) +
     scale_shape_manual(values = 0:11) +
     theme_bw() 
+
+
+
+joined_counts %>% 
+   filter(index %in% "hours_wbgt_gt85") %>% 
+ ggplot(aes(x = value, y = fct_reorder(installation, value))) +
+    ggridges::geom_density_ridges(
+       jittered_points = TRUE,
+       aes(point_color = installation, point_fill = installation), 
+       alpha = 0.5,
+       point_alpha = 1) +
+    labs(
+      title = "Hours WBGT exceeding 85 deg F, 1997-2018",
+      y = "Installation",
+      x = "Hours WBGT > 85"
+    ) +
+    theme_bw() +
+    theme(legend.position = "none")
 ```
 
 
@@ -291,7 +330,6 @@ data_hours_wbgt_gt85_counts <-
 pooled <- glm(count ~ value + installation, data = data_hours_wbgt_gt85_counts)
 summary(pooled)
 
-
 pooled_offset <- glm(count ~ value + installation, data = data_hours_wbgt_gt85_counts, offset = log(population))
 summary(pooled_offset)
 
@@ -306,10 +344,31 @@ random_intercept <- glmer(count ~ value_scaled + (1|installation), data = data_h
 # predictor to vary based on a separate grouping variable.
 
 
-random_intercept_slope <- glmer(count ~ value_scaled + (value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
+
+poisson_mod <- glm(count ~ value_scaled + installation, data = data_hours_wbgt_gt85_counts, family = poisson)
+sjPlot::tab_model(poisson_mod, p.val = "kr", show.df = TRUE)
+
+poisson_mod_offset <- glm(count ~ value_scaled + installation, data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
+sjPlot::tab_model(poisson_mod, poisson_mod_offset, p.val = "kr", show.df = TRUE)
+
+
+
+random_intercept_slope <- glmer(count ~ value_scaled + (1 + value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
+
+random_intercept_slope_bct <- glmer(count ~ value_scaled + bct + (1 + value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
+
+
 
 summary(random_intercept_slope)
+sjPlot::tab_model(random_intercept_slope, p.val = "kr", show.df = TRUE)
 
+
+random_intercept_slope_no_offset <- glmer(count ~ value_scaled + (1 + value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson)
+
+
+
+summary(random_intercept_slope_no_offset)
+sjPlot::tab_model(random_intercept_slope_no_offset, p.val = "kr", show.df = TRUE)
 
 ```
 
@@ -320,8 +379,14 @@ summary(random_intercept_slope)
 
 ```{r}
 
-sjPlot::tab_model(random_intercept_slope, p.val = "kr", show.df = TRUE)
+sjPlot::tab_model(random_intercept_slope, random_intercept_slope_bct, p.val = "kr", show.df = TRUE)
 
+sjPlot::tab_model(random_intercept_slope_no_offset, p.val = "kr", show.df = TRUE)
+
+broom::glance(random_intercept_slope)
+broom::glance(random_intercept_slope_bct)
+broom::tidy(random_intercept_slope)
+broom::tidy(random_intercept_slope_bct)
 
 ```
 
@@ -338,9 +403,120 @@ sjPlot::plot_model(random_intercept_slope, type = "re", terms = "value_scaled")
 sjPlot::plot_model(random_intercept_slope, type = "resid", terms = "value_scaled")
 sjPlot::plot_model(random_intercept_slope, type = "diag", terms = "value_scaled")
 
+
+sjPlot::plot_model(random_intercept_slope_no_offset)
+sjPlot::plot_model(random_intercept_slope_no_offset, type = "pred", terms = "value_scaled")
+sjPlot::plot_model(random_intercept_slope_no_offset, type = "re", terms = "value_scaled")
+
+sjPlot::plot_model(poisson_mod)
+sjPlot::plot_model(poisson_mod_offset)
+
+
+
+sjPlot::plot_model(random_intercept_slope_bct)
+sjPlot::plot_model(random_intercept_slope_bct, type = "pred", terms = "value_scaled")
+sjPlot::plot_model(random_intercept_slope_bct, type = "re", terms = "value_scaled")
 ```
 
 
+## Multiple Models Function
 
+
+```{r glmer_function}
+
+# center and scale by each index (pooled over all installations)  
+
+joined_counts_scaled <-
+  joined_counts %>% 
+    ungroup() %>% 
+    dplyr::group_by(index) %>% 
+      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
+    ungroup()
+
+
+
+gg_miss_var(joined_counts_scaled)
+gg_miss_var(joined_counts_scaled,
+            facet = index)
+
+# missing values for indices gt 125 deg
+# omit observations with missing records
+
+joined_counts_scaled <-
+  joined_counts_scaled %>% 
+  na.omit()
+
+joined_counts_scaled
+# write_rds(joined_counts_scaled, "data/joined_counts_scaled.rds")
+
+
+random_slope_bct_function = function(df) {
+  df %>% 
+    glmer(count ~ value_scaled + bct + (1 + value_scaled|installation), data = ., family = poisson, offset = log(population))
+}
+
+
+random_slope_bct_nest <-
+  joined_counts_scaled %>%
+    dplyr::select(index, everything()) %>% 
+      nest(data = installation:value_scaled) %>% 
+      mutate(glmer_models = map(data, random_slope_bct_function),
+             glance = map(glmer_models, broom::glance),
+             tidy =   map(glmer_models, broom::tidy),
+             augment = map(glmer_models, broom::augment))
+
+
+random_slope_bct_nest 
+
+# Check singular fit models
+
+map(random_slope_bct_nest$glmer_models, isSingular) %>% 
+  unlist() %>% 
+  tibble::enframe(name = NULL) %>% 
+  mutate(index = random_slope_bct_nest$index) %>% 
+  filter(value %in% "TRUE")
+
+# Remove `days_wbgt_gt95pct_may_sep`: singular fit model
+
+random_slope_bct_nest <-
+  random_slope_bct_nest %>% 
+  filter(!index %in% "days_wbgt_gt95pct_may_sep")
+
+
+# write_rds(random_slope_bct_nest, "data/random_slope_bct_nest.rds")
+
+
+
+# Model summaries
+
+random_slope_bct_nest  %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>%
+  filter(term %in% "value_scaled") %>% 
+  arrange(desc(estimate))
+
+
+random_slope_bct_nest  %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>%
+  filter(term %in% "bct") %>% 
+  arrange(desc(estimate))
+
+
+
+random_slope_bct_nest  %>% 
+  unnest(glance, .drop = TRUE) %>% 
+  dplyr::select(index, sigma:df.residual) %>% 
+  arrange(AIC)
+
+
+
+```
+
+```{r}
+random_slope_bct_nest %>% 
+  pull(glmer_models) %>% 
+  map(sjPlot::plot_model)
+```
 
 

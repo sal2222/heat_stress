@@ -65,6 +65,13 @@ left:
           href: daily_models.html
         - text: "Case-crossover models"
           href: case_crossover.html
+        - text: "Shiny - interactive"
+      icon: fa-desktop  
+      menu: 
+        - text: "Annual HSI"
+          href: https://sal2222.shinyapps.io/annual_heat/
+
+          
 right:
     - icon: fa-envelope fa-lg
       href: mailto:sal2222@cumc.columbia.edu
