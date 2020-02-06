@@ -33,8 +33,7 @@ library(car)
 library(reshape2)
 library(sjPlot)
 library(ggridges)
-
-
+library(readxl)
 ```
 
 Annual models from DMED data.
@@ -93,6 +92,11 @@ annual_tables_list <-
   read_rds("data/annual_tables_list.rds")
 
 annual_tables_list
+
+index_heat_key <-
+  readxl::read_excel("data/index_heat_key.xlsx")
+
+# write_rds(index_heat_key, "data/index_heat_key")
 
 ```
 
@@ -154,6 +158,7 @@ hsi_rates <-
            location = dplyr::recode(location, bliss = "fort_bliss"),
            location = as.character(location))
 
+# Ambulatory HSI
 
 hsi_counts <-
   dmed_tidy %>% 
@@ -179,11 +184,65 @@ hsi_counts <-
            location = as.character(location))
 
 
+# Hospitalization HSI
 
-# Function to assign Basic Combat Training (BCT) category
+hsi_hosp <-
+  dmed_tidy %>% 
+    filter(location %in% c("benning", "bragg", "campbell", "jackson",
+                           "polk", "hood", "stewart", "leonardwood", 
+                           "riley", "irwin", "bliss"),
+           type == "Hospitalizations",
+           hsi == "all",
+           strata == "gender",
+           category == "Total") %>% 
+    dplyr::select(location, year, count, population) %>% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
+           location = as.character(location),
+           rate = (count / population) * 1000) 
 
 
 
+# Reportable Events Counts
+
+hsi_rme <-
+  dmed_tidy %>% 
+    filter(location %in% c("benning", "bragg", "campbell", "jackson",
+                           "polk", "hood", "stewart", "leonardwood", 
+                           "riley", "irwin", "bliss"),
+           type == "Reportable Events",
+           hsi == "all",
+           strata == "gender",
+           category == "Total") %>% 
+    dplyr::select(location, year, count, population) %>% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
+           location = as.character(location),
+           rate = (count / population) * 1000)
+
+
+
+# Join with Annual heat; assign Basic Combat Training (BCT) category
+
+# Ambultatory
 joined_rate <-
   index_long %>% 
     left_join(hsi_rates, by = c("installation" = "location", "year" = "year")) %>% 
@@ -199,7 +258,43 @@ joined_counts <-
     left_join(hsi_counts, by = c("installation" = "location", "year" = "year")) %>% 
       drop_na(count) %>% 
   mutate(bct = case_when(installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
-                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0))
+                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0)) 
+
+
+
+# Hospitalization
+  # Join to indices of heat; assign BCT status; center and scale heat index value (pooled, for each index)  
+
+
+joined_hsi_hosp <-
+  index_long %>% 
+    left_join(hsi_hosp, by = c("installation" = "location", "year" = "year")) %>% 
+      drop_na(count) %>% 
+  mutate(bct = case_when(installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
+                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0)) %>%
+  ungroup() %>% 
+  dplyr::group_by(index) %>% 
+      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
+  ungroup()
+
+# write_rds(joined_hsi_hosp, "data/joined_hsi_hosp.rds", compress = "none")
+
+
+
+# Reportable Events
+joined_hsi_rme <-
+  index_long %>% 
+    left_join(hsi_rme, by = c("installation" = "location", "year" = "year")) %>% 
+      drop_na(count) %>% 
+  mutate(bct = case_when(installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
+                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0)) %>%
+  ungroup() %>% 
+  dplyr::group_by(index) %>% 
+      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
+  ungroup()
+
+# write_rds(joined_hsi_rme, "data/joined_hsi_rme.rds", compress = "none")
+
 
 
 ```
@@ -447,7 +542,8 @@ joined_counts_scaled <-
   na.omit()
 
 joined_counts_scaled
-# write_rds(joined_counts_scaled, "data/joined_counts_scaled.rds")
+
+#write_rds(joined_counts_scaled, "data/joined_counts_scaled.rds", compress = "none")
 
 
 random_slope_bct_function = function(df) {
@@ -467,7 +563,7 @@ random_slope_bct_nest <-
 
 
 random_slope_bct_nest 
-
+random_slope_bct_nest$index %>% View()
 # Check singular fit models
 
 map(random_slope_bct_nest$glmer_models, isSingular) %>% 
@@ -483,7 +579,7 @@ random_slope_bct_nest <-
   filter(!index %in% "days_wbgt_gt95pct_may_sep")
 
 
-# write_rds(random_slope_bct_nest, "data/random_slope_bct_nest.rds")
+# write_rds(random_slope_bct_nest, "data/random_slope_bct_nest.rds", compress = "none")
 
 
 
