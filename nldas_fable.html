@@ -461,12 +461,29 @@ div.tocify {
     <li>
       <a href="mixed_models.html">Mixed models</a>
     </li>
+    <li>
+      <a href="mixed_poisson.html">Mixed models - Poisson</a>
+    </li>
     <li class="dropdown-header">Daily</li>
     <li>
       <a href="daily_models.html">Overview of daily models</a>
     </li>
     <li>
       <a href="case_crossover.html">Case-crossover models</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-desktop"></span>
+     
+    Shiny - interactive
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="https://sal2222.shinyapps.io/annual_heat/">Annual HSI Shiny</a>
     </li>
   </ul>
 </li>
@@ -585,10 +602,6 @@ nldas_tsibble %&gt;%
   ggplot(aes(x = trend_strength, y = seasonal_strength_day, label = installation)) +
   geom_point() +
   ggrepel::geom_text_repel()</code></pre>
-<pre><code>## Warning: 1 error encountered for feature 1
-## [1] cannot allocate vector of size 6.0 Mb</code></pre>
-<pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
-<pre><code>## Warning: Removed 1 rows containing missing values (geom_text_repel).</code></pre>
 <p><img src="nldas_fable_files/figure-html/feature_extraction-1.png" width="672" /></p>
 </div>
 <div id="forecast-models" class="section level2">

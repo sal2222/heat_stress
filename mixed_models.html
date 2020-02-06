@@ -461,12 +461,29 @@ div.tocify {
     <li>
       <a href="mixed_models.html">Mixed models</a>
     </li>
+    <li>
+      <a href="mixed_poisson.html">Mixed models - Poisson</a>
+    </li>
     <li class="dropdown-header">Daily</li>
     <li>
       <a href="daily_models.html">Overview of daily models</a>
     </li>
     <li>
       <a href="case_crossover.html">Case-crossover models</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-desktop"></span>
+     
+    Shiny - interactive
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="https://sal2222.shinyapps.io/annual_heat/">Annual HSI Shiny</a>
     </li>
   </ul>
 </li>
@@ -803,10 +820,23 @@ data_hours_wbgt_gt85 %&gt;%
       ) +
       scale_shape_manual(values = 0:11) +
       theme_bw() </code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/scaled-1.png" width="672" /></p>
+<pre class="r"><code>data_hours_wbgt_gt85 %&gt;% 
+  ggplot(aes(x = value, y = rate)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = &quot;Army Heat Stress Illness Ambulatory Rates&quot;,
+      x = &quot;Hours WBGT &gt; 85 deg F (Centered/Scaled)&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw()</code></pre>
+<p><img src="mixed_models_files/figure-html/plot_scaled-1.png" width="672" /></p>
 <pre class="r"><code># Fitting ‘installation’ as a fixed effect in model M1 assumes 
 # the 11 ‘installation’ means are all independent of one another, 
 # and share a common residual variance
+
+mod0_pooled &lt;- lm(rate ~ value, data = data_hours_wbgt_gt85)
 
 mod1_fixed_effect &lt;- lm(rate ~ installation, data = data_hours_wbgt_gt85)
 
@@ -841,6 +871,75 @@ isSingular(mod7_random_intercept_slope_yr, tol = 1e-05)</code></pre>
 </div>
 <div id="model-evaluation" class="section level2">
 <h2>Model Evaluation</h2>
+<pre class="r"><code>sjPlot::tab_model(mod0_pooled)</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="3" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+rate
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Estimates
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+(Intercept)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+9.34
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+7.81 – 10.88
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+value
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+2.46
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.89 – 4.03
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>0.002</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="3">
+242
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+R<sup>2</sup> / R<sup>2</sup> adjusted
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.038 / 0.034
+</td>
+</tr>
+</table>
 <pre class="r"><code>sjPlot::tab_model(mod1_fixed_effect, mod2_random_intercept, p.val = &quot;kr&quot;, show.df = TRUE)</code></pre>
 <table style="border-collapse:collapse; border:none;">
 <tr>
@@ -2046,77 +2145,79 @@ Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
 <div id="plot-models" class="section level2">
 <h2>Plot models</h2>
 <pre class="r"><code># Mod 1
-plot(mod1_fixed_effect)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-1.png" width="672" /><img src="mixed_models_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
+plot(mod0_pooled)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-1.png" width="672" /><img src="mixed_models_files/figure-html/unnamed-chunk-3-2.png" width="672" /><img src="mixed_models_files/figure-html/unnamed-chunk-3-3.png" width="672" /><img src="mixed_models_files/figure-html/unnamed-chunk-3-4.png" width="672" /></p>
+<pre class="r"><code>plot(mod1_fixed_effect)</code></pre>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-5.png" width="672" /><img src="mixed_models_files/figure-html/unnamed-chunk-3-6.png" width="672" /></p>
 <pre><code>## hat values (leverages) are all = 0.04545455
 ##  and there are no factor predictors; no plot no. 5</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-3.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-7.png" width="672" /></p>
 <pre class="r"><code>par(mfrow = c(2,2))
 plot(mod1_fixed_effect, which = 1:4)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-4.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-8.png" width="672" /></p>
 <pre class="r"><code>par(mfrow = c(1,1))
 
 par(mfrow = c(2,2))
 plot(mod1a_fixed_effect, which = 1:4)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-5.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-9.png" width="672" /></p>
 <pre class="r"><code>par(mfrow = c(1,1))
 
 sjPlot::plot_model(mod1_fixed_effect)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-6.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-10.png" width="672" /></p>
 <pre class="r"><code>sjPlot::plot_model(mod1a_fixed_effect)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-7.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-11.png" width="672" /></p>
 <pre class="r"><code># Mod 2
 
 plot(mod2_random_intercept)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-8.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-12.png" width="672" /></p>
 <pre class="r"><code>par(mfrow = c(1,1))
 
 # Mod 3
 sjPlot::plot_model(mod3_random_intercept)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-9.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-13.png" width="672" /></p>
 <pre class="r"><code># Mod 4
 sjPlot::plot_model(mod4_random_intercept_slope)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-10.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-14.png" width="672" /></p>
 <pre class="r"><code># Mod 5
 sjPlot::plot_model(mod5_random_intercept_yr)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-11.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-15.png" width="672" /></p>
 <pre class="r"><code>#Mod 6
 sjPlot::plot_model(mod6_random_intercept_yr)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-12.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-16.png" width="672" /></p>
 <pre class="r"><code># Mod 7
 sjPlot::plot_model(mod7_random_intercept_slope_yr)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-13.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-3-17.png" width="672" /></p>
 </div>
 <div id="predicted-values" class="section level2">
 <h2>Predicted values</h2>
 <pre class="r"><code>sjPlot::plot_model(mod3_random_intercept, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
 <pre class="r"><code>sjPlot::plot_model(mod3_random_intercept, type = &quot;re&quot;, terms = &quot;value&quot;)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
 <pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-3.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-3.png" width="672" /></p>
 <pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope, type = &quot;re&quot;, terms = &quot;value&quot;)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-4.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-4.png" width="672" /></p>
 <pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope, type = &quot;resid&quot;, terms = &quot;value&quot;)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-5.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-5.png" width="672" /></p>
 <pre class="r"><code>sjPlot::plot_model(mod4_random_intercept_slope, type = &quot;diag&quot;, terms = &quot;value&quot;)</code></pre>
 <pre><code>## [[1]]</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-6.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-6.png" width="672" /></p>
 <pre><code>## 
 ## [[2]]
 ## [[2]]$installation</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-7.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-7.png" width="672" /></p>
 <pre><code>## 
 ## 
 ## [[3]]</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-8.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-8.png" width="672" /></p>
 <pre><code>## 
 ## [[4]]</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-9.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-9.png" width="672" /></p>
 <pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr, type = &quot;pred&quot;, terms = &quot;value&quot;)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-10.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-10.png" width="672" /></p>
 <pre class="r"><code>sjPlot::plot_model(mod6_random_intercept_yr, type = &quot;pred&quot;, terms = &quot;year&quot;)</code></pre>
-<p><img src="mixed_models_files/figure-html/unnamed-chunk-5-11.png" width="672" /></p>
+<p><img src="mixed_models_files/figure-html/unnamed-chunk-4-11.png" width="672" /></p>
 </div>
 
 
