@@ -21,7 +21,6 @@ library(purrr)
 library(furrr)
 library(table1)
 library(furniture)
-library(kableExtra)
 library(visdat)
 library(naniar)
 library(modelr)
@@ -34,6 +33,7 @@ library(reshape2)
 library(sjPlot)
 library(ggridges)
 library(readxl)
+
 ```
 
 Annual models from DMED data.
@@ -43,14 +43,14 @@ Scope:
 
   CONUS Army Installations:  
   
-    Fort Jackson, SC     
-    Fort Benning, GA    
+    Fort Jackson, SC (Basic Combat Training site)     
+    Fort Benning, GA (Basic Combat Training site)     
     Fort Bragg, NC  
     Fort Campbell, KY  
     Fort Polk, LA  
     Fort Hood, TX  
     Fort Stewart, GA  
-    Fort Leonard Wood, MO
+    Fort Leonard Wood, MO (Basic Combat Training site)  
     Fort Riley, KS  
     Fort Irwin, CA  
     Fort Bliss, TX  
@@ -58,10 +58,9 @@ Scope:
 Population: Active-duty Army service members  
 
 **Outcome**:
-  Ambulatory (Out-patient)  
-  Annual Rate of Heat Stress Illness (any type, primary diagnosis)  
-  1997 - 2018
-  
+  Ambulatory (Out-patient), 1997 - 2018 / Hospitalization (In-Patient), 1990-2018 / Reportable Events, 1995 - 2018  
+  Annual Count / Rate of Heat Stress Illness (any type, primary diagnosis)  
+
 **Exposure indices**:  
 *“Absolute” indices*  
   Annual mean (full-year): temperature, heat index, WBGT  
@@ -96,7 +95,8 @@ annual_tables_list
 index_heat_key <-
   readxl::read_excel("data/index_heat_key.xlsx")
 
-# write_rds(index_heat_key, "data/index_heat_key")
+index_heat_key
+# write_rds(index_heat_key, "data/index_heat_key.rds")
 
 ```
 
@@ -160,7 +160,7 @@ hsi_rates <-
 
 # Ambulatory HSI
 
-hsi_counts <-
+hsi_amb <-
   dmed_tidy %>% 
     filter(location %in% c("benning", "bragg", "campbell", "jackson",
                            "polk", "hood", "stewart", "leonardwood", 
@@ -181,7 +181,8 @@ hsi_counts <-
            location = dplyr::recode(location, riley = "fort_riley"),
            location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
            location = dplyr::recode(location, bliss = "fort_bliss"),
-           location = as.character(location))
+           location = as.character(location),
+           rate = (count / population) * 1000)
 
 
 # Hospitalization HSI
@@ -243,22 +244,18 @@ hsi_rme <-
 # Join with Annual heat; assign Basic Combat Training (BCT) category
 
 # Ambultatory
-joined_rate <-
+
+joined_hsi_amb <-
   index_long %>% 
-    left_join(hsi_rates, by = c("installation" = "location", "year" = "year")) %>% 
-    drop_na(rate)
-
-
-joined_rate_pop <-
-  joined_rate %>%
-    left_join(dmed_population, by = c("installation" = "location", "year"))
-
-joined_counts <-
-  index_long %>% 
-    left_join(hsi_counts, by = c("installation" = "location", "year" = "year")) %>% 
+    left_join(hsi_amb, by = c("installation" = "location", "year" = "year")) %>% 
       drop_na(count) %>% 
   mutate(bct = case_when(installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
-                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0)) 
+                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0))  %>%
+  ungroup() %>% 
+  dplyr::group_by(index) %>% 
+      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
+  ungroup() %>% 
+  na.omit()
 
 
 
@@ -275,7 +272,8 @@ joined_hsi_hosp <-
   ungroup() %>% 
   dplyr::group_by(index) %>% 
       mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
-  ungroup()
+  ungroup() %>% 
+  na.omit()
 
 # write_rds(joined_hsi_hosp, "data/joined_hsi_hosp.rds", compress = "none")
 
@@ -291,7 +289,8 @@ joined_hsi_rme <-
   ungroup() %>% 
   dplyr::group_by(index) %>% 
       mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
-  ungroup()
+  ungroup() %>% 
+  na.omit()
 
 # write_rds(joined_hsi_rme, "data/joined_hsi_rme.rds", compress = "none")
 
@@ -304,7 +303,7 @@ joined_hsi_rme <-
 
 ```{r plot_ambulatory_rates, cache = TRUE, warning = FALSE}
 
-joined_counts %>% 
+joined_hsi_amb %>% 
  ggplot(aes(x = year, y = population, color = installation, shape = installation)) +
     geom_line() +
     geom_point() +
@@ -317,7 +316,7 @@ joined_counts %>%
     theme_bw() 
 
 
-joined_counts %>% 
+joined_hsi_amb %>% 
  ggplot(aes(x = count)) +
     geom_histogram(color = "darkblue", fill = "lightblue") +
     facet_wrap(installation ~ .) +
@@ -337,7 +336,7 @@ Annual hours WBGT greater than 85 deg F
 ```{r}
 
 
-joined_counts %>% 
+joined_hsi_amb %>% 
   filter(index %in% "hours_wbgt_gt85") %>% 
   ggplot(aes(x = year, y = count)) +
     geom_point() +
@@ -350,7 +349,7 @@ joined_counts %>%
     theme_bw() 
 
 
-joined_counts %>% 
+joined_hsi_amb %>% 
   filter(index %in% "hours_wbgt_gt85") %>% 
   ggplot(aes(x = year, y = count, color = installation, shape = installation)) +
     geom_point() +
@@ -363,7 +362,7 @@ joined_counts %>%
     theme_bw() 
 
 
-joined_counts %>% 
+joined_hsi_amb %>% 
   filter(index %in% "hours_wbgt_gt85") %>% 
   ggplot(aes(x = value, y = count, color = installation, shape = installation)) +
     geom_point() +
@@ -376,9 +375,7 @@ joined_counts %>%
     scale_shape_manual(values = 0:11) +
     theme_bw() 
 
-
-
-joined_counts %>% 
+joined_hsi_amb %>% 
    filter(index %in% "hours_wbgt_gt85") %>% 
  ggplot(aes(x = value, y = fct_reorder(installation, value))) +
     ggridges::geom_density_ridges(
@@ -395,6 +392,7 @@ joined_counts %>%
     theme(legend.position = "none")
 ```
 
+## Observational Findings
 
 1. Ambulatory HSI rates increased over time.
 2. WBGT temperatures increased over time.
@@ -410,14 +408,13 @@ joined_counts %>%
 # Assign dataset; center and scale predictor value
 
 data_hours_wbgt_gt85_counts <-
-  joined_counts %>% 
-    filter(index %in% "hours_wbgt_gt85") %>% 
-    mutate(value_scaled = scale(value, center = TRUE, scale = TRUE))
+  joined_hsi_amb %>% 
+    filter(index %in% "hours_wbgt_gt85")
 
 
 ```
 
-```{r models}
+```{r models_initial, eval = FALSE}
 # Fitting ‘installation’ as a fixed effect in model M1 assumes 
 # the 11 ‘installation’ means are all independent of one another, 
 # and share a common residual variance
@@ -438,112 +435,68 @@ random_intercept <- glmer(count ~ value_scaled + (1|installation), data = data_h
 # Fitting random intercepts and slopes allows the slope of a 
 # predictor to vary based on a separate grouping variable.
 
-
-
 poisson_mod <- glm(count ~ value_scaled + installation, data = data_hours_wbgt_gt85_counts, family = poisson)
 sjPlot::tab_model(poisson_mod, p.val = "kr", show.df = TRUE)
 
 poisson_mod_offset <- glm(count ~ value_scaled + installation, data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
 sjPlot::tab_model(poisson_mod, poisson_mod_offset, p.val = "kr", show.df = TRUE)
 
+random_intercept_slope_no_offset <- glmer(count ~ value_scaled + (1 + value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson)
+summary(random_intercept_slope_no_offset)
 
+
+```
+
+## Poisson with population offset, mixed effects (random intercepts and slopes)
+
+```{r models_selected}
 
 random_intercept_slope <- glmer(count ~ value_scaled + (1 + value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
-
-random_intercept_slope_bct <- glmer(count ~ value_scaled + bct + (1 + value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
-
-
 
 summary(random_intercept_slope)
 sjPlot::tab_model(random_intercept_slope, p.val = "kr", show.df = TRUE)
 
 
-random_intercept_slope_no_offset <- glmer(count ~ value_scaled + (1 + value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson)
+random_intercept_slope_bct <- glmer(count ~ value_scaled + bct + (1 + value_scaled|installation), data = data_hours_wbgt_gt85_counts, family = poisson, offset = log(population))
 
-
-
-summary(random_intercept_slope_no_offset)
-sjPlot::tab_model(random_intercept_slope_no_offset, p.val = "kr", show.df = TRUE)
-
-```
-
-
-
-
-## Model Evaluation
-
-```{r}
-
-sjPlot::tab_model(random_intercept_slope, random_intercept_slope_bct, p.val = "kr", show.df = TRUE)
-
-sjPlot::tab_model(random_intercept_slope_no_offset, p.val = "kr", show.df = TRUE)
-
-broom::glance(random_intercept_slope)
+summary(random_intercept_slope_bct)
 broom::glance(random_intercept_slope_bct)
-broom::tidy(random_intercept_slope)
 broom::tidy(random_intercept_slope_bct)
-
+sjPlot::tab_model(random_intercept_slope_bct, p.val = "kr", show.df = TRUE)
 ```
 
 ## Plot models
 
-```{r}
-# Mod 1
-plot(random_intercept_slope)
-
-sjPlot::plot_model(random_intercept_slope)
-
-sjPlot::plot_model(random_intercept_slope, type = "pred", terms = "value_scaled")
-sjPlot::plot_model(random_intercept_slope, type = "re", terms = "value_scaled")
-sjPlot::plot_model(random_intercept_slope, type = "resid", terms = "value_scaled")
-sjPlot::plot_model(random_intercept_slope, type = "diag", terms = "value_scaled")
-
-
-sjPlot::plot_model(random_intercept_slope_no_offset)
-sjPlot::plot_model(random_intercept_slope_no_offset, type = "pred", terms = "value_scaled")
-sjPlot::plot_model(random_intercept_slope_no_offset, type = "re", terms = "value_scaled")
-
-sjPlot::plot_model(poisson_mod)
-sjPlot::plot_model(poisson_mod_offset)
-
-
+```{r model_plots}
 
 sjPlot::plot_model(random_intercept_slope_bct)
 sjPlot::plot_model(random_intercept_slope_bct, type = "pred", terms = "value_scaled")
 sjPlot::plot_model(random_intercept_slope_bct, type = "re", terms = "value_scaled")
+sjPlot::plot_model(random_intercept_slope_bct, type = "resid", terms = "value_scaled")
+sjPlot::plot_model(random_intercept_slope_bct, type = "diag", terms = "value_scaled")
+
+```
+
+## Table of index means and standard deviations (pooled)
+For interpreting centered and scaled estimates.
+
+```{r index_mean_sd}
+index_mean_sd <- 
+  joined_hsi_amb %>% 
+    group_by(index) %>% 
+    summarise(
+      mean = mean(value),
+      sd = sd(value)
+    )
+
+index_mean_sd
+
 ```
 
 
 ## Multiple Models Function
 
-
-```{r glmer_function}
-
-# center and scale by each index (pooled over all installations)  
-
-joined_counts_scaled <-
-  joined_counts %>% 
-    ungroup() %>% 
-    dplyr::group_by(index) %>% 
-      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
-    ungroup()
-
-
-
-gg_miss_var(joined_counts_scaled)
-gg_miss_var(joined_counts_scaled,
-            facet = index)
-
-# missing values for indices gt 125 deg
-# omit observations with missing records
-
-joined_counts_scaled <-
-  joined_counts_scaled %>% 
-  na.omit()
-
-joined_counts_scaled
-
-#write_rds(joined_counts_scaled, "data/joined_counts_scaled.rds", compress = "none")
+```{r glmer_function, warning = FALSE}
 
 
 random_slope_bct_function = function(df) {
@@ -551,9 +504,10 @@ random_slope_bct_function = function(df) {
     glmer(count ~ value_scaled + bct + (1 + value_scaled|installation), data = ., family = poisson, offset = log(population))
 }
 
+# Ambulatory nested models
 
 random_slope_bct_nest <-
-  joined_counts_scaled %>%
+  joined_hsi_amb %>%
     dplyr::select(index, everything()) %>% 
       nest(data = installation:value_scaled) %>% 
       mutate(glmer_models = map(data, random_slope_bct_function),
@@ -585,12 +539,15 @@ random_slope_bct_nest <-
 
 # Model summaries
 
+# Arranged by magnitude of index value estimate
+
 random_slope_bct_nest  %>% 
   unnest(tidy, .drop = TRUE) %>% 
   dplyr::select(index, term:group) %>%
   filter(term %in% "value_scaled") %>% 
   arrange(desc(estimate))
 
+# Arranged by magnitude of "bct" estimate
 
 random_slope_bct_nest  %>% 
   unnest(tidy, .drop = TRUE) %>% 
@@ -599,6 +556,7 @@ random_slope_bct_nest  %>%
   arrange(desc(estimate))
 
 
+# Arranged by AIC (lower is better)
 
 random_slope_bct_nest  %>% 
   unnest(glance, .drop = TRUE) %>% 
@@ -609,10 +567,44 @@ random_slope_bct_nest  %>%
 
 ```
 
-```{r}
-random_slope_bct_nest %>% 
-  pull(glmer_models) %>% 
-  map(sjPlot::plot_model)
+## Plot estimates of all nested models
+
+```{r plot_all_models}
+
+#random_slope_bct_nest %>% 
+#  pull(glmer_models) %>% 
+#  map(sjPlot::plot_model)
+#  
+#
+
+# Plot 10
+
+models_10_names <-
+  random_slope_bct_nest  %>% 
+      unnest(tidy, .drop = TRUE) %>% 
+      dplyr::select(index, term:group) %>%
+      filter(term %in% "value_scaled") %>% 
+      arrange(desc(estimate)) %>% 
+      slice(1:10) %>%
+      pull(index)
+           
+models_10 <-
+  random_slope_bct_nest %>% 
+  filter(index %in% models_10_names) %>% 
+  pull(glmer_models)
+
+map2(.x = models_10, .y = models_10_names, .f = ~ sjPlot::plot_model(.x, title = .y))  
+map2(.x = models_10, .y = models_10_names, .f = ~ sjPlot::plot_model(.x, type = "pred", terms = "value_scaled", title = .y))
+map2(.x = models_10, .y = models_10_names, .f = ~ sjPlot::plot_model(.x, type = "re", terms = "value_scaled", title = .y))
+
+
+  
+index_mean_sd %>% 
+  filter(index %in% models_10_names) %>% 
+  knitr::kable(digits = 3) %>% 
+  kableExtra::kable_styling()
+  
+  
 ```
 
 
