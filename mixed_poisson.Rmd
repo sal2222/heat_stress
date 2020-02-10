@@ -567,6 +567,66 @@ random_slope_bct_nest  %>%
 
 ```
 
+
+
+```{r}
+# Ambulatory estimates plot
+
+random_slope_bct_nest  %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>%
+  filter(term %in% "value_scaled") %>%
+  mutate(index = fct_reorder(index, estimate)) %>%
+  ggplot() +
+    geom_point(aes(x = estimate, y = index)) +
+    geom_errorbarh(
+      aes(y = index,
+          xmin = estimate - 1.96 * std.error,
+          xmax = estimate + 1.96 * std.error)) +
+     geom_vline(aes(xintercept = 0), colour = "blue") +
+     theme_bw() +
+     theme(axis.text.y = element_text(size = rel(0.75))) +
+      ggtitle("Regression coefficients - Ambulatory, value-scaled")
+   
+
+      
+ random_slope_bct_nest  %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>%
+  filter(term %in% "value_scaled") %>%
+  mutate(index = fct_reorder(index, estimate)) %>% 
+  ggplot() +
+    geom_point(aes(x = exp(estimate), y = index)) +
+    geom_errorbarh(
+      aes(y = index,
+          xmin = exp(estimate - 1.96 * std.error),
+          xmax = exp(estimate + 1.96 * std.error))) +
+     geom_vline(aes(xintercept = 1), colour = "blue") +
+     theme_bw() +
+     theme(axis.text.y = element_text(size = rel(0.75))) +
+     ggtitle("Rate Ratio - - Ambulatory, value-scaled")
+
+
+
+# p-value boxplot
+random_slope_bct_nest  %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>%
+  filter(term %in% "value_scaled") %>% 
+  ggplot(aes(x = "", y = p.value)) +
+        geom_boxplot() +
+        geom_hline(aes(yintercept = 0.05), colour = "blue") +
+        geom_rug() +
+        coord_flip() +
+        ggtitle("Boxplot of value-scaled p-values") +
+        theme_bw()
+
+```
+
+
+
+
+
 ## Plot estimates of all nested models
 
 ```{r plot_all_models}
@@ -600,10 +660,29 @@ map2(.x = models_10, .y = models_10_names, .f = ~ sjPlot::plot_model(.x, type = 
 
   
 index_mean_sd %>% 
-  filter(index %in% models_10_names) %>% 
+  filter(index %in% "models_10_names") %>% 
   knitr::kable(digits = 3) %>% 
   kableExtra::kable_styling()
+
+
+
+ random_slope_bct_nest %>% 
+  filter(index %in% "hours_wbgt_gt82") %>% 
+  pull(glmer_models) %>%  
+  sjPlot::tab_model(p.val = "kr", show.df = TRUE)
+
+ 
+ random_slope_bct_nest %>% 
+  filter(index %in% "hours_wbgt_gt82") %>% 
+  pull(glmer_models) %>%   
+summary()
+ 
+ 
+broom::glance(random_intercept_slope_bct)
+broom::tidy(random_intercept_slope_bct)
+
   
+
   
 ```
 

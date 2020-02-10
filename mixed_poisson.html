@@ -1431,6 +1431,53 @@ random_slope_bct_nest  %&gt;%
 ##  9 hours_hi_gt80                   1 -6430. 12872. 12893.   11228.         236
 ## 10 days_wbgt_max_gt2sd             1 -6455. 12921. 12942.   11272.         236
 ## # ... with 73 more rows</code></pre>
+<pre class="r"><code># Ambulatory estimates plot
+
+random_slope_bct_nest  %&gt;% 
+  unnest(tidy, .drop = TRUE) %&gt;% 
+  dplyr::select(index, term:group) %&gt;%
+  filter(term %in% &quot;value_scaled&quot;) %&gt;%
+  mutate(index = fct_reorder(index, estimate)) %&gt;%
+  ggplot() +
+    geom_point(aes(x = estimate, y = index)) +
+    geom_errorbarh(
+      aes(y = index,
+          xmin = estimate - 1.96 * std.error,
+          xmax = estimate + 1.96 * std.error)) +
+     geom_vline(aes(xintercept = 0), colour = &quot;blue&quot;) +
+     theme_bw() +
+     theme(axis.text.y = element_text(size = rel(0.75))) +
+      ggtitle(&quot;Regression coefficients - Ambulatory, value-scaled&quot;)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code> random_slope_bct_nest  %&gt;% 
+  unnest(tidy, .drop = TRUE) %&gt;% 
+  dplyr::select(index, term:group) %&gt;%
+  filter(term %in% &quot;value_scaled&quot;) %&gt;%
+  mutate(index = fct_reorder(index, estimate)) %&gt;% 
+  ggplot() +
+    geom_point(aes(x = exp(estimate), y = index)) +
+    geom_errorbarh(
+      aes(y = index,
+          xmin = exp(estimate - 1.96 * std.error),
+          xmax = exp(estimate + 1.96 * std.error))) +
+     geom_vline(aes(xintercept = 1), colour = &quot;blue&quot;) +
+     theme_bw() +
+     theme(axis.text.y = element_text(size = rel(0.75))) +
+     ggtitle(&quot;Rate Ratio - - Ambulatory, value-scaled&quot;)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
+<pre class="r"><code># p-value boxplot
+random_slope_bct_nest  %&gt;% 
+  unnest(tidy, .drop = TRUE) %&gt;% 
+  dplyr::select(index, term:group) %&gt;%
+  filter(term %in% &quot;value_scaled&quot;) %&gt;% 
+  ggplot(aes(x = &quot;&quot;, y = p.value)) +
+        geom_boxplot() +
+        geom_hline(aes(yintercept = 0.05), colour = &quot;blue&quot;) +
+        geom_rug() +
+        coord_flip() +
+        ggtitle(&quot;Boxplot of value-scaled p-values&quot;) +
+        theme_bw()</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-2-3.png" width="672" /></p>
 </div>
 <div id="plot-estimates-of-all-nested-models" class="section level2">
 <h2>Plot estimates of all nested models</h2>
@@ -1547,7 +1594,7 @@ map2(.x = models_10, .y = models_10_names, .f = ~ sjPlot::plot_model(.x, title =
 ## [[10]]</code></pre>
 <p><img src="mixed_poisson_files/figure-html/plot_all_models-30.png" width="672" /></p>
 <pre class="r"><code>index_mean_sd %&gt;% 
-  filter(index %in% models_10_names) %&gt;% 
+  filter(index %in% &quot;models_10_names&quot;) %&gt;% 
   knitr::kable(digits = 3) %&gt;% 
   kableExtra::kable_styling()</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
@@ -1566,117 +1613,168 @@ sd
 </thead>
 <tbody>
 <tr>
-<td style="text-align:left;">
-days_hi_gt80
-</td>
-<td style="text-align:right;">
-125.322
-</td>
-<td style="text-align:right;">
-46.345
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-days_wbgt_gt82
-</td>
-<td style="text-align:right;">
-62.393
-</td>
-<td style="text-align:right;">
-40.198
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-heat_index_mean
-</td>
-<td style="text-align:right;">
-59.357
-</td>
-<td style="text-align:right;">
-5.961
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hours_hi_gt80
-</td>
-<td style="text-align:right;">
-1483.756
-</td>
-<td style="text-align:right;">
-764.248
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hours_hi_gt90
-</td>
-<td style="text-align:right;">
-491.434
-</td>
-<td style="text-align:right;">
-391.567
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hours_wbgt_gt82
-</td>
-<td style="text-align:right;">
-418.810
-</td>
-<td style="text-align:right;">
-342.693
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hours_wbgt_gt85
-</td>
-<td style="text-align:right;">
-194.095
-</td>
-<td style="text-align:right;">
-187.493
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-hours_wbgt_gt90
-</td>
-<td style="text-align:right;">
-20.521
-</td>
-<td style="text-align:right;">
-27.828
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-tmp_f_mean
-</td>
-<td style="text-align:right;">
-60.022
-</td>
-<td style="text-align:right;">
-5.840
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-wbgt_f_mean
-</td>
-<td style="text-align:right;">
-55.561
-</td>
-<td style="text-align:right;">
-5.139
-</td>
 </tr>
 </tbody>
 </table>
+<pre class="r"><code> random_slope_bct_nest %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt82&quot;) %&gt;% 
+  pull(glmer_models) %&gt;%  
+  sjPlot::tab_model(p.val = &quot;kr&quot;, show.df = TRUE)</code></pre>
+<pre><code>## Warning: mu of 0.0 is too close to zero, estimate of random effect variances may be unreliable.</code></pre>
+<table style="border-collapse:collapse; border:none;">
+<tr>
+<th style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm;  text-align:left; ">
+ 
+</th>
+<th colspan="3" style="border-top: double; text-align:center; font-style:normal; font-weight:bold; padding:0.2cm; ">
+count
+</th>
+</tr>
+<tr>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  text-align:left; ">
+Predictors
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+Incidence Rate Ratios
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+CI
+</td>
+<td style=" text-align:center; border-bottom:1px solid; font-style:italic; font-weight:normal;  ">
+p
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+(Intercept)
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.02
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.00 – 0.07
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>&lt;0.001
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+value_scaled
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+4.11
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.26 – 13.40
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+<strong>0.019</strong>
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; ">
+bct
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+1.14
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.39 – 3.30
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:center;  ">
+0.810
+</td>
+</tr>
+<tr>
+<td colspan="4" style="font-weight:bold; text-align:left; padding-top:.8em;">
+Random Effects
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+σ<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+5.85
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>00</sub> <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+6.09
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+τ<sub>11</sub> <sub>installation.value_scaled</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+3.93
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ρ<sub>01</sub> <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.96
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+ICC
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.63
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+N <sub>installation</sub>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+11
+</td>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm; border-top:1px solid;">
+Observations
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left; border-top:1px solid;" colspan="3">
+242
+</td>
+</tr>
+<tr>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; text-align:left; padding-top:0.1cm; padding-bottom:0.1cm;">
+Marginal R<sup>2</sup> / Conditional R<sup>2</sup>
+</td>
+<td style=" padding:0.2cm; text-align:left; vertical-align:top; padding-top:0.1cm; padding-bottom:0.1cm; text-align:left;" colspan="3">
+0.113 / 0.673
+</td>
+</tr>
+</table>
+<pre class="r"><code> random_slope_bct_nest %&gt;% 
+  filter(index %in% &quot;hours_wbgt_gt82&quot;) %&gt;% 
+  pull(glmer_models) %&gt;%   
+summary()</code></pre>
+<pre><code>##      Length Class    Mode
+## [1,] 1      glmerMod S4</code></pre>
+<pre class="r"><code>broom::glance(random_intercept_slope_bct)</code></pre>
+<pre><code>## # A tibble: 1 x 6
+##   sigma logLik    AIC    BIC deviance df.residual
+##   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;       &lt;int&gt;
+## 1     1 -6656. 13324. 13345.   11683.         236</code></pre>
+<pre class="r"><code>broom::tidy(random_intercept_slope_bct)</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   term                          estimate std.error statistic   p.value group    
+##   &lt;chr&gt;                            &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;    
+## 1 (Intercept)                     -5.07      0.288    -17.6   1.62e-69 fixed    
+## 2 value_scaled                     0.593     0.183      3.23  1.23e- 3 fixed    
+## 3 bct                              0.741     0.418      1.77  7.62e- 2 fixed    
+## 4 sd_(Intercept).installation      0.838    NA         NA    NA        installa~
+## 5 sd_value_scaled.installation     0.540    NA         NA    NA        installa~
+## 6 cor_(Intercept).value_scaled~    0.702    NA         NA    NA        installa~</code></pre>
 </div>
 
 

@@ -290,6 +290,18 @@ dmed_bases %>%
            axis.title.y = element_blank()) 
 
 
+select_bases %>% 
+ ggplot() +
+     geom_sf(data = us_states, alpha = 0.5) +
+     geom_sf() +
+     stat_sf_coordinates(color = "blue", size = 3) +
+     geom_sf_text(aes(label = site_name), size = 3, nudge_y = -0.5, fontface = "bold") +
+     theme_bw() +
+     theme(axis.text.x = element_text(size = rel(1)),
+           axis.text.y = element_text(size = rel(1)),
+           axis.title.x = element_blank(),
+           axis.title.y = element_blank()) 
+
   
 ```
 
