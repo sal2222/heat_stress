@@ -44,8 +44,10 @@ left:
       icon: fa-medkit  
       menu: 
         - text: "Annual"
-        - text: "Annual cases"
+        - text: "Annual HSI cases"
           href: dmed_summary.html
+        - text: "Annual encounters: All ICD codes"
+          href: dmed_full_icd.html  
         - text: "Daily"
         - text: "Daily cases"
     - text: "Models"

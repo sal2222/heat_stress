@@ -1,0 +1,208 @@
+---
+title: "dmed_full_icd"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/slewa/Projects/heat_stress")
+
+library(tidyverse)
+library(readxl)
+library(lubridate)
+library(viridis)
+library(knitr)
+library(kableExtra)
+library(zoo)
+library(purrr)
+library(furrr)
+library(table1)
+library(furniture)
+library(kableExtra)
+library(visdat)
+library(naniar)
+library(modelr)
+library(lme4)
+library(ICC) 
+library(dotwhisker)
+library(broom)
+library(car)
+library(reshape2)
+```
+
+Annual encounter trends (All ICD codes) from DMED data.
+
+  CONUS Army Installations:  
+  
+    Fort Jackson, SC     
+    Fort Benning, GA    
+    Fort Bragg, NC  
+    Fort Campbell, KY  
+    Fort Polk, LA  
+    Fort Hood, TX  
+    Fort Stewart, GA  
+    Fort Leonard Wood, MO
+    Fort Riley, KS  
+    Fort Irwin, CA  
+    Fort Bliss, TX  
+      
+Population: Active-duty Army service members  
+
+
+```{r read_data}
+
+# Outcomes
+dmed_tidy_full <- 
+  read_rds("data/dmed_tidy_full.rds")
+
+dmed_tidy_full
+
+```
+
+## Table of HSI Ambulatory Rates
+Ambulatory rates (per 1,000 persons per year) of any heat stress illness type (Army personnel)
+```{r rates_table}
+
+dmed_tidy_full <- 
+  read_rds("data/dmed_tidy_full.rds")
+
+dmed_tidy_full %>% 
+  filter(type %in% "Ambulatory Data",
+         category %in% "Total") %>% 
+  dplyr::select(location, year, rate) %>%
+  group_by(location) %>%
+  pivot_wider(., names_from = year, values_from = rate) %>% 
+   knitr::kable(digits = 2) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(width = "700px") 
+  
+dmed_tidy_full %>% 
+  filter(type %in% "Hospitalizations",
+         category %in% "Total") %>% 
+  dplyr::select(location, year, rate) %>%
+  group_by(location) %>%
+  pivot_wider(., names_from = year, values_from = rate) %>% 
+   knitr::kable(digits = 2) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(width = "700px") 
+
+dmed_tidy_full %>% 
+  filter(type %in% "Reportable Events",
+         category %in% "Total") %>% 
+  dplyr::select(location, year, rate) %>%
+  group_by(location) %>%
+  pivot_wider(., names_from = year, values_from = rate) %>% 
+   knitr::kable(digits = 2) %>% 
+  kable_styling(bootstrap_options = "striped", font_size = 10) %>% 
+  scroll_box(width = "700px") 
+```
+
+
+## Plots 
+
+```{r plot_ambulatory_rates, cache = TRUE, warning = FALSE}
+dmed_tidy_full %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         category == "Total") %>% 
+ ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Ambulatory Rates - all ICD codes",
+      x = "Year",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+# By gender
+dmed_tidy_full %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Ambulatory Data",
+         !category == "Total") %>% 
+ ggplot(aes(x = year, y = rate, color = category, shape = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Ambulatory Rates - all ICD codes",
+      x = "Year",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+
+
+dmed_tidy_full %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Hospitalizations",
+         category == "Total") %>% 
+ ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Hospitalization Rates - all ICD codes",
+      x = "Year",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+
+
+dmed_tidy_full %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Reportable Events",
+         category == "Total") %>% 
+ ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Reportable Event Rates - all ICD codes",
+      x = "Year",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+
+```
+
+
+```{r join_tables}
+
+
+all_icd <-
+  dmed_tidy_full %>% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
+           location = as.character(location))
+
+#write_rds(all_icd, "data/all_icd.rds")
+
+
+```
+
+

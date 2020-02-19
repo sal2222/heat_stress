@@ -98,6 +98,12 @@ index_heat_key <-
 index_heat_key
 # write_rds(index_heat_key, "data/index_heat_key.rds")
 
+
+# Medical encounters - all ICD codes
+
+all_icd <-
+  read_rds("data/all_icd.rds")
+
 ```
 
 
@@ -604,7 +610,7 @@ random_slope_bct_nest  %>%
      geom_vline(aes(xintercept = 1), colour = "blue") +
      theme_bw() +
      theme(axis.text.y = element_text(size = rel(0.75))) +
-     ggtitle("Rate Ratio - - Ambulatory, value-scaled")
+     ggtitle("Rate Ratio - Ambulatory, value-scaled")
 
 
 
@@ -686,4 +692,76 @@ broom::tidy(random_intercept_slope_bct)
   
 ```
 
+## Hospitalization Nested
+```{r}
+
+# Hospitalization nested models
+
+hosp_random_slope_bct_nest <-
+  joined_hsi_hosp %>%
+  na.omit() %>% 
+    dplyr::select(index, everything()) %>% 
+      nest(data = installation:value_scaled) %>% 
+      mutate(glmer_models = map(data, random_slope_bct_function),
+             glance = map(glmer_models, broom::glance),
+             tidy =   map(glmer_models, broom::tidy),
+             augment = map(glmer_models, broom::augment))
+
+# Check singular fit models
+
+map(hosp_random_slope_bct_nest$glmer_models, isSingular) %>% 
+  unlist() %>% 
+  tibble::enframe(name = NULL) %>% 
+  mutate(index = hosp_random_slope_bct_nest$index) %>% 
+  filter(value %in% "TRUE")
+
+# Remove `days_tmp_gt85pct_may_sep`, `days_tmp_gt95pct_may_sep` , `days_wbgt_gt95pct_may_sep`: singular fit model
+
+hosp_random_slope_bct_nest <-
+  hosp_random_slope_bct_nest %>% 
+  filter(!index %in% c("days_wbgt_gt95pct_may_sep", "days_tmp_gt85pct_may_sep", "days_tmp_gt95pct_may_sep"))
+
+#write_rds(hosp_random_slope_bct_nest, "data/hosp_random_slope_bct_nest.rds", compress = "none")
+```
+
+
+
+```{r}
+hosp_random_slope_bct_nest  %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>%
+  filter(term %in% "value_scaled") %>%
+  mutate(index = fct_reorder(index, estimate)) %>%
+  ggplot() +
+    geom_point(aes(x = estimate, y = index)) +
+    geom_errorbarh(
+      aes(y = index,
+          xmin = estimate - 1.96 * std.error,
+          xmax = estimate + 1.96 * std.error)) +
+     geom_vline(aes(xintercept = 0), colour = "blue") +
+     theme_bw() +
+     theme(axis.text.y = element_text(size = rel(0.75))) +
+      ggtitle("Regression coefficients - Hospitalization, value-scaled")
+   
+
+      
+ hosp_random_slope_bct_nest  %>% 
+  unnest(tidy, .drop = TRUE) %>% 
+  dplyr::select(index, term:group) %>%
+  filter(term %in% "value_scaled") %>%
+  mutate(index = fct_reorder(index, estimate)) %>% 
+  ggplot() +
+    geom_point(aes(x = exp(estimate), y = index)) +
+    geom_errorbarh(
+      aes(y = index,
+          xmin = exp(estimate - 1.96 * std.error),
+          xmax = exp(estimate + 1.96 * std.error))) +
+     geom_vline(aes(xintercept = 1), colour = "blue") +
+     theme_bw() +
+     theme(axis.text.y = element_text(size = rel(0.75))) +
+     ggtitle("Rate Ratio - Hospitalization, value-scaled")
+
+
+ 
+```
 

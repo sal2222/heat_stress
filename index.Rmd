@@ -75,7 +75,9 @@ Do we observe effect estimate changes at defined Heat Category boundaries? Are t
 
 ## Heat Stress Outcomes
 
-- DMED Summary (annual) [[here]](dmed_summary.html)  
+- DMED HSI Summary (annual) [[here]](dmed_summary.html) 
+
+- DMED encounters (all diseases and injuries) [[here]](dmed_full_icd.html)
 
 ## Models
 

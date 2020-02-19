@@ -521,6 +521,10 @@ div.tocify {
 dmed_file_list &lt;- list.files(path = &quot;D:/dmed/dmed_tables&quot;, pattern = &quot;^[0-9].*\\.(xlsx)$&quot;) %&gt;% 
   paste0(&quot;D:/dmed/dmed_tables/&quot;, .)
 
+#dmed_file_list &lt;- list.files(path = &quot;D:/dmed/dmed_full&quot;, pattern = &quot;^[0-9].*\\.(xlsx)$&quot;) %&gt;% 
+#  paste0(&quot;D:/dmed/dmed_full/&quot;, .)
+
+
 dmed_file_list 
 dmed_file %&gt;% excel_sheets() %&gt;% set_names()</code></pre>
 <div id="functions-to-read-excel-tables" class="section level2">
@@ -1099,6 +1103,72 @@ dmed_tidy &lt;-
   na.omit()
 
 # write_rds(dmed_tidy, path = &quot;data/dmed_tidy.rds&quot;)</code></pre>
+</div>
+<div id="map-read-function-over-file-list---full-icd" class="section level2">
+<h2>Map read function over file list - full ICD</h2>
+<p>ICD 9: 001-V99 All diseases and injuries ICD 10: A00-Z99 All diseases and injuries</p>
+<pre class="r"><code># ICD 9, from 2006
+
+dmed_files_icd9_from2006 &lt;-
+  dmed_file_list %&gt;%
+  as_tibble() %&gt;% 
+  rename(file_name = value) %&gt;%
+  mutate(cut = str_sub(file_name, end = -6L),  
+         year = str_sub(cut, start = -4L)) %&gt;% 
+  filter(year %in% &quot;2006&quot;) %&gt;% 
+  dplyr::select(file_name) %&gt;% 
+  as_vector()
+  
+ 
+icd9_from2006_df &lt;- furrr::future_map_dfr(dmed_files_icd9_from2006, read_icd9_from2006, .progress = TRUE) 
+
+
+#####################################################
+
+dmed_files_icd9_from1990 &lt;-
+  dmed_file_list %&gt;%
+    as_tibble() %&gt;% 
+    rename(file_name = value) %&gt;%
+    mutate(cut = str_sub(file_name, end = -6L),  
+           year = str_sub(cut, start = -4L)) %&gt;% 
+    filter(year %in% &quot;1990&quot;) %&gt;% 
+    dplyr::select(file_name) %&gt;% 
+    as_vector()
+
+
+icd9_from1990_df &lt;- furrr::future_map_dfr(dmed_files_icd9_from1990, read_icd9_from1990, .progress = TRUE) 
+#########################################################
+
+#ICD 10
+
+dmed_files_icd10_from2016 &lt;-
+    dmed_file_list %&gt;%
+    as_tibble() %&gt;% 
+    rename(file_name = value) %&gt;%
+    mutate(cut = str_sub(file_name, end = -6L),  
+           year = str_sub(cut, start = -4L)) %&gt;% 
+    filter(year %in% &quot;2016&quot;) %&gt;% 
+    dplyr::select(file_name) %&gt;% 
+    as_vector()
+
+
+icd10_from2016_df &lt;- furrr::future_map_dfr(dmed_files_icd10_from2016, read_icd10_from2016, .progress = TRUE) 
+
+#############################################################
+
+
+dmed_tidy_full &lt;-
+  rbind(icd9_from1990_df, icd9_from2006_df, icd10_from2016_df) %&gt;% 
+    mutate(type = as_factor(type),
+           category = as_factor(category),
+           location = as_factor(location),
+           year = as.integer(year),
+           strata = as_factor(strata),
+           hsi = as_factor(hsi)) %&gt;% 
+    na.omit()
+
+
+# saveRDS(dmed_tidy_full, file = &quot;data/dmed_tidy_full.rds&quot;)</code></pre>
 </div>
 
 

@@ -1,0 +1,3650 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>dmed_full_icd</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<link rel="shortcut icon" href="favicon.ico">
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Heat Stress Research</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
+    <li>
+      <a href="shapefiles.html">Installation Shapefiles</a>
+    </li>
+    <li>
+      <a href="nldas_wget.html">Download NLDAS-2 Data</a>
+    </li>
+    <li>
+      <a href="extract_cells.html">Extract from NLDAS netCDF Files</a>
+    </li>
+    <li>
+      <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
+    </li>
+    <li>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-thermometer"></span>
+     
+    Meteorology
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
+    </li>
+    <li>
+      <a href="nldas_fable.html">Time series (Fable)</a>
+    </li>
+    <li>
+      <a href="nldas_averaged.html">Aggregate over calendar periods</a>
+    </li>
+    <li>
+      <a href="climatology.html">Climatologies / Anomalies</a>
+    </li>
+    <li>
+      <a href="annual_tables.html">Annual index tables</a>
+    </li>
+    <li>
+      <a href="af_weather.html">Air Force weather station data</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_summary.html">Annual cases</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_models.html">Annual models - Outpatient HSI</a>
+    </li>
+    <li>
+      <a href="dmed_models_hospitalization.html">Annual models - Inpatient HSI</a>
+    </li>
+    <li>
+      <a href="mixed_models.html">Mixed models</a>
+    </li>
+    <li>
+      <a href="mixed_poisson.html">Mixed models - Poisson</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="daily_models.html">Overview of daily models</a>
+    </li>
+    <li>
+      <a href="case_crossover.html">Case-crossover models</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-desktop"></span>
+     
+    Shiny - interactive
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="https://sal2222.shinyapps.io/annual_heat/">Annual HSI Shiny</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:sal2222@cumc.columbia.edu">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/sal2222/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">dmed_full_icd</h1>
+
+</div>
+
+
+<p>Annual encounter trends (All ICD codes) from DMED data.</p>
+<p>CONUS Army Installations:</p>
+<pre><code>Fort Jackson, SC     
+Fort Benning, GA    
+Fort Bragg, NC  
+Fort Campbell, KY  
+Fort Polk, LA  
+Fort Hood, TX  
+Fort Stewart, GA  
+Fort Leonard Wood, MO
+Fort Riley, KS  
+Fort Irwin, CA  
+Fort Bliss, TX  
+  </code></pre>
+<p>Population: Active-duty Army service members</p>
+<pre class="r"><code># Outcomes
+dmed_tidy_full &lt;- 
+  read_rds(&quot;data/dmed_tidy_full.rds&quot;)
+
+dmed_tidy_full</code></pre>
+<pre><code>## # A tibble: 2,313 x 9
+##    type             category  year count population  rate location strata hsi  
+##    &lt;fct&gt;            &lt;fct&gt;    &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;  &lt;fct&gt;
+##  1 Hospitalizations Male      1990   859     17397.  49.4 benning  gender full 
+##  2 Hospitalizations Female    1990   163      1209. 135.  benning  gender full 
+##  3 Hospitalizations Total     1990  1022     18606.  54.9 benning  gender full 
+##  4 Hospitalizations Male      1991  2048     14962. 137.  benning  gender full 
+##  5 Hospitalizations Female    1991   525      1106. 475.  benning  gender full 
+##  6 Hospitalizations Total     1991  2573     16067. 160.  benning  gender full 
+##  7 Hospitalizations Male      1992  2175     17498. 124.  benning  gender full 
+##  8 Hospitalizations Female    1992   443      1186. 374.  benning  gender full 
+##  9 Hospitalizations Total     1992  2618     18683. 140.  benning  gender full 
+## 10 Hospitalizations Male      1993  2431     17794. 137.  benning  gender full 
+## # ... with 2,303 more rows</code></pre>
+<div id="table-of-hsi-ambulatory-rates" class="section level2">
+<h2>Table of HSI Ambulatory Rates</h2>
+<p>Ambulatory rates (per 1,000 persons per year) of any heat stress illness type (Army personnel)</p>
+<pre class="r"><code>dmed_tidy_full &lt;- 
+  read_rds(&quot;data/dmed_tidy_full.rds&quot;)
+
+dmed_tidy_full %&gt;% 
+  filter(type %in% &quot;Ambulatory Data&quot;,
+         category %in% &quot;Total&quot;) %&gt;% 
+  dplyr::select(location, year, rate) %&gt;%
+  group_by(location) %&gt;%
+  pivot_wider(., names_from = year, values_from = rate) %&gt;% 
+   knitr::kable(digits = 2) %&gt;% 
+  kable_styling(bootstrap_options = &quot;striped&quot;, font_size = 10) %&gt;% 
+  scroll_box(width = &quot;700px&quot;) </code></pre>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:700px; ">
+<table class="table table-striped" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+location
+</th>
+<th style="text-align:right;">
+1997
+</th>
+<th style="text-align:right;">
+1998
+</th>
+<th style="text-align:right;">
+1999
+</th>
+<th style="text-align:right;">
+2000
+</th>
+<th style="text-align:right;">
+2001
+</th>
+<th style="text-align:right;">
+2002
+</th>
+<th style="text-align:right;">
+2003
+</th>
+<th style="text-align:right;">
+2004
+</th>
+<th style="text-align:right;">
+2005
+</th>
+<th style="text-align:right;">
+2006
+</th>
+<th style="text-align:right;">
+2007
+</th>
+<th style="text-align:right;">
+2008
+</th>
+<th style="text-align:right;">
+2009
+</th>
+<th style="text-align:right;">
+2010
+</th>
+<th style="text-align:right;">
+2011
+</th>
+<th style="text-align:right;">
+2012
+</th>
+<th style="text-align:right;">
+2013
+</th>
+<th style="text-align:right;">
+2014
+</th>
+<th style="text-align:right;">
+2015
+</th>
+<th style="text-align:right;">
+2016
+</th>
+<th style="text-align:right;">
+2017
+</th>
+<th style="text-align:right;">
+2018
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+benning
+</td>
+<td style="text-align:right;">
+4598.05
+</td>
+<td style="text-align:right;">
+8207.29
+</td>
+<td style="text-align:right;">
+9194.61
+</td>
+<td style="text-align:right;">
+10074.39
+</td>
+<td style="text-align:right;">
+10341.96
+</td>
+<td style="text-align:right;">
+10595.34
+</td>
+<td style="text-align:right;">
+10876.45
+</td>
+<td style="text-align:right;">
+12135.99
+</td>
+<td style="text-align:right;">
+13948.03
+</td>
+<td style="text-align:right;">
+16058.73
+</td>
+<td style="text-align:right;">
+16012.63
+</td>
+<td style="text-align:right;">
+17324.03
+</td>
+<td style="text-align:right;">
+18596.43
+</td>
+<td style="text-align:right;">
+18436.74
+</td>
+<td style="text-align:right;">
+18714.59
+</td>
+<td style="text-align:right;">
+19058.88
+</td>
+<td style="text-align:right;">
+20398.73
+</td>
+<td style="text-align:right;">
+20662.57
+</td>
+<td style="text-align:right;">
+20906.38
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bragg
+</td>
+<td style="text-align:right;">
+6514.33
+</td>
+<td style="text-align:right;">
+7591.55
+</td>
+<td style="text-align:right;">
+8307.42
+</td>
+<td style="text-align:right;">
+9508.57
+</td>
+<td style="text-align:right;">
+10692.31
+</td>
+<td style="text-align:right;">
+9758.35
+</td>
+<td style="text-align:right;">
+9347.69
+</td>
+<td style="text-align:right;">
+9356.47
+</td>
+<td style="text-align:right;">
+8209.73
+</td>
+<td style="text-align:right;">
+9826.35
+</td>
+<td style="text-align:right;">
+8529.49
+</td>
+<td style="text-align:right;">
+10970.04
+</td>
+<td style="text-align:right;">
+11232.45
+</td>
+<td style="text-align:right;">
+12451.89
+</td>
+<td style="text-align:right;">
+13326.89
+</td>
+<td style="text-align:right;">
+14935.94
+</td>
+<td style="text-align:right;">
+15157.46
+</td>
+<td style="text-align:right;">
+15020.33
+</td>
+<td style="text-align:right;">
+15259.16
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+campbell
+</td>
+<td style="text-align:right;">
+7038.52
+</td>
+<td style="text-align:right;">
+8798.49
+</td>
+<td style="text-align:right;">
+8859.82
+</td>
+<td style="text-align:right;">
+9449.15
+</td>
+<td style="text-align:right;">
+8170.40
+</td>
+<td style="text-align:right;">
+7285.65
+</td>
+<td style="text-align:right;">
+7020.93
+</td>
+<td style="text-align:right;">
+11220.95
+</td>
+<td style="text-align:right;">
+10384.95
+</td>
+<td style="text-align:right;">
+9004.63
+</td>
+<td style="text-align:right;">
+13215.42
+</td>
+<td style="text-align:right;">
+10448.14
+</td>
+<td style="text-align:right;">
+15389.11
+</td>
+<td style="text-align:right;">
+15109.78
+</td>
+<td style="text-align:right;">
+17715.22
+</td>
+<td style="text-align:right;">
+19273.38
+</td>
+<td style="text-align:right;">
+17814.24
+</td>
+<td style="text-align:right;">
+17351.89
+</td>
+<td style="text-align:right;">
+17122.85
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+jackson
+</td>
+<td style="text-align:right;">
+5688.02
+</td>
+<td style="text-align:right;">
+12857.85
+</td>
+<td style="text-align:right;">
+10793.47
+</td>
+<td style="text-align:right;">
+13644.50
+</td>
+<td style="text-align:right;">
+13223.43
+</td>
+<td style="text-align:right;">
+13954.60
+</td>
+<td style="text-align:right;">
+14605.44
+</td>
+<td style="text-align:right;">
+15008.03
+</td>
+<td style="text-align:right;">
+20023.51
+</td>
+<td style="text-align:right;">
+18908.46
+</td>
+<td style="text-align:right;">
+20975.39
+</td>
+<td style="text-align:right;">
+21627.32
+</td>
+<td style="text-align:right;">
+23898.34
+</td>
+<td style="text-align:right;">
+24864.87
+</td>
+<td style="text-align:right;">
+24122.37
+</td>
+<td style="text-align:right;">
+21308.01
+</td>
+<td style="text-align:right;">
+22286.75
+</td>
+<td style="text-align:right;">
+21541.67
+</td>
+<td style="text-align:right;">
+21646.86
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+polk
+</td>
+<td style="text-align:right;">
+7860.85
+</td>
+<td style="text-align:right;">
+11879.08
+</td>
+<td style="text-align:right;">
+12780.25
+</td>
+<td style="text-align:right;">
+14041.53
+</td>
+<td style="text-align:right;">
+12620.41
+</td>
+<td style="text-align:right;">
+10311.97
+</td>
+<td style="text-align:right;">
+10779.64
+</td>
+<td style="text-align:right;">
+13441.60
+</td>
+<td style="text-align:right;">
+15511.23
+</td>
+<td style="text-align:right;">
+16285.89
+</td>
+<td style="text-align:right;">
+16514.24
+</td>
+<td style="text-align:right;">
+14846.72
+</td>
+<td style="text-align:right;">
+18364.72
+</td>
+<td style="text-align:right;">
+18521.34
+</td>
+<td style="text-align:right;">
+16872.48
+</td>
+<td style="text-align:right;">
+18862.39
+</td>
+<td style="text-align:right;">
+17797.44
+</td>
+<td style="text-align:right;">
+17748.14
+</td>
+<td style="text-align:right;">
+18418.62
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hood
+</td>
+<td style="text-align:right;">
+3491.58
+</td>
+<td style="text-align:right;">
+7301.00
+</td>
+<td style="text-align:right;">
+7658.26
+</td>
+<td style="text-align:right;">
+9514.17
+</td>
+<td style="text-align:right;">
+9514.83
+</td>
+<td style="text-align:right;">
+9556.85
+</td>
+<td style="text-align:right;">
+8747.57
+</td>
+<td style="text-align:right;">
+9759.33
+</td>
+<td style="text-align:right;">
+12612.29
+</td>
+<td style="text-align:right;">
+10674.45
+</td>
+<td style="text-align:right;">
+12465.25
+</td>
+<td style="text-align:right;">
+14255.89
+</td>
+<td style="text-align:right;">
+15016.95
+</td>
+<td style="text-align:right;">
+19718.50
+</td>
+<td style="text-align:right;">
+18002.19
+</td>
+<td style="text-align:right;">
+21666.09
+</td>
+<td style="text-align:right;">
+21628.04
+</td>
+<td style="text-align:right;">
+22199.37
+</td>
+<td style="text-align:right;">
+23504.19
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stewart
+</td>
+<td style="text-align:right;">
+5246.40
+</td>
+<td style="text-align:right;">
+7416.72
+</td>
+<td style="text-align:right;">
+8184.11
+</td>
+<td style="text-align:right;">
+7884.55
+</td>
+<td style="text-align:right;">
+8184.66
+</td>
+<td style="text-align:right;">
+9453.52
+</td>
+<td style="text-align:right;">
+8029.84
+</td>
+<td style="text-align:right;">
+11980.76
+</td>
+<td style="text-align:right;">
+5878.11
+</td>
+<td style="text-align:right;">
+12123.18
+</td>
+<td style="text-align:right;">
+9501.26
+</td>
+<td style="text-align:right;">
+14081.78
+</td>
+<td style="text-align:right;">
+17734.78
+</td>
+<td style="text-align:right;">
+14419.81
+</td>
+<td style="text-align:right;">
+18546.18
+</td>
+<td style="text-align:right;">
+19901.72
+</td>
+<td style="text-align:right;">
+19832.47
+</td>
+<td style="text-align:right;">
+19761.47
+</td>
+<td style="text-align:right;">
+18333.96
+</td>
+<td style="text-align:right;">
+19335.63
+</td>
+<td style="text-align:right;">
+19227.62
+</td>
+<td style="text-align:right;">
+19150.91
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+leonardwood
+</td>
+<td style="text-align:right;">
+11475.69
+</td>
+<td style="text-align:right;">
+15656.90
+</td>
+<td style="text-align:right;">
+16539.71
+</td>
+<td style="text-align:right;">
+16120.77
+</td>
+<td style="text-align:right;">
+15951.18
+</td>
+<td style="text-align:right;">
+16439.92
+</td>
+<td style="text-align:right;">
+17330.55
+</td>
+<td style="text-align:right;">
+18726.70
+</td>
+<td style="text-align:right;">
+18452.26
+</td>
+<td style="text-align:right;">
+18695.00
+</td>
+<td style="text-align:right;">
+19876.80
+</td>
+<td style="text-align:right;">
+20375.24
+</td>
+<td style="text-align:right;">
+22136.47
+</td>
+<td style="text-align:right;">
+23778.64
+</td>
+<td style="text-align:right;">
+24026.39
+</td>
+<td style="text-align:right;">
+24031.45
+</td>
+<td style="text-align:right;">
+23304.81
+</td>
+<td style="text-align:right;">
+23240.67
+</td>
+<td style="text-align:right;">
+23504.67
+</td>
+<td style="text-align:right;">
+26296.62
+</td>
+<td style="text-align:right;">
+27712.89
+</td>
+<td style="text-align:right;">
+25380.66
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+riley
+</td>
+<td style="text-align:right;">
+7190.80
+</td>
+<td style="text-align:right;">
+9188.44
+</td>
+<td style="text-align:right;">
+8371.45
+</td>
+<td style="text-align:right;">
+8783.40
+</td>
+<td style="text-align:right;">
+9325.51
+</td>
+<td style="text-align:right;">
+9164.06
+</td>
+<td style="text-align:right;">
+10248.80
+</td>
+<td style="text-align:right;">
+11263.25
+</td>
+<td style="text-align:right;">
+13014.77
+</td>
+<td style="text-align:right;">
+15306.03
+</td>
+<td style="text-align:right;">
+12930.09
+</td>
+<td style="text-align:right;">
+16130.62
+</td>
+<td style="text-align:right;">
+16524.63
+</td>
+<td style="text-align:right;">
+18836.66
+</td>
+<td style="text-align:right;">
+19732.35
+</td>
+<td style="text-align:right;">
+21292.32
+</td>
+<td style="text-align:right;">
+20118.75
+</td>
+<td style="text-align:right;">
+17896.88
+</td>
+<td style="text-align:right;">
+18289.21
+</td>
+<td style="text-align:right;">
+18623.92
+</td>
+<td style="text-align:right;">
+19331.95
+</td>
+<td style="text-align:right;">
+19481.81
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+irwin
+</td>
+<td style="text-align:right;">
+7081.77
+</td>
+<td style="text-align:right;">
+8566.69
+</td>
+<td style="text-align:right;">
+7448.05
+</td>
+<td style="text-align:right;">
+9230.68
+</td>
+<td style="text-align:right;">
+10238.89
+</td>
+<td style="text-align:right;">
+8456.86
+</td>
+<td style="text-align:right;">
+9477.54
+</td>
+<td style="text-align:right;">
+10412.26
+</td>
+<td style="text-align:right;">
+9498.34
+</td>
+<td style="text-align:right;">
+13207.53
+</td>
+<td style="text-align:right;">
+14447.35
+</td>
+<td style="text-align:right;">
+13789.23
+</td>
+<td style="text-align:right;">
+15272.67
+</td>
+<td style="text-align:right;">
+14838.48
+</td>
+<td style="text-align:right;">
+18522.82
+</td>
+<td style="text-align:right;">
+22111.50
+</td>
+<td style="text-align:right;">
+25308.36
+</td>
+<td style="text-align:right;">
+23262.83
+</td>
+<td style="text-align:right;">
+20303.95
+</td>
+<td style="text-align:right;">
+21176.22
+</td>
+<td style="text-align:right;">
+21615.56
+</td>
+<td style="text-align:right;">
+20176.57
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bliss
+</td>
+<td style="text-align:right;">
+238.95
+</td>
+<td style="text-align:right;">
+9275.50
+</td>
+<td style="text-align:right;">
+12129.58
+</td>
+<td style="text-align:right;">
+11666.94
+</td>
+<td style="text-align:right;">
+10241.00
+</td>
+<td style="text-align:right;">
+10561.78
+</td>
+<td style="text-align:right;">
+10708.18
+</td>
+<td style="text-align:right;">
+13887.61
+</td>
+<td style="text-align:right;">
+15379.92
+</td>
+<td style="text-align:right;">
+14250.82
+</td>
+<td style="text-align:right;">
+11958.89
+</td>
+<td style="text-align:right;">
+15212.99
+</td>
+<td style="text-align:right;">
+15311.11
+</td>
+<td style="text-align:right;">
+17157.03
+</td>
+<td style="text-align:right;">
+19121.82
+</td>
+<td style="text-align:right;">
+19812.25
+</td>
+<td style="text-align:right;">
+18664.97
+</td>
+<td style="text-align:right;">
+18982.60
+</td>
+<td style="text-align:right;">
+18503.10
+</td>
+<td style="text-align:right;">
+19136.32
+</td>
+<td style="text-align:right;">
+18199.35
+</td>
+<td style="text-align:right;">
+17309.44
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>dmed_tidy_full %&gt;% 
+  filter(type %in% &quot;Hospitalizations&quot;,
+         category %in% &quot;Total&quot;) %&gt;% 
+  dplyr::select(location, year, rate) %&gt;%
+  group_by(location) %&gt;%
+  pivot_wider(., names_from = year, values_from = rate) %&gt;% 
+   knitr::kable(digits = 2) %&gt;% 
+  kable_styling(bootstrap_options = &quot;striped&quot;, font_size = 10) %&gt;% 
+  scroll_box(width = &quot;700px&quot;) </code></pre>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:700px; ">
+<table class="table table-striped" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+location
+</th>
+<th style="text-align:right;">
+1990
+</th>
+<th style="text-align:right;">
+1991
+</th>
+<th style="text-align:right;">
+1992
+</th>
+<th style="text-align:right;">
+1993
+</th>
+<th style="text-align:right;">
+1994
+</th>
+<th style="text-align:right;">
+1995
+</th>
+<th style="text-align:right;">
+1996
+</th>
+<th style="text-align:right;">
+1997
+</th>
+<th style="text-align:right;">
+1998
+</th>
+<th style="text-align:right;">
+1999
+</th>
+<th style="text-align:right;">
+2000
+</th>
+<th style="text-align:right;">
+2001
+</th>
+<th style="text-align:right;">
+2002
+</th>
+<th style="text-align:right;">
+2003
+</th>
+<th style="text-align:right;">
+2004
+</th>
+<th style="text-align:right;">
+2005
+</th>
+<th style="text-align:right;">
+2006
+</th>
+<th style="text-align:right;">
+2007
+</th>
+<th style="text-align:right;">
+2008
+</th>
+<th style="text-align:right;">
+2009
+</th>
+<th style="text-align:right;">
+2010
+</th>
+<th style="text-align:right;">
+2011
+</th>
+<th style="text-align:right;">
+2012
+</th>
+<th style="text-align:right;">
+2013
+</th>
+<th style="text-align:right;">
+2014
+</th>
+<th style="text-align:right;">
+2015
+</th>
+<th style="text-align:right;">
+2016
+</th>
+<th style="text-align:right;">
+2017
+</th>
+<th style="text-align:right;">
+2018
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+benning
+</td>
+<td style="text-align:right;">
+54.93
+</td>
+<td style="text-align:right;">
+160.14
+</td>
+<td style="text-align:right;">
+140.13
+</td>
+<td style="text-align:right;">
+148.77
+</td>
+<td style="text-align:right;">
+147.92
+</td>
+<td style="text-align:right;">
+157.36
+</td>
+<td style="text-align:right;">
+122.65
+</td>
+<td style="text-align:right;">
+52.33
+</td>
+<td style="text-align:right;">
+64.50
+</td>
+<td style="text-align:right;">
+68.32
+</td>
+<td style="text-align:right;">
+56.64
+</td>
+<td style="text-align:right;">
+69.87
+</td>
+<td style="text-align:right;">
+71.03
+</td>
+<td style="text-align:right;">
+93.04
+</td>
+<td style="text-align:right;">
+83.60
+</td>
+<td style="text-align:right;">
+81.64
+</td>
+<td style="text-align:right;">
+80.31
+</td>
+<td style="text-align:right;">
+105.26
+</td>
+<td style="text-align:right;">
+85.49
+</td>
+<td style="text-align:right;">
+87.31
+</td>
+<td style="text-align:right;">
+60.14
+</td>
+<td style="text-align:right;">
+64.86
+</td>
+<td style="text-align:right;">
+62.73
+</td>
+<td style="text-align:right;">
+67.52
+</td>
+<td style="text-align:right;">
+71.16
+</td>
+<td style="text-align:right;">
+73.45
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bragg
+</td>
+<td style="text-align:right;">
+33.92
+</td>
+<td style="text-align:right;">
+142.59
+</td>
+<td style="text-align:right;">
+138.68
+</td>
+<td style="text-align:right;">
+132.87
+</td>
+<td style="text-align:right;">
+123.13
+</td>
+<td style="text-align:right;">
+120.96
+</td>
+<td style="text-align:right;">
+114.31
+</td>
+<td style="text-align:right;">
+87.82
+</td>
+<td style="text-align:right;">
+66.66
+</td>
+<td style="text-align:right;">
+72.72
+</td>
+<td style="text-align:right;">
+79.43
+</td>
+<td style="text-align:right;">
+71.40
+</td>
+<td style="text-align:right;">
+65.02
+</td>
+<td style="text-align:right;">
+56.37
+</td>
+<td style="text-align:right;">
+58.88
+</td>
+<td style="text-align:right;">
+59.16
+</td>
+<td style="text-align:right;">
+60.85
+</td>
+<td style="text-align:right;">
+64.33
+</td>
+<td style="text-align:right;">
+63.99
+</td>
+<td style="text-align:right;">
+59.19
+</td>
+<td style="text-align:right;">
+61.81
+</td>
+<td style="text-align:right;">
+67.92
+</td>
+<td style="text-align:right;">
+63.14
+</td>
+<td style="text-align:right;">
+60.03
+</td>
+<td style="text-align:right;">
+60.09
+</td>
+<td style="text-align:right;">
+59.24
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+campbell
+</td>
+<td style="text-align:right;">
+41.34
+</td>
+<td style="text-align:right;">
+151.67
+</td>
+<td style="text-align:right;">
+139.19
+</td>
+<td style="text-align:right;">
+151.97
+</td>
+<td style="text-align:right;">
+136.50
+</td>
+<td style="text-align:right;">
+136.22
+</td>
+<td style="text-align:right;">
+123.51
+</td>
+<td style="text-align:right;">
+45.71
+</td>
+<td style="text-align:right;">
+46.32
+</td>
+<td style="text-align:right;">
+54.97
+</td>
+<td style="text-align:right;">
+40.42
+</td>
+<td style="text-align:right;">
+45.38
+</td>
+<td style="text-align:right;">
+57.64
+</td>
+<td style="text-align:right;">
+62.30
+</td>
+<td style="text-align:right;">
+66.91
+</td>
+<td style="text-align:right;">
+66.04
+</td>
+<td style="text-align:right;">
+60.89
+</td>
+<td style="text-align:right;">
+75.98
+</td>
+<td style="text-align:right;">
+64.05
+</td>
+<td style="text-align:right;">
+77.52
+</td>
+<td style="text-align:right;">
+87.75
+</td>
+<td style="text-align:right;">
+78.08
+</td>
+<td style="text-align:right;">
+80.45
+</td>
+<td style="text-align:right;">
+66.28
+</td>
+<td style="text-align:right;">
+68.00
+</td>
+<td style="text-align:right;">
+63.14
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+jackson
+</td>
+<td style="text-align:right;">
+81.73
+</td>
+<td style="text-align:right;">
+268.68
+</td>
+<td style="text-align:right;">
+262.06
+</td>
+<td style="text-align:right;">
+283.58
+</td>
+<td style="text-align:right;">
+235.85
+</td>
+<td style="text-align:right;">
+234.58
+</td>
+<td style="text-align:right;">
+219.33
+</td>
+<td style="text-align:right;">
+88.35
+</td>
+<td style="text-align:right;">
+137.81
+</td>
+<td style="text-align:right;">
+154.22
+</td>
+<td style="text-align:right;">
+154.43
+</td>
+<td style="text-align:right;">
+74.26
+</td>
+<td style="text-align:right;">
+76.53
+</td>
+<td style="text-align:right;">
+83.17
+</td>
+<td style="text-align:right;">
+88.01
+</td>
+<td style="text-align:right;">
+85.45
+</td>
+<td style="text-align:right;">
+68.52
+</td>
+<td style="text-align:right;">
+83.60
+</td>
+<td style="text-align:right;">
+76.61
+</td>
+<td style="text-align:right;">
+76.68
+</td>
+<td style="text-align:right;">
+70.48
+</td>
+<td style="text-align:right;">
+79.22
+</td>
+<td style="text-align:right;">
+78.77
+</td>
+<td style="text-align:right;">
+81.01
+</td>
+<td style="text-align:right;">
+61.33
+</td>
+<td style="text-align:right;">
+52.51
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+polk
+</td>
+<td style="text-align:right;">
+38.36
+</td>
+<td style="text-align:right;">
+154.35
+</td>
+<td style="text-align:right;">
+131.70
+</td>
+<td style="text-align:right;">
+126.73
+</td>
+<td style="text-align:right;">
+131.73
+</td>
+<td style="text-align:right;">
+122.74
+</td>
+<td style="text-align:right;">
+118.84
+</td>
+<td style="text-align:right;">
+60.27
+</td>
+<td style="text-align:right;">
+58.57
+</td>
+<td style="text-align:right;">
+82.19
+</td>
+<td style="text-align:right;">
+58.57
+</td>
+<td style="text-align:right;">
+52.99
+</td>
+<td style="text-align:right;">
+53.84
+</td>
+<td style="text-align:right;">
+69.62
+</td>
+<td style="text-align:right;">
+60.58
+</td>
+<td style="text-align:right;">
+64.97
+</td>
+<td style="text-align:right;">
+71.36
+</td>
+<td style="text-align:right;">
+79.14
+</td>
+<td style="text-align:right;">
+74.58
+</td>
+<td style="text-align:right;">
+82.01
+</td>
+<td style="text-align:right;">
+88.39
+</td>
+<td style="text-align:right;">
+95.96
+</td>
+<td style="text-align:right;">
+86.71
+</td>
+<td style="text-align:right;">
+75.10
+</td>
+<td style="text-align:right;">
+74.98
+</td>
+<td style="text-align:right;">
+72.75
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hood
+</td>
+<td style="text-align:right;">
+41.79
+</td>
+<td style="text-align:right;">
+133.04
+</td>
+<td style="text-align:right;">
+120.14
+</td>
+<td style="text-align:right;">
+115.52
+</td>
+<td style="text-align:right;">
+114.00
+</td>
+<td style="text-align:right;">
+109.25
+</td>
+<td style="text-align:right;">
+102.57
+</td>
+<td style="text-align:right;">
+67.26
+</td>
+<td style="text-align:right;">
+65.29
+</td>
+<td style="text-align:right;">
+72.53
+</td>
+<td style="text-align:right;">
+63.23
+</td>
+<td style="text-align:right;">
+62.65
+</td>
+<td style="text-align:right;">
+65.59
+</td>
+<td style="text-align:right;">
+71.73
+</td>
+<td style="text-align:right;">
+72.70
+</td>
+<td style="text-align:right;">
+68.18
+</td>
+<td style="text-align:right;">
+67.35
+</td>
+<td style="text-align:right;">
+76.04
+</td>
+<td style="text-align:right;">
+72.37
+</td>
+<td style="text-align:right;">
+72.08
+</td>
+<td style="text-align:right;">
+81.74
+</td>
+<td style="text-align:right;">
+77.89
+</td>
+<td style="text-align:right;">
+83.52
+</td>
+<td style="text-align:right;">
+77.28
+</td>
+<td style="text-align:right;">
+76.69
+</td>
+<td style="text-align:right;">
+82.34
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stewart
+</td>
+<td style="text-align:right;">
+32.94
+</td>
+<td style="text-align:right;">
+148.50
+</td>
+<td style="text-align:right;">
+131.77
+</td>
+<td style="text-align:right;">
+132.11
+</td>
+<td style="text-align:right;">
+118.64
+</td>
+<td style="text-align:right;">
+110.44
+</td>
+<td style="text-align:right;">
+109.84
+</td>
+<td style="text-align:right;">
+69.37
+</td>
+<td style="text-align:right;">
+67.82
+</td>
+<td style="text-align:right;">
+75.03
+</td>
+<td style="text-align:right;">
+62.62
+</td>
+<td style="text-align:right;">
+60.57
+</td>
+<td style="text-align:right;">
+64.60
+</td>
+<td style="text-align:right;">
+58.58
+</td>
+<td style="text-align:right;">
+71.11
+</td>
+<td style="text-align:right;">
+57.22
+</td>
+<td style="text-align:right;">
+55.68
+</td>
+<td style="text-align:right;">
+67.25
+</td>
+<td style="text-align:right;">
+58.06
+</td>
+<td style="text-align:right;">
+73.17
+</td>
+<td style="text-align:right;">
+52.86
+</td>
+<td style="text-align:right;">
+60.97
+</td>
+<td style="text-align:right;">
+70.77
+</td>
+<td style="text-align:right;">
+63.76
+</td>
+<td style="text-align:right;">
+63.14
+</td>
+<td style="text-align:right;">
+69.13
+</td>
+<td style="text-align:right;">
+67.56
+</td>
+<td style="text-align:right;">
+71.91
+</td>
+<td style="text-align:right;">
+68.17
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+leonardwood
+</td>
+<td style="text-align:right;">
+78.07
+</td>
+<td style="text-align:right;">
+204.38
+</td>
+<td style="text-align:right;">
+187.79
+</td>
+<td style="text-align:right;">
+216.36
+</td>
+<td style="text-align:right;">
+193.59
+</td>
+<td style="text-align:right;">
+176.14
+</td>
+<td style="text-align:right;">
+185.29
+</td>
+<td style="text-align:right;">
+152.05
+</td>
+<td style="text-align:right;">
+141.79
+</td>
+<td style="text-align:right;">
+138.52
+</td>
+<td style="text-align:right;">
+94.44
+</td>
+<td style="text-align:right;">
+85.70
+</td>
+<td style="text-align:right;">
+82.50
+</td>
+<td style="text-align:right;">
+90.13
+</td>
+<td style="text-align:right;">
+84.34
+</td>
+<td style="text-align:right;">
+80.62
+</td>
+<td style="text-align:right;">
+84.78
+</td>
+<td style="text-align:right;">
+84.10
+</td>
+<td style="text-align:right;">
+87.04
+</td>
+<td style="text-align:right;">
+89.70
+</td>
+<td style="text-align:right;">
+81.09
+</td>
+<td style="text-align:right;">
+90.85
+</td>
+<td style="text-align:right;">
+85.03
+</td>
+<td style="text-align:right;">
+69.05
+</td>
+<td style="text-align:right;">
+66.08
+</td>
+<td style="text-align:right;">
+65.57
+</td>
+<td style="text-align:right;">
+68.14
+</td>
+<td style="text-align:right;">
+66.85
+</td>
+<td style="text-align:right;">
+67.56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+riley
+</td>
+<td style="text-align:right;">
+41.87
+</td>
+<td style="text-align:right;">
+130.29
+</td>
+<td style="text-align:right;">
+139.69
+</td>
+<td style="text-align:right;">
+139.60
+</td>
+<td style="text-align:right;">
+130.35
+</td>
+<td style="text-align:right;">
+134.65
+</td>
+<td style="text-align:right;">
+104.52
+</td>
+<td style="text-align:right;">
+69.94
+</td>
+<td style="text-align:right;">
+69.01
+</td>
+<td style="text-align:right;">
+69.99
+</td>
+<td style="text-align:right;">
+62.66
+</td>
+<td style="text-align:right;">
+75.41
+</td>
+<td style="text-align:right;">
+62.63
+</td>
+<td style="text-align:right;">
+76.98
+</td>
+<td style="text-align:right;">
+84.05
+</td>
+<td style="text-align:right;">
+80.61
+</td>
+<td style="text-align:right;">
+70.59
+</td>
+<td style="text-align:right;">
+75.71
+</td>
+<td style="text-align:right;">
+75.21
+</td>
+<td style="text-align:right;">
+73.28
+</td>
+<td style="text-align:right;">
+77.87
+</td>
+<td style="text-align:right;">
+84.46
+</td>
+<td style="text-align:right;">
+86.92
+</td>
+<td style="text-align:right;">
+73.69
+</td>
+<td style="text-align:right;">
+64.94
+</td>
+<td style="text-align:right;">
+65.69
+</td>
+<td style="text-align:right;">
+66.84
+</td>
+<td style="text-align:right;">
+60.79
+</td>
+<td style="text-align:right;">
+65.95
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+irwin
+</td>
+<td style="text-align:right;">
+39.36
+</td>
+<td style="text-align:right;">
+168.89
+</td>
+<td style="text-align:right;">
+164.65
+</td>
+<td style="text-align:right;">
+160.44
+</td>
+<td style="text-align:right;">
+117.92
+</td>
+<td style="text-align:right;">
+103.20
+</td>
+<td style="text-align:right;">
+132.54
+</td>
+<td style="text-align:right;">
+74.97
+</td>
+<td style="text-align:right;">
+52.08
+</td>
+<td style="text-align:right;">
+52.17
+</td>
+<td style="text-align:right;">
+51.70
+</td>
+<td style="text-align:right;">
+49.36
+</td>
+<td style="text-align:right;">
+47.73
+</td>
+<td style="text-align:right;">
+53.30
+</td>
+<td style="text-align:right;">
+56.72
+</td>
+<td style="text-align:right;">
+74.22
+</td>
+<td style="text-align:right;">
+66.63
+</td>
+<td style="text-align:right;">
+82.36
+</td>
+<td style="text-align:right;">
+86.08
+</td>
+<td style="text-align:right;">
+88.93
+</td>
+<td style="text-align:right;">
+77.74
+</td>
+<td style="text-align:right;">
+71.92
+</td>
+<td style="text-align:right;">
+105.95
+</td>
+<td style="text-align:right;">
+108.90
+</td>
+<td style="text-align:right;">
+92.20
+</td>
+<td style="text-align:right;">
+74.61
+</td>
+<td style="text-align:right;">
+68.87
+</td>
+<td style="text-align:right;">
+73.98
+</td>
+<td style="text-align:right;">
+86.76
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bliss
+</td>
+<td style="text-align:right;">
+50.42
+</td>
+<td style="text-align:right;">
+168.16
+</td>
+<td style="text-align:right;">
+152.21
+</td>
+<td style="text-align:right;">
+148.08
+</td>
+<td style="text-align:right;">
+139.55
+</td>
+<td style="text-align:right;">
+166.20
+</td>
+<td style="text-align:right;">
+184.84
+</td>
+<td style="text-align:right;">
+95.26
+</td>
+<td style="text-align:right;">
+104.45
+</td>
+<td style="text-align:right;">
+96.15
+</td>
+<td style="text-align:right;">
+90.58
+</td>
+<td style="text-align:right;">
+84.03
+</td>
+<td style="text-align:right;">
+84.58
+</td>
+<td style="text-align:right;">
+81.67
+</td>
+<td style="text-align:right;">
+86.20
+</td>
+<td style="text-align:right;">
+85.48
+</td>
+<td style="text-align:right;">
+81.73
+</td>
+<td style="text-align:right;">
+82.08
+</td>
+<td style="text-align:right;">
+87.69
+</td>
+<td style="text-align:right;">
+92.23
+</td>
+<td style="text-align:right;">
+91.02
+</td>
+<td style="text-align:right;">
+121.43
+</td>
+<td style="text-align:right;">
+105.05
+</td>
+<td style="text-align:right;">
+86.59
+</td>
+<td style="text-align:right;">
+87.23
+</td>
+<td style="text-align:right;">
+81.63
+</td>
+<td style="text-align:right;">
+83.57
+</td>
+<td style="text-align:right;">
+76.78
+</td>
+<td style="text-align:right;">
+80.15
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>dmed_tidy_full %&gt;% 
+  filter(type %in% &quot;Reportable Events&quot;,
+         category %in% &quot;Total&quot;) %&gt;% 
+  dplyr::select(location, year, rate) %&gt;%
+  group_by(location) %&gt;%
+  pivot_wider(., names_from = year, values_from = rate) %&gt;% 
+   knitr::kable(digits = 2) %&gt;% 
+  kable_styling(bootstrap_options = &quot;striped&quot;, font_size = 10) %&gt;% 
+  scroll_box(width = &quot;700px&quot;) </code></pre>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:700px; ">
+<table class="table table-striped" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+location
+</th>
+<th style="text-align:right;">
+1995
+</th>
+<th style="text-align:right;">
+1996
+</th>
+<th style="text-align:right;">
+1997
+</th>
+<th style="text-align:right;">
+1998
+</th>
+<th style="text-align:right;">
+1999
+</th>
+<th style="text-align:right;">
+2000
+</th>
+<th style="text-align:right;">
+2001
+</th>
+<th style="text-align:right;">
+2002
+</th>
+<th style="text-align:right;">
+2003
+</th>
+<th style="text-align:right;">
+2004
+</th>
+<th style="text-align:right;">
+2005
+</th>
+<th style="text-align:right;">
+2006
+</th>
+<th style="text-align:right;">
+2007
+</th>
+<th style="text-align:right;">
+2008
+</th>
+<th style="text-align:right;">
+2009
+</th>
+<th style="text-align:right;">
+2010
+</th>
+<th style="text-align:right;">
+2011
+</th>
+<th style="text-align:right;">
+2012
+</th>
+<th style="text-align:right;">
+2013
+</th>
+<th style="text-align:right;">
+2014
+</th>
+<th style="text-align:right;">
+2015
+</th>
+<th style="text-align:right;">
+2016
+</th>
+<th style="text-align:right;">
+2017
+</th>
+<th style="text-align:right;">
+2018
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+benning
+</td>
+<td style="text-align:right;">
+9.28
+</td>
+<td style="text-align:right;">
+4.33
+</td>
+<td style="text-align:right;">
+15.71
+</td>
+<td style="text-align:right;">
+15.10
+</td>
+<td style="text-align:right;">
+18.57
+</td>
+<td style="text-align:right;">
+17.62
+</td>
+<td style="text-align:right;">
+22.41
+</td>
+<td style="text-align:right;">
+20.69
+</td>
+<td style="text-align:right;">
+18.92
+</td>
+<td style="text-align:right;">
+17.44
+</td>
+<td style="text-align:right;">
+11.47
+</td>
+<td style="text-align:right;">
+18.81
+</td>
+<td style="text-align:right;">
+15.20
+</td>
+<td style="text-align:right;">
+13.49
+</td>
+<td style="text-align:right;">
+17.24
+</td>
+<td style="text-align:right;">
+12.89
+</td>
+<td style="text-align:right;">
+26.58
+</td>
+<td style="text-align:right;">
+18.27
+</td>
+<td style="text-align:right;">
+16.40
+</td>
+<td style="text-align:right;">
+12.07
+</td>
+<td style="text-align:right;">
+17.56
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bragg
+</td>
+<td style="text-align:right;">
+2.41
+</td>
+<td style="text-align:right;">
+3.21
+</td>
+<td style="text-align:right;">
+2.50
+</td>
+<td style="text-align:right;">
+11.87
+</td>
+<td style="text-align:right;">
+32.64
+</td>
+<td style="text-align:right;">
+39.82
+</td>
+<td style="text-align:right;">
+49.38
+</td>
+<td style="text-align:right;">
+61.03
+</td>
+<td style="text-align:right;">
+45.80
+</td>
+<td style="text-align:right;">
+55.09
+</td>
+<td style="text-align:right;">
+43.26
+</td>
+<td style="text-align:right;">
+52.06
+</td>
+<td style="text-align:right;">
+34.97
+</td>
+<td style="text-align:right;">
+43.21
+</td>
+<td style="text-align:right;">
+45.13
+</td>
+<td style="text-align:right;">
+32.89
+</td>
+<td style="text-align:right;">
+49.85
+</td>
+<td style="text-align:right;">
+27.37
+</td>
+<td style="text-align:right;">
+23.46
+</td>
+<td style="text-align:right;">
+21.96
+</td>
+<td style="text-align:right;">
+24.32
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+campbell
+</td>
+<td style="text-align:right;">
+33.35
+</td>
+<td style="text-align:right;">
+30.77
+</td>
+<td style="text-align:right;">
+28.20
+</td>
+<td style="text-align:right;">
+24.06
+</td>
+<td style="text-align:right;">
+22.00
+</td>
+<td style="text-align:right;">
+23.09
+</td>
+<td style="text-align:right;">
+43.77
+</td>
+<td style="text-align:right;">
+35.29
+</td>
+<td style="text-align:right;">
+32.69
+</td>
+<td style="text-align:right;">
+38.17
+</td>
+<td style="text-align:right;">
+28.13
+</td>
+<td style="text-align:right;">
+23.83
+</td>
+<td style="text-align:right;">
+28.01
+</td>
+<td style="text-align:right;">
+7.72
+</td>
+<td style="text-align:right;">
+20.20
+</td>
+<td style="text-align:right;">
+23.45
+</td>
+<td style="text-align:right;">
+18.60
+</td>
+<td style="text-align:right;">
+20.79
+</td>
+<td style="text-align:right;">
+18.80
+</td>
+<td style="text-align:right;">
+20.88
+</td>
+<td style="text-align:right;">
+21.44
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+jackson
+</td>
+<td style="text-align:right;">
+30.99
+</td>
+<td style="text-align:right;">
+79.69
+</td>
+<td style="text-align:right;">
+70.52
+</td>
+<td style="text-align:right;">
+30.89
+</td>
+<td style="text-align:right;">
+51.51
+</td>
+<td style="text-align:right;">
+46.15
+</td>
+<td style="text-align:right;">
+31.45
+</td>
+<td style="text-align:right;">
+34.85
+</td>
+<td style="text-align:right;">
+29.22
+</td>
+<td style="text-align:right;">
+32.08
+</td>
+<td style="text-align:right;">
+21.87
+</td>
+<td style="text-align:right;">
+26.32
+</td>
+<td style="text-align:right;">
+23.44
+</td>
+<td style="text-align:right;">
+28.53
+</td>
+<td style="text-align:right;">
+98.94
+</td>
+<td style="text-align:right;">
+46.79
+</td>
+<td style="text-align:right;">
+62.74
+</td>
+<td style="text-align:right;">
+57.12
+</td>
+<td style="text-align:right;">
+38.51
+</td>
+<td style="text-align:right;">
+27.74
+</td>
+<td style="text-align:right;">
+21.36
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+polk
+</td>
+<td style="text-align:right;">
+12.00
+</td>
+<td style="text-align:right;">
+8.08
+</td>
+<td style="text-align:right;">
+17.42
+</td>
+<td style="text-align:right;">
+30.39
+</td>
+<td style="text-align:right;">
+31.57
+</td>
+<td style="text-align:right;">
+36.58
+</td>
+<td style="text-align:right;">
+34.86
+</td>
+<td style="text-align:right;">
+34.00
+</td>
+<td style="text-align:right;">
+23.47
+</td>
+<td style="text-align:right;">
+24.01
+</td>
+<td style="text-align:right;">
+30.83
+</td>
+<td style="text-align:right;">
+29.64
+</td>
+<td style="text-align:right;">
+32.22
+</td>
+<td style="text-align:right;">
+19.44
+</td>
+<td style="text-align:right;">
+82.34
+</td>
+<td style="text-align:right;">
+49.80
+</td>
+<td style="text-align:right;">
+33.65
+</td>
+<td style="text-align:right;">
+29.17
+</td>
+<td style="text-align:right;">
+28.12
+</td>
+<td style="text-align:right;">
+25.29
+</td>
+<td style="text-align:right;">
+28.45
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+hood
+</td>
+<td style="text-align:right;">
+34.45
+</td>
+<td style="text-align:right;">
+12.91
+</td>
+<td style="text-align:right;">
+38.70
+</td>
+<td style="text-align:right;">
+44.02
+</td>
+<td style="text-align:right;">
+43.03
+</td>
+<td style="text-align:right;">
+57.44
+</td>
+<td style="text-align:right;">
+62.21
+</td>
+<td style="text-align:right;">
+67.87
+</td>
+<td style="text-align:right;">
+49.39
+</td>
+<td style="text-align:right;">
+34.94
+</td>
+<td style="text-align:right;">
+62.03
+</td>
+<td style="text-align:right;">
+39.73
+</td>
+<td style="text-align:right;">
+54.10
+</td>
+<td style="text-align:right;">
+53.02
+</td>
+<td style="text-align:right;">
+50.46
+</td>
+<td style="text-align:right;">
+57.64
+</td>
+<td style="text-align:right;">
+49.48
+</td>
+<td style="text-align:right;">
+37.27
+</td>
+<td style="text-align:right;">
+35.94
+</td>
+<td style="text-align:right;">
+30.50
+</td>
+<td style="text-align:right;">
+35.35
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+stewart
+</td>
+<td style="text-align:right;">
+19.66
+</td>
+<td style="text-align:right;">
+21.71
+</td>
+<td style="text-align:right;">
+23.74
+</td>
+<td style="text-align:right;">
+29.81
+</td>
+<td style="text-align:right;">
+30.74
+</td>
+<td style="text-align:right;">
+32.83
+</td>
+<td style="text-align:right;">
+27.19
+</td>
+<td style="text-align:right;">
+38.62
+</td>
+<td style="text-align:right;">
+13.82
+</td>
+<td style="text-align:right;">
+36.61
+</td>
+<td style="text-align:right;">
+18.08
+</td>
+<td style="text-align:right;">
+57.13
+</td>
+<td style="text-align:right;">
+48.47
+</td>
+<td style="text-align:right;">
+42.50
+</td>
+<td style="text-align:right;">
+69.59
+</td>
+<td style="text-align:right;">
+34.89
+</td>
+<td style="text-align:right;">
+63.24
+</td>
+<td style="text-align:right;">
+33.48
+</td>
+<td style="text-align:right;">
+19.49
+</td>
+<td style="text-align:right;">
+21.66
+</td>
+<td style="text-align:right;">
+31.12
+</td>
+<td style="text-align:right;">
+31.17
+</td>
+<td style="text-align:right;">
+36.47
+</td>
+<td style="text-align:right;">
+39.20
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+leonardwood
+</td>
+<td style="text-align:right;">
+26.23
+</td>
+<td style="text-align:right;">
+21.91
+</td>
+<td style="text-align:right;">
+27.52
+</td>
+<td style="text-align:right;">
+27.64
+</td>
+<td style="text-align:right;">
+16.81
+</td>
+<td style="text-align:right;">
+22.33
+</td>
+<td style="text-align:right;">
+25.72
+</td>
+<td style="text-align:right;">
+31.19
+</td>
+<td style="text-align:right;">
+26.44
+</td>
+<td style="text-align:right;">
+22.90
+</td>
+<td style="text-align:right;">
+30.18
+</td>
+<td style="text-align:right;">
+25.22
+</td>
+<td style="text-align:right;">
+27.94
+</td>
+<td style="text-align:right;">
+26.18
+</td>
+<td style="text-align:right;">
+44.64
+</td>
+<td style="text-align:right;">
+33.08
+</td>
+<td style="text-align:right;">
+38.58
+</td>
+<td style="text-align:right;">
+13.33
+</td>
+<td style="text-align:right;">
+11.79
+</td>
+<td style="text-align:right;">
+15.22
+</td>
+<td style="text-align:right;">
+14.28
+</td>
+<td style="text-align:right;">
+14.01
+</td>
+<td style="text-align:right;">
+16.95
+</td>
+<td style="text-align:right;">
+16.43
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+riley
+</td>
+<td style="text-align:right;">
+9.13
+</td>
+<td style="text-align:right;">
+13.02
+</td>
+<td style="text-align:right;">
+30.15
+</td>
+<td style="text-align:right;">
+43.06
+</td>
+<td style="text-align:right;">
+29.60
+</td>
+<td style="text-align:right;">
+30.39
+</td>
+<td style="text-align:right;">
+31.81
+</td>
+<td style="text-align:right;">
+39.71
+</td>
+<td style="text-align:right;">
+27.06
+</td>
+<td style="text-align:right;">
+18.80
+</td>
+<td style="text-align:right;">
+21.58
+</td>
+<td style="text-align:right;">
+26.54
+</td>
+<td style="text-align:right;">
+27.40
+</td>
+<td style="text-align:right;">
+36.57
+</td>
+<td style="text-align:right;">
+36.16
+</td>
+<td style="text-align:right;">
+30.09
+</td>
+<td style="text-align:right;">
+35.77
+</td>
+<td style="text-align:right;">
+26.27
+</td>
+<td style="text-align:right;">
+25.68
+</td>
+<td style="text-align:right;">
+25.57
+</td>
+<td style="text-align:right;">
+29.73
+</td>
+<td style="text-align:right;">
+31.44
+</td>
+<td style="text-align:right;">
+31.34
+</td>
+<td style="text-align:right;">
+46.71
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+irwin
+</td>
+<td style="text-align:right;">
+3.90
+</td>
+<td style="text-align:right;">
+12.71
+</td>
+<td style="text-align:right;">
+14.45
+</td>
+<td style="text-align:right;">
+16.17
+</td>
+<td style="text-align:right;">
+13.67
+</td>
+<td style="text-align:right;">
+18.66
+</td>
+<td style="text-align:right;">
+20.77
+</td>
+<td style="text-align:right;">
+17.03
+</td>
+<td style="text-align:right;">
+14.98
+</td>
+<td style="text-align:right;">
+19.69
+</td>
+<td style="text-align:right;">
+12.83
+</td>
+<td style="text-align:right;">
+20.50
+</td>
+<td style="text-align:right;">
+23.80
+</td>
+<td style="text-align:right;">
+19.26
+</td>
+<td style="text-align:right;">
+36.10
+</td>
+<td style="text-align:right;">
+22.40
+</td>
+<td style="text-align:right;">
+14.65
+</td>
+<td style="text-align:right;">
+25.37
+</td>
+<td style="text-align:right;">
+15.45
+</td>
+<td style="text-align:right;">
+19.26
+</td>
+<td style="text-align:right;">
+22.48
+</td>
+<td style="text-align:right;">
+18.50
+</td>
+<td style="text-align:right;">
+8.54
+</td>
+<td style="text-align:right;">
+38.56
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+bliss
+</td>
+<td style="text-align:right;">
+20.10
+</td>
+<td style="text-align:right;">
+24.76
+</td>
+<td style="text-align:right;">
+38.96
+</td>
+<td style="text-align:right;">
+46.26
+</td>
+<td style="text-align:right;">
+34.63
+</td>
+<td style="text-align:right;">
+33.68
+</td>
+<td style="text-align:right;">
+43.96
+</td>
+<td style="text-align:right;">
+37.82
+</td>
+<td style="text-align:right;">
+25.11
+</td>
+<td style="text-align:right;">
+33.17
+</td>
+<td style="text-align:right;">
+41.22
+</td>
+<td style="text-align:right;">
+27.40
+</td>
+<td style="text-align:right;">
+17.72
+</td>
+<td style="text-align:right;">
+38.62
+</td>
+<td style="text-align:right;">
+30.53
+</td>
+<td style="text-align:right;">
+46.32
+</td>
+<td style="text-align:right;">
+53.33
+</td>
+<td style="text-align:right;">
+30.09
+</td>
+<td style="text-align:right;">
+18.35
+</td>
+<td style="text-align:right;">
+23.22
+</td>
+<td style="text-align:right;">
+27.48
+</td>
+<td style="text-align:right;">
+31.99
+</td>
+<td style="text-align:right;">
+36.01
+</td>
+<td style="text-align:right;">
+42.19
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="plots" class="section level2">
+<h2>Plots</h2>
+<pre class="r"><code>dmed_tidy_full %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Ambulatory Rates - all ICD codes&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-1.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy_full %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Hospitalizations&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Hospitalization Rates - all ICD codes&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-2.png" width="672" /></p>
+<pre class="r"><code>dmed_tidy_full %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Reportable Events&quot;,
+         category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = year, y = rate, color = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Reportable Event Rates - all ICD codes&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-3.png" width="672" /></p>
+<pre class="r"><code>all_icd &lt;-
+  dmed_tidy_full %&gt;% 
+    filter(location %in% c(&quot;benning&quot;, &quot;bragg&quot;, &quot;campbell&quot;, &quot;jackson&quot;,
+                           &quot;polk&quot;, &quot;hood&quot;, &quot;stewart&quot;, &quot;leonardwood&quot;, 
+                           &quot;riley&quot;, &quot;irwin&quot;, &quot;bliss&quot;),
+           type == &quot;Ambulatory Data&quot;,
+           hsi == &quot;all&quot;,
+           strata == &quot;gender&quot;,
+           category == &quot;Total&quot;) %&gt;% 
+    dplyr::select(location, year, rate) %&gt;% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
+           location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
+           location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
+           location = dplyr::recode(location, campbell = &quot;fort_campbell&quot;),
+           location = dplyr::recode(location, polk = &quot;fort_polk&quot;),
+           location = dplyr::recode(location, hood = &quot;fort_hood&quot;),
+           location = dplyr::recode(location, stewart = &quot;fort_stewart&quot;),
+           location = dplyr::recode(location, leonardwood = &quot;fort_leonard_wood&quot;),
+           location = dplyr::recode(location, riley = &quot;fort_riley&quot;),
+           location = dplyr::recode(location, irwin = &quot;ntc_and_fort_irwin&quot;),
+           location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
+           location = as.character(location))
+
+
+
+# Join table
+
+joined_rate &lt;-
+  index_long %&gt;% 
+    left_join(hsi_rates, by = c(&quot;installation&quot; = &quot;location&quot;, &quot;year&quot; = &quot;year&quot;)) %&gt;% 
+    drop_na(rate)
+
+joined_rate</code></pre>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

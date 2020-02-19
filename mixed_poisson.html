@@ -605,7 +605,13 @@ index_heat_key</code></pre>
 ##  9 wbgt_f_min   Minimum WBGT during the year                Absolute   WBGT     
 ## 10 tmp_f_sd     Standard deviation of hourly temperatures ~ Absolute   T        
 ## # ... with 74 more rows</code></pre>
-<pre class="r"><code># write_rds(index_heat_key, &quot;data/index_heat_key.rds&quot;)</code></pre>
+<pre class="r"><code># write_rds(index_heat_key, &quot;data/index_heat_key.rds&quot;)
+
+
+# Medical encounters - all ICD codes
+
+all_icd &lt;-
+  read_rds(&quot;data/all_icd.rds&quot;)</code></pre>
 <pre class="r"><code>dmed_population &lt;-
   dmed_tidy %&gt;% 
   filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
@@ -1463,7 +1469,7 @@ random_slope_bct_nest  %&gt;%
      geom_vline(aes(xintercept = 1), colour = &quot;blue&quot;) +
      theme_bw() +
      theme(axis.text.y = element_text(size = rel(0.75))) +
-     ggtitle(&quot;Rate Ratio - - Ambulatory, value-scaled&quot;)</code></pre>
+     ggtitle(&quot;Rate Ratio - Ambulatory, value-scaled&quot;)</code></pre>
 <p><img src="mixed_poisson_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>
 <pre class="r"><code># p-value boxplot
 random_slope_bct_nest  %&gt;% 
@@ -1775,6 +1781,581 @@ summary()</code></pre>
 ## 4 sd_(Intercept).installation      0.838    NA         NA    NA        installa~
 ## 5 sd_value_scaled.installation     0.540    NA         NA    NA        installa~
 ## 6 cor_(Intercept).value_scaled~    0.702    NA         NA    NA        installa~</code></pre>
+</div>
+<div id="hospitalization-nested" class="section level2">
+<h2>Hospitalization Nested</h2>
+<pre class="r"><code># Hospitalization nested models
+
+hosp_random_slope_bct_nest &lt;-
+  joined_hsi_hosp %&gt;%
+  na.omit() %&gt;% 
+    dplyr::select(index, everything()) %&gt;% 
+      nest(data = installation:value_scaled) %&gt;% 
+      mutate(glmer_models = map(data, random_slope_bct_function),
+             glance = map(glmer_models, broom::glance),
+             tidy =   map(glmer_models, broom::tidy),
+             augment = map(glmer_models, broom::augment))</code></pre>
+<pre><code>## boundary (singular) fit: see ?isSingular
+## boundary (singular) fit: see ?isSingular
+## boundary (singular) fit: see ?isSingular</code></pre>
+<pre><code>## Warning in checkConv(attr(opt, &quot;derivs&quot;), opt$par, ctrl = control$checkConv, :
+## Model failed to converge with max|grad| = 0.00317331 (tol = 0.001, component 1)</code></pre>
+<pre><code>## boundary (singular) fit: see ?isSingular</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding factor and character vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in bind_rows_(x, .id): binding character and factor vector, coercing
+## into character vector</code></pre>
+<pre><code>## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs
+
+## Warning in hatvalues.merMod(model): the hat matrix may not make sense for GLMMs</code></pre>
+<pre class="r"><code># Check singular fit models
+
+map(hosp_random_slope_bct_nest$glmer_models, isSingular) %&gt;% 
+  unlist() %&gt;% 
+  tibble::enframe(name = NULL) %&gt;% 
+  mutate(index = hosp_random_slope_bct_nest$index) %&gt;% 
+  filter(value %in% &quot;TRUE&quot;)</code></pre>
+<pre><code>## # A tibble: 3 x 2
+##   value index                    
+##   &lt;lgl&gt; &lt;chr&gt;                    
+## 1 TRUE  days_tmp_gt85pct_may_sep 
+## 2 TRUE  days_tmp_gt95pct_may_sep 
+## 3 TRUE  days_wbgt_gt95pct_may_sep</code></pre>
+<pre class="r"><code># Remove `days_tmp_gt85pct_may_sep`, `days_tmp_gt95pct_may_sep` , `days_wbgt_gt95pct_may_sep`: singular fit model
+
+hosp_random_slope_bct_nest &lt;-
+  hosp_random_slope_bct_nest %&gt;% 
+  filter(!index %in% c(&quot;days_wbgt_gt95pct_may_sep&quot;, &quot;days_tmp_gt85pct_may_sep&quot;, &quot;days_tmp_gt95pct_may_sep&quot;))
+
+#write_rds(hosp_random_slope_bct_nest, &quot;data/hosp_random_slope_bct_nest.rds&quot;, compress = &quot;none&quot;)</code></pre>
+<pre class="r"><code>hosp_random_slope_bct_nest  %&gt;% 
+  unnest(tidy, .drop = TRUE) %&gt;% 
+  dplyr::select(index, term:group) %&gt;%
+  filter(term %in% &quot;value_scaled&quot;) %&gt;%
+  mutate(index = fct_reorder(index, estimate)) %&gt;%
+  ggplot() +
+    geom_point(aes(x = estimate, y = index)) +
+    geom_errorbarh(
+      aes(y = index,
+          xmin = estimate - 1.96 * std.error,
+          xmax = estimate + 1.96 * std.error)) +
+     geom_vline(aes(xintercept = 0), colour = &quot;blue&quot;) +
+     theme_bw() +
+     theme(axis.text.y = element_text(size = rel(0.75))) +
+      ggtitle(&quot;Regression coefficients - Hospitalization, value-scaled&quot;)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code> hosp_random_slope_bct_nest  %&gt;% 
+  unnest(tidy, .drop = TRUE) %&gt;% 
+  dplyr::select(index, term:group) %&gt;%
+  filter(term %in% &quot;value_scaled&quot;) %&gt;%
+  mutate(index = fct_reorder(index, estimate)) %&gt;% 
+  ggplot() +
+    geom_point(aes(x = exp(estimate), y = index)) +
+    geom_errorbarh(
+      aes(y = index,
+          xmin = exp(estimate - 1.96 * std.error),
+          xmax = exp(estimate + 1.96 * std.error))) +
+     geom_vline(aes(xintercept = 1), colour = &quot;blue&quot;) +
+     theme_bw() +
+     theme(axis.text.y = element_text(size = rel(0.75))) +
+     ggtitle(&quot;Rate Ratio - Hospitalization, value-scaled&quot;)</code></pre>
+<p><img src="mixed_poisson_files/figure-html/unnamed-chunk-4-2.png" width="672" /></p>
 </div>
 
 

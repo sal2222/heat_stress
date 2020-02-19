@@ -36,6 +36,10 @@ dmed_file <- "D:/dmed/dmed_tables/1_9_us_all_age.xlsx"
 dmed_file_list <- list.files(path = "D:/dmed/dmed_tables", pattern = "^[0-9].*\\.(xlsx)$") %>% 
   paste0("D:/dmed/dmed_tables/", .)
 
+#dmed_file_list <- list.files(path = "D:/dmed/dmed_full", pattern = "^[0-9].*\\.(xlsx)$") %>% 
+#  paste0("D:/dmed/dmed_full/", .)
+
+
 dmed_file_list 
 dmed_file %>% excel_sheets() %>% set_names()
 ```
@@ -564,6 +568,9 @@ icd10_from2016_df <-
 ```
 
 
+
+
+
 ## Combine ICD9 and ICD 10 dataframes
 ```{r combine_dataframes, eval = FALSE}
 
@@ -586,6 +593,7 @@ dmed_tidy <-
 dmed_tidy
 
 ```
+
 
 ## Inspect missing data
 ```{r missing_data, eval = FALSE}
@@ -663,5 +671,78 @@ dmed_tidy <-
   na.omit()
 
 # write_rds(dmed_tidy, path = "data/dmed_tidy.rds")
+```
+
+## Map read function over file list - full ICD
+ICD 9: 001-V99 All diseases and injuries
+ICD 10: A00-Z99 All diseases and injuries
+
+```{r map_full_icd, eval = FALSE}
+
+# ICD 9, from 2006
+
+dmed_files_icd9_from2006 <-
+  dmed_file_list %>%
+  as_tibble() %>% 
+  rename(file_name = value) %>%
+  mutate(cut = str_sub(file_name, end = -6L),  
+         year = str_sub(cut, start = -4L)) %>% 
+  filter(year %in% "2006") %>% 
+  dplyr::select(file_name) %>% 
+  as_vector()
+  
+ 
+icd9_from2006_df <- furrr::future_map_dfr(dmed_files_icd9_from2006, read_icd9_from2006, .progress = TRUE) 
+
+
+#####################################################
+
+dmed_files_icd9_from1990 <-
+  dmed_file_list %>%
+    as_tibble() %>% 
+    rename(file_name = value) %>%
+    mutate(cut = str_sub(file_name, end = -6L),  
+           year = str_sub(cut, start = -4L)) %>% 
+    filter(year %in% "1990") %>% 
+    dplyr::select(file_name) %>% 
+    as_vector()
+
+
+icd9_from1990_df <- furrr::future_map_dfr(dmed_files_icd9_from1990, read_icd9_from1990, .progress = TRUE) 
+#########################################################
+
+#ICD 10
+
+dmed_files_icd10_from2016 <-
+    dmed_file_list %>%
+    as_tibble() %>% 
+    rename(file_name = value) %>%
+    mutate(cut = str_sub(file_name, end = -6L),  
+           year = str_sub(cut, start = -4L)) %>% 
+    filter(year %in% "2016") %>% 
+    dplyr::select(file_name) %>% 
+    as_vector()
+
+
+icd10_from2016_df <- furrr::future_map_dfr(dmed_files_icd10_from2016, read_icd10_from2016, .progress = TRUE) 
+
+#############################################################
+
+
+dmed_tidy_full <-
+  rbind(icd9_from1990_df, icd9_from2006_df, icd10_from2016_df) %>% 
+    mutate(type = as_factor(type),
+           category = as_factor(category),
+           location = as_factor(location),
+           year = as.integer(year),
+           strata = as_factor(strata),
+           hsi = as_factor(hsi)) %>% 
+    na.omit()
+
+
+# saveRDS(dmed_tidy_full, file = "data/dmed_tidy_full.rds")
+
+
+
 ```
 
