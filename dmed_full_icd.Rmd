@@ -159,6 +159,26 @@ dmed_tidy_full %>%
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
+# By gender
+dmed_tidy_full %>% 
+  filter(!location %in% c("us", "overseas"),
+         type == "Hospitalizations",
+         !category == "Total") %>% 
+ ggplot(aes(x = year, y = rate, color = category, shape = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = "Army Hospitalization Rates - all ICD codes",
+      x = "Year",
+      y = "HSI rate (per 1,000 persons per year)"
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+
 
 
 dmed_tidy_full %>% 

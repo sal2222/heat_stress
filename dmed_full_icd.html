@@ -437,7 +437,10 @@ div.tocify {
   <ul class="dropdown-menu" role="menu">
     <li class="dropdown-header">Annual</li>
     <li>
-      <a href="dmed_summary.html">Annual cases</a>
+      <a href="dmed_summary.html">Annual HSI cases</a>
+    </li>
+    <li>
+      <a href="dmed_full_icd.html">Annual encounters: All ICD codes</a>
     </li>
     <li class="dropdown-header">Daily</li>
     <li class="dropdown-header">Daily cases</li>
@@ -3506,6 +3509,24 @@ bliss
     theme(strip.text = element_text(size = 6)) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
 <p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-1.png" width="672" /></p>
+<pre class="r"><code># By gender
+dmed_tidy_full %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Ambulatory Data&quot;,
+         !category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = year, y = rate, color = category, shape = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Ambulatory Rates - all ICD codes&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-2.png" width="672" /></p>
 <pre class="r"><code>dmed_tidy_full %&gt;% 
   filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
          type == &quot;Hospitalizations&quot;,
@@ -3521,7 +3542,25 @@ bliss
     theme_bw() +
     theme(strip.text = element_text(size = 6)) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
-<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-2.png" width="672" /></p>
+<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-3.png" width="672" /></p>
+<pre class="r"><code># By gender
+dmed_tidy_full %&gt;% 
+  filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
+         type == &quot;Hospitalizations&quot;,
+         !category == &quot;Total&quot;) %&gt;% 
+ ggplot(aes(x = year, y = rate, color = category, shape = location)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = &quot;Army Hospitalization Rates - all ICD codes&quot;,
+      x = &quot;Year&quot;,
+      y = &quot;HSI rate (per 1,000 persons per year)&quot;
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() +
+    theme(strip.text = element_text(size = 6)) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
+<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-4.png" width="672" /></p>
 <pre class="r"><code>dmed_tidy_full %&gt;% 
   filter(!location %in% c(&quot;us&quot;, &quot;overseas&quot;),
          type == &quot;Reportable Events&quot;,
@@ -3537,17 +3576,9 @@ bliss
     theme_bw() +
     theme(strip.text = element_text(size = 6)) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))</code></pre>
-<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-3.png" width="672" /></p>
+<p><img src="dmed_full_icd_files/figure-html/plot_ambulatory_rates-5.png" width="672" /></p>
 <pre class="r"><code>all_icd &lt;-
   dmed_tidy_full %&gt;% 
-    filter(location %in% c(&quot;benning&quot;, &quot;bragg&quot;, &quot;campbell&quot;, &quot;jackson&quot;,
-                           &quot;polk&quot;, &quot;hood&quot;, &quot;stewart&quot;, &quot;leonardwood&quot;, 
-                           &quot;riley&quot;, &quot;irwin&quot;, &quot;bliss&quot;),
-           type == &quot;Ambulatory Data&quot;,
-           hsi == &quot;all&quot;,
-           strata == &quot;gender&quot;,
-           category == &quot;Total&quot;) %&gt;% 
-    dplyr::select(location, year, rate) %&gt;% 
     dplyr::mutate(location = dplyr::recode(location, jackson = &quot;fort_jackson&quot;),
            location = dplyr::recode(location, benning = &quot;fort_benning_ga&quot;),                 
            location = dplyr::recode(location, bragg = &quot;fort_bragg&quot;),
@@ -3561,16 +3592,7 @@ bliss
            location = dplyr::recode(location, bliss = &quot;fort_bliss&quot;),
            location = as.character(location))
 
-
-
-# Join table
-
-joined_rate &lt;-
-  index_long %&gt;% 
-    left_join(hsi_rates, by = c(&quot;installation&quot; = &quot;location&quot;, &quot;year&quot; = &quot;year&quot;)) %&gt;% 
-    drop_na(rate)
-
-joined_rate</code></pre>
+#write_rds(all_icd, &quot;data/all_icd.rds&quot;)</code></pre>
 </div>
 
 
