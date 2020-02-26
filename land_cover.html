@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>land_cover</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/sandstone.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<link rel="shortcut icon" href="favicon.ico">
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 61px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h2 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h3 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h4 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h5 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.section h6 {
+  padding-top: 66px;
+  margin-top: -66px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Heat Stress Research</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    Home
+  </a>
+</li>
+<li>
+  <a href="about.html">
+    <span class="fa fa-info"></span>
+     
+    About
+  </a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-gear"></span>
+     
+    Data Preparation
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Meteorology Data</li>
+    <li>
+      <a href="shapefiles.html">Installation Shapefiles</a>
+    </li>
+    <li>
+      <a href="nldas_wget.html">Download NLDAS-2 Data</a>
+    </li>
+    <li>
+      <a href="extract_cells.html">Extract from NLDAS netCDF Files</a>
+    </li>
+    <li>
+      <a href="installation_nldas.html">Tidy NLDAS Data for Analysis</a>
+    </li>
+    <li>
+      <a href="nldas_indices.html">NLDAS Conversions and Indices</a>
+    </li>
+    <li class="divider"></li>
+    <li class="dropdown-header">Outcome Data</li>
+    <li>
+      <a href="dmed_read.html">DMED Queries</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-thermometer"></span>
+     
+    Meteorology
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="nldas_timeseries.html">Time series formats (zoo, xts, ts)</a>
+    </li>
+    <li>
+      <a href="nldas_fable.html">Time series (Fable)</a>
+    </li>
+    <li>
+      <a href="nldas_averaged.html">Aggregate over calendar periods</a>
+    </li>
+    <li>
+      <a href="climatology.html">Climatologies / Anomalies</a>
+    </li>
+    <li>
+      <a href="annual_tables.html">Annual index tables</a>
+    </li>
+    <li>
+      <a href="af_weather.html">Air Force weather station data</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-tree"></span>
+     
+    Land Cover
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="land_cover.html">Tree canopy</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-medkit"></span>
+     
+    Heat Illness
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_summary.html">Annual HSI cases</a>
+    </li>
+    <li>
+      <a href="dmed_full_icd.html">Annual encounters: All ICD codes</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li class="dropdown-header">Daily cases</li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-line-chart"></span>
+     
+    Models
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li class="dropdown-header">Annual</li>
+    <li>
+      <a href="dmed_models.html">Annual models - Outpatient HSI</a>
+    </li>
+    <li>
+      <a href="dmed_models_hospitalization.html">Annual models - Inpatient HSI</a>
+    </li>
+    <li>
+      <a href="mixed_models.html">Mixed models</a>
+    </li>
+    <li>
+      <a href="mixed_poisson.html">Mixed models - Poisson</a>
+    </li>
+    <li class="dropdown-header">Daily</li>
+    <li>
+      <a href="daily_models.html">Overview of daily models</a>
+    </li>
+    <li>
+      <a href="case_crossover.html">Case-crossover models</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    <span class="fa fa-desktop"></span>
+     
+    Shiny
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="https://sal2222.shinyapps.io/annual_heat/">Annual HSI Shiny</a>
+    </li>
+  </ul>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="mailto:sal2222@cumc.columbia.edu">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="http://github.com/sal2222/">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">land_cover</h1>
+
+</div>
+
+
+<div id="load-military-installations-ranges-and-training-areas-mirta-dataset" class="section level2">
+<h2>Load Military Installations, Ranges, and Training Areas (MIRTA) Dataset</h2>
+<p>Accessed from: <a href="https://catalog.data.gov/dataset/military-installations-ranges-and-training-areas" class="uri">https://catalog.data.gov/dataset/military-installations-ranges-and-training-areas</a>.<br />
+Metadata updated date: January 18, 2017.</p>
+<p>Join Fort Benning Georgia and Alabama shapefiles. Note: Fort Lewis (JBLM) geometry includes remote sites.</p>
+</div>
+<div id="select-installations" class="section level2">
+<h2>Select installations</h2>
+<p>Select bases for analyses. Citeria: in list of top CONUS bases for heat illnesses from MSMR report (April 2018). Additional Army installations based on HSI counts and rates (from DMED) and for diversity of climate regions.</p>
+<p>Add centroid column.</p>
+<pre class="r"><code># saveRDS(select_bases, &quot;data/select_bases.rds&quot;)
+
+select_bases &lt;-
+  read_rds(&quot;data/select_bases.rds&quot;)
+
+army_shapefiles &lt;-
+  select_bases %&gt;% 
+  dplyr::filter(.$site_name %in% c(&quot;Fort Benning GA&quot;, &quot;Fort Bragg&quot;,&quot;Fort Campbell&quot;,
+                              &quot;Fort Jackson&quot;, &quot;Fort Polk&quot;, &quot;Fort Hood&quot;,
+                              &quot;Fort Stewart&quot;, &quot;Fort Leonard Wood&quot;, &quot;Fort Riley&quot;,
+                              &quot;NTC and Fort Irwin&quot;, &quot;Fort Bliss&quot;))</code></pre>
+</div>
+<div id="download-and-crop-the-national-land-cover-database" class="section level2">
+<h2>Download and crop the National Land Cover Database</h2>
+<p>ref: <a href="https://github.com/ropensci/FedData/blob/master/R/NLCD_FUNCTIONS.R" class="uri">https://github.com/ropensci/FedData/blob/master/R/NLCD_FUNCTIONS.R</a></p>
+<pre class="r"><code>canopy_list &lt;- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    base_canopy &lt;-
+      get_nlcd(template = army_shapefiles$geometry[i],
+                   year = 2016,
+                   dataset = &quot;Tree_Canopy&quot;,
+                   label = army_shapefiles$site_name[i])  
+    canopy_list[[i]] &lt;- base_canopy
+}
+
+
+
+# write_rds(canopy_list, &quot;data/canopy_list.rds&quot;)</code></pre>
+</div>
+<div id="tree-canopy-maps" class="section level2">
+<h2>Tree Canopy Maps</h2>
+<pre class="r"><code>canopy_list &lt;-
+  read_rds(&quot;data/canopy_list.rds&quot;)
+
+# Change canopy raster projection to base shapefile projection
+
+projection &lt;- &quot;+proj=longlat +datum=WGS84 +no_defs&quot;
+
+
+
+# Function to canopy raster projections to base shapefile projections
+canopy_crs_function &lt;- function(stack) {
+    projectRaster(stack, crs = projection)
+}
+
+
+
+canopy_list_crs &lt;- 
+  map(canopy_list, canopy_crs_function)
+canopy_list_crs</code></pre>
+<pre><code>## $`Fort Benning GA`
+## class      : RasterLayer 
+## dimensions : 1384, 1439, 1991576  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000228  (x, y)
+## extent     : -85.0227, -84.63561, 32.23751, 32.55306  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : -7.188737, 112.0051  (min, max)
+## 
+## 
+## $`Fort Campbell`
+## class      : RasterLayer 
+## dimensions : 897, 1488, 1334736  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000216  (x, y)
+## extent     : -87.82221, -87.42194, 36.5343, 36.72806  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : -3.902629, 106.1863  (min, max)
+## 
+## 
+## $`Fort Riley`
+## class      : RasterLayer 
+## dimensions : 1624, 1063, 1726312  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000209  (x, y)
+## extent     : -96.96643, -96.68048, 38.9686, 39.30802  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 2, 86  (min, max)
+## 
+## 
+## $`NTC and Fort Irwin`
+## class      : RasterLayer 
+## dimensions : 2489, 3431, 8539759  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00022  (x, y)
+## extent     : -117.0845, -116.1615, 35.08111, 35.62869  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 2, 13  (min, max)
+## 
+## 
+## $`Fort Bragg`
+## class      : RasterLayer 
+## dimensions : 1081, 1789, 1933909  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00022  (x, y)
+## extent     : -79.38191, -78.90067, 35.03808, 35.2759  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : -7.390338, 117.2866  (min, max)
+## 
+## 
+## $`Fort Polk`
+## class      : RasterLayer 
+## dimensions : 2484, 2676, 6647184  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00023  (x, y)
+## extent     : -93.58131, -92.86146, 30.92067, 31.49199  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 8, 102.728  (min, max)
+## 
+## 
+## $`Fort Jackson`
+## class      : RasterLayer 
+## dimensions : 580, 978, 567240  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000223  (x, y)
+## extent     : -80.96573, -80.70265, 33.97707, 34.10641  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : -3.3624, 105.8267  (min, max)
+## 
+## 
+## $`Fort Leonard Wood`
+## class      : RasterLayer 
+## dimensions : 1751, 1184, 2073184  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000213  (x, y)
+## extent     : -92.26483, -91.94633, 37.59655, 37.96951  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 6, 100  (min, max)
+## 
+## 
+## $`Fort Bliss`
+## class      : RasterLayer 
+## dimensions : 3992, 3938, 15720496  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000228  (x, y)
+## extent     : -106.5828, -105.5235, 31.7877, 32.69787  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : C:/Users/slewa/AppData/Local/Temp/Rtmp8SHYej/raster/r_tmp_2020-02-26_111512_18872_34216.grd 
+## names      : layer 
+## values     : 1, 56.64309  (min, max)
+## 
+## 
+## $`Fort Hood`
+## class      : RasterLayer 
+## dimensions : 1667, 1522, 2537174  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000231  (x, y)
+## extent     : -97.91424, -97.50482, 31.0092, 31.39427  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 5.110082, 92.87275  (min, max)
+## 
+## 
+## $`Fort Stewart`
+## class      : RasterLayer 
+## dimensions : 1542, 2185, 3369270  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000229  (x, y)
+## extent     : -81.89063, -81.30287, 31.77325, 32.12637  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 8, 103.7453  (min, max)</code></pre>
+<pre class="r"><code>plot_raster_function &lt;- function(stack, base) {
+    plot(stack, main = NULL)
+    par(mar = c(2,2,2,2) + 0.1)
+    plot(base, add = TRUE, lwd = 3)
+}
+
+
+map2(.x = canopy_list_crs, .y = army_shapefiles$geometry, .f = plot_raster_function)</code></pre>
+<p><img src="land_cover_files/figure-html/plot_tree_cover-1.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-2.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-3.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-4.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-5.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-6.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-7.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-8.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-9.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-10.png" width="672" /><img src="land_cover_files/figure-html/plot_tree_cover-11.png" width="672" /></p>
+<pre><code>## $`Fort Benning GA`
+## NULL
+## 
+## $`Fort Campbell`
+## NULL
+## 
+## $`Fort Riley`
+## NULL
+## 
+## $`NTC and Fort Irwin`
+## NULL
+## 
+## $`Fort Bragg`
+## NULL
+## 
+## $`Fort Polk`
+## NULL
+## 
+## $`Fort Jackson`
+## NULL
+## 
+## $`Fort Leonard Wood`
+## NULL
+## 
+## $`Fort Bliss`
+## NULL
+## 
+## $`Fort Hood`
+## NULL
+## 
+## $`Fort Stewart`
+## NULL</code></pre>
+</div>
+<div id="mask-raster-by-installation-boundary" class="section level2">
+<h2>Mask raster by installation boundary</h2>
+<pre class="r"><code>mask_canopy_list &lt;- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    mask_canopy &lt;-
+        mask(canopy_list_crs[[i]], as(army_shapefiles$geometry[i], &quot;Spatial&quot;))
+    
+    mask_canopy_list[[i]] &lt;- mask_canopy
+}
+
+names(mask_canopy_list) &lt;- army_shapefiles$site_name
+mask_canopy_list
+
+purrr::map2(mask_canopy_list, names(mask_canopy_list), 
+     ~plot(.x, main = .y))
+
+
+# write_rds(mask_canopy_list, &quot;data/mask_canopy_list.rds&quot;)</code></pre>
+</div>
+<div id="raster-cell-stats" class="section level2">
+<h2>Raster cell stats</h2>
+<p>sum, mean, min, max, sd</p>
+<pre class="r"><code>mask_canopy_list &lt;-
+  read_rds(&quot;data/mask_canopy_list.rds&quot;)
+
+
+# Mean percent canopy at each installation
+map_dfr(mask_canopy_list, ~ cellStats(., &quot;mean&quot;)) %&gt;% 
+  tidyr::pivot_longer(., 1:11, names_to = &quot;location&quot;,  values_to = &quot;mean_pct_canopy&quot;)</code></pre>
+<pre><code>## # A tibble: 11 x 2
+##    location           mean_pct_canopy
+##    &lt;chr&gt;                        &lt;dbl&gt;
+##  1 Fort Benning GA              73.7 
+##  2 Fort Campbell                69.7 
+##  3 Fort Riley                   27.0 
+##  4 NTC and Fort Irwin            7.33
+##  5 Fort Bragg                   60.9 
+##  6 Fort Polk                    83.8 
+##  7 Fort Jackson                 61.9 
+##  8 Fort Leonard Wood            66.7 
+##  9 Fort Bliss                   12.6 
+## 10 Fort Hood                    58.6 
+## 11 Fort Stewart                 77.2</code></pre>
+<pre class="r"><code># Canopy pixel frequency tables
+# map(mask_canopy_list, freq)
+
+
+# Canopy raster value statitics
+mask_canopy_stats_list &lt;- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    mask_canopy_stats &lt;-
+       freq(mask_canopy_list[[i]]) %&gt;% 
+       as_tibble() %&gt;%
+       summarise(sum_pixel = sum(count)) %&gt;% 
+       mutate(na_count = freq(mask_canopy_list[[i]]) %&gt;%
+                    as_tibble() %&gt;% 
+                    dplyr::filter(value %in% NA) %&gt;% 
+                    pull(count),
+              pct_na = na_count / sum_pixel,
+              mean_canopy = cellStats(mask_canopy_list[[i]], &quot;mean&quot;),
+              sd_canopy = cellStats(mask_canopy_list[[i]], &quot;sd&quot;))
+    
+mask_canopy_stats_list[[i]] &lt;- mask_canopy_stats 
+}
+
+
+mask_canopy_stats_list %&gt;% 
+  bind_rows() %&gt;% 
+  mutate(installation = army_shapefiles$site_name)</code></pre>
+<pre><code>## # A tibble: 11 x 6
+##    sum_pixel na_count pct_na mean_canopy sd_canopy installation      
+##        &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;             
+##  1   1991576   978192  0.491       73.7      20.4  Fort Benning GA   
+##  2   1334736   773994  0.580       69.7      22.8  Fort Campbell     
+##  3   1726312  1459192  0.845       27.0      22.6  Fort Riley        
+##  4   8539759  8539592  1.000        7.33      2.75 NTC and Fort Irwin
+##  5   1933909  1066986  0.552       60.9      21.8  Fort Bragg        
+##  6   6647184  5240581  0.788       83.8      17.2  Fort Polk         
+##  7    567240   268956  0.474       61.9      22.9  Fort Jackson      
+##  8   2073184  1648265  0.795       66.7      14.1  Fort Leonard Wood 
+##  9  15720496 13174505  0.838       12.6       5.56 Fort Bliss        
+## 10   2537174  1838709  0.725       58.6      20.2  Fort Hood         
+## 11   3369270  1762014  0.523       77.2      17.4  Fort Stewart</code></pre>
+<pre class="r"><code># Plot percent NA by mean_canopy value (includes space outside of mask)
+mask_canopy_stats_list %&gt;% 
+  bind_rows() %&gt;% 
+  ggplot(aes(x = mean_canopy, y = pct_na)) +
+    geom_point() +
+    geom_smooth(method = lm)</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-1.png" width="672" /></p>
+<pre class="r"><code># Histograms of canopy pixel values
+
+purrr::map2(mask_canopy_list, names(mask_canopy_list), 
+     ~histogram(.x, main = .y))</code></pre>
+<pre><code>## Warning in sampleInt(length(x), size): size changed to n because it cannot be
+## larger than n when replace is FALSE</code></pre>
+<pre><code>## $`Fort Benning GA`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-2.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Campbell`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-3.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Riley`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-4.png" width="672" /></p>
+<pre><code>## 
+## $`NTC and Fort Irwin`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-5.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Bragg`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-6.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Polk`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-7.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Jackson`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-8.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Leonard Wood`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-9.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Bliss`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-10.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Hood`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-11.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Stewart`</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-12.png" width="672" /></p>
+<pre class="r"><code># Map &quot;NA&quot; values
+# Inclusive of inside mask and bounding box
+map2(mask_canopy_list, names(mask_canopy_list),  ~ plot(is.na(.), main = .y))</code></pre>
+<p><img src="land_cover_files/figure-html/raster_stats-13.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-14.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-15.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-16.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-17.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-18.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-19.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-20.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-21.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-22.png" width="672" /><img src="land_cover_files/figure-html/raster_stats-23.png" width="672" /></p>
+<pre><code>## $`Fort Benning GA`
+## NULL
+## 
+## $`Fort Campbell`
+## NULL
+## 
+## $`Fort Riley`
+## NULL
+## 
+## $`NTC and Fort Irwin`
+## NULL
+## 
+## $`Fort Bragg`
+## NULL
+## 
+## $`Fort Polk`
+## NULL
+## 
+## $`Fort Jackson`
+## NULL
+## 
+## $`Fort Leonard Wood`
+## NULL
+## 
+## $`Fort Bliss`
+## NULL
+## 
+## $`Fort Hood`
+## NULL
+## 
+## $`Fort Stewart`
+## NULL</code></pre>
+</div>
+<div id="convert-na-to-0-zero-then-mask-shapefile" class="section level2">
+<h2>Convert NA to 0 (zero), then mask shapefile</h2>
+<p>Reclassify function</p>
+<pre class="r"><code>canopy_list_crs[[1]] %&gt;% plot()</code></pre>
+<p><img src="land_cover_files/figure-html/reclassify_na-1.png" width="672" /></p>
+<pre class="r"><code>canopy_list_crs[[1]] %&gt;% 
+  is.na()</code></pre>
+<pre><code>## class      : RasterLayer 
+## dimensions : 1384, 1439, 1991576  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000228  (x, y)
+## extent     : -85.0227, -84.63561, 32.23751, 32.55306  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : layer 
+## values     : 0, 1  (min, max)</code></pre>
+<pre class="r"><code># Function to replace NA values
+replace_na_function &lt;- function(raster_layer) {
+  raster::reclassify(raster_layer, cbind(NA, 0))
+}
+
+
+canopy_list_no_na &lt;-
+  map(.x = canopy_list_crs, .f = replace_na_function)
+
+canopy_list_no_na</code></pre>
+<pre><code>## $`Fort Benning GA`
+## class      : RasterLayer 
+## dimensions : 1384, 1439, 1991576  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000228  (x, y)
+## extent     : -85.0227, -84.63561, 32.23751, 32.55306  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : -7.188737, 112.0051  (min, max)
+## 
+## 
+## $`Fort Campbell`
+## class      : RasterLayer 
+## dimensions : 897, 1488, 1334736  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000216  (x, y)
+## extent     : -87.82221, -87.42194, 36.5343, 36.72806  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : -3.902629, 106.1863  (min, max)
+## 
+## 
+## $`Fort Riley`
+## class      : RasterLayer 
+## dimensions : 1624, 1063, 1726312  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000209  (x, y)
+## extent     : -96.96643, -96.68048, 38.9686, 39.30802  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 86  (min, max)
+## 
+## 
+## $`NTC and Fort Irwin`
+## class      : RasterLayer 
+## dimensions : 2489, 3431, 8539759  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00022  (x, y)
+## extent     : -117.0845, -116.1615, 35.08111, 35.62869  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 13  (min, max)
+## 
+## 
+## $`Fort Bragg`
+## class      : RasterLayer 
+## dimensions : 1081, 1789, 1933909  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00022  (x, y)
+## extent     : -79.38191, -78.90067, 35.03808, 35.2759  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : -7.390338, 117.2866  (min, max)
+## 
+## 
+## $`Fort Polk`
+## class      : RasterLayer 
+## dimensions : 2484, 2676, 6647184  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00023  (x, y)
+## extent     : -93.58131, -92.86146, 30.92067, 31.49199  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 102.728  (min, max)
+## 
+## 
+## $`Fort Jackson`
+## class      : RasterLayer 
+## dimensions : 580, 978, 567240  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000223  (x, y)
+## extent     : -80.96573, -80.70265, 33.97707, 34.10641  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : -3.3624, 105.8267  (min, max)
+## 
+## 
+## $`Fort Leonard Wood`
+## class      : RasterLayer 
+## dimensions : 1751, 1184, 2073184  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000213  (x, y)
+## extent     : -92.26483, -91.94633, 37.59655, 37.96951  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 100  (min, max)
+## 
+## 
+## $`Fort Bliss`
+## class      : RasterLayer 
+## dimensions : 3992, 3938, 15720496  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000228  (x, y)
+## extent     : -106.5828, -105.5235, 31.7877, 32.69787  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : layer 
+## values     : 0, 56.64309  (min, max)
+## 
+## 
+## $`Fort Hood`
+## class      : RasterLayer 
+## dimensions : 1667, 1522, 2537174  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000231  (x, y)
+## extent     : -97.91424, -97.50482, 31.0092, 31.39427  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 92.87275  (min, max)
+## 
+## 
+## $`Fort Stewart`
+## class      : RasterLayer 
+## dimensions : 1542, 2185, 3369270  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000229  (x, y)
+## extent     : -81.89063, -81.30287, 31.77325, 32.12637  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 103.7453  (min, max)</code></pre>
+<pre class="r"><code>canopy_list_no_na[[1]] %&gt;% plot()</code></pre>
+<p><img src="land_cover_files/figure-html/reclassify_na-2.png" width="672" /></p>
+<p>Mask shapefile</p>
+<pre class="r"><code>mask_canopy_no_na_list &lt;- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    mask_canopy_no_na &lt;-
+        mask(canopy_list_no_na[[i]], as(army_shapefiles$geometry[i], &quot;Spatial&quot;))
+    
+    mask_canopy_no_na_list[[i]] &lt;- mask_canopy_no_na
+}
+
+names(mask_canopy_no_na_list) &lt;- army_shapefiles$site_name
+mask_canopy_no_na_list</code></pre>
+<pre><code>## $`Fort Benning GA`
+## class      : RasterLayer 
+## dimensions : 1384, 1439, 1991576  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000228  (x, y)
+## extent     : -85.0227, -84.63561, 32.23751, 32.55306  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 100  (min, max)
+## 
+## 
+## $`Fort Campbell`
+## class      : RasterLayer 
+## dimensions : 897, 1488, 1334736  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000216  (x, y)
+## extent     : -87.82221, -87.42194, 36.5343, 36.72806  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 99.96742  (min, max)
+## 
+## 
+## $`Fort Riley`
+## class      : RasterLayer 
+## dimensions : 1624, 1063, 1726312  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000209  (x, y)
+## extent     : -96.96643, -96.68048, 38.9686, 39.30802  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 84  (min, max)
+## 
+## 
+## $`NTC and Fort Irwin`
+## class      : RasterLayer 
+## dimensions : 2489, 3431, 8539759  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00022  (x, y)
+## extent     : -117.0845, -116.1615, 35.08111, 35.62869  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 13  (min, max)
+## 
+## 
+## $`Fort Bragg`
+## class      : RasterLayer 
+## dimensions : 1081, 1789, 1933909  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00022  (x, y)
+## extent     : -79.38191, -78.90067, 35.03808, 35.2759  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 99  (min, max)
+## 
+## 
+## $`Fort Polk`
+## class      : RasterLayer 
+## dimensions : 2484, 2676, 6647184  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.00023  (x, y)
+## extent     : -93.58131, -92.86146, 30.92067, 31.49199  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 100  (min, max)
+## 
+## 
+## $`Fort Jackson`
+## class      : RasterLayer 
+## dimensions : 580, 978, 567240  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000223  (x, y)
+## extent     : -80.96573, -80.70265, 33.97707, 34.10641  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 99  (min, max)
+## 
+## 
+## $`Fort Leonard Wood`
+## class      : RasterLayer 
+## dimensions : 1751, 1184, 2073184  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000213  (x, y)
+## extent     : -92.26483, -91.94633, 37.59655, 37.96951  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 99.48892  (min, max)
+## 
+## 
+## $`Fort Bliss`
+## class      : RasterLayer 
+## dimensions : 3992, 3938, 15720496  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000228  (x, y)
+## extent     : -106.5828, -105.5235, 31.7877, 32.69787  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : layer 
+## values     : 0, 51.77322  (min, max)
+## 
+## 
+## $`Fort Hood`
+## class      : RasterLayer 
+## dimensions : 1667, 1522, 2537174  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000231  (x, y)
+## extent     : -97.91424, -97.50482, 31.0092, 31.39427  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 92.87275  (min, max)
+## 
+## 
+## $`Fort Stewart`
+## class      : RasterLayer 
+## dimensions : 1542, 2185, 3369270  (nrow, ncol, ncell)
+## resolution : 0.000269, 0.000229  (x, y)
+## extent     : -81.89063, -81.30287, 31.77325, 32.12637  (xmin, xmax, ymin, ymax)
+## crs        : +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0 
+## source     : memory
+## names      : NLCD_2016_Tree_Canopy_L48 
+## values     : 0, 100  (min, max)</code></pre>
+<pre class="r"><code>purrr::map2(mask_canopy_no_na_list, names(mask_canopy_no_na_list), 
+     ~plot(.x, main = .y))</code></pre>
+<p><img src="land_cover_files/figure-html/mask_no_na-1.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-2.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-3.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-4.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-5.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-6.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-7.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-8.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-9.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-10.png" width="672" /><img src="land_cover_files/figure-html/mask_no_na-11.png" width="672" /></p>
+<pre><code>## $`Fort Benning GA`
+## NULL
+## 
+## $`Fort Campbell`
+## NULL
+## 
+## $`Fort Riley`
+## NULL
+## 
+## $`NTC and Fort Irwin`
+## NULL
+## 
+## $`Fort Bragg`
+## NULL
+## 
+## $`Fort Polk`
+## NULL
+## 
+## $`Fort Jackson`
+## NULL
+## 
+## $`Fort Leonard Wood`
+## NULL
+## 
+## $`Fort Bliss`
+## NULL
+## 
+## $`Fort Hood`
+## NULL
+## 
+## $`Fort Stewart`
+## NULL</code></pre>
+<pre class="r"><code># write_rds(mask_canopy_list, &quot;data/mask_canopy_list.rds&quot;)</code></pre>
+</div>
+<div id="canopy-cell-statistics-with-nas-reclassified" class="section level2">
+<h2>Canopy cell statistics with NA’s reclassified</h2>
+<pre class="r"><code># Canopy raster value statitics
+mask_canopy_stats_no_na_list &lt;- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    mask_canopy_stats_no_na &lt;-
+       freq(mask_canopy_no_na_list[[i]]) %&gt;% 
+       as_tibble() %&gt;%
+       summarise(sum_pixel = sum(count)) %&gt;% 
+       mutate(na_count = freq(mask_canopy_no_na_list[[i]]) %&gt;%
+                    as_tibble() %&gt;% 
+                    dplyr::filter(value %in% NA) %&gt;% 
+                    pull(count),
+              pct_na = na_count / sum_pixel,
+              mean_canopy = cellStats(mask_canopy_no_na_list[[i]], &quot;mean&quot;),
+              sd_canopy = cellStats(mask_canopy_no_na_list[[i]], &quot;sd&quot;))
+    
+mask_canopy_stats_no_na_list[[i]] &lt;- mask_canopy_stats_no_na 
+}
+
+
+mask_canopy_stats_no_na_list %&gt;% 
+  bind_rows() %&gt;% 
+  mutate(installation = army_shapefiles$site_name)</code></pre>
+<pre><code>## # A tibble: 11 x 6
+##    sum_pixel na_count pct_na mean_canopy sd_canopy installation      
+##        &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;       &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;             
+##  1   1991576   838202  0.421   64.7        30.7    Fort Benning GA   
+##  2   1334736   600649  0.450   53.3        35.7    Fort Campbell     
+##  3   1726312  1118630  0.648   11.9        20.1    Fort Riley        
+##  4   8539759  3418430  0.400    0.000239    0.0447 NTC and Fort Irwin
+##  5   1933909   885084  0.458   50.4        30.4    Fort Bragg        
+##  6   6647184  5148494  0.775   78.6        26.2    Fort Polk         
+##  7    567240   221823  0.391   53.5        30.1    Fort Jackson      
+##  8   2073184  1581061  0.763   57.6        26.4    Fort Leonard Wood 
+##  9  15720496  8772281  0.558    4.61        6.94   Fort Bliss        
+## 10   2537174  1240948  0.489   31.6        32.8    Fort Hood         
+## 11   3369270  1616044  0.480   70.8        27.1    Fort Stewart</code></pre>
+<pre class="r"><code># Histograms of canopy pixel values with NAs reclassified to 0
+
+purrr::map2(mask_canopy_no_na_list, names(mask_canopy_list), 
+     ~histogram(.x, main = .y))</code></pre>
+<pre><code>## $`Fort Benning GA`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-1.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Campbell`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-2.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Riley`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-3.png" width="672" /></p>
+<pre><code>## 
+## $`NTC and Fort Irwin`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-4.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Bragg`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-5.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Polk`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-6.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Jackson`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-7.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Leonard Wood`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-8.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Bliss`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-9.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Hood`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-10.png" width="672" /></p>
+<pre><code>## 
+## $`Fort Stewart`</code></pre>
+<p><img src="land_cover_files/figure-html/cell_stats_no_na-11.png" width="672" /></p>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

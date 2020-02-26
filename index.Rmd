@@ -73,6 +73,10 @@ Do we observe effect estimate changes at defined Heat Category boundaries? Are t
 
 - Air Force weather station data (U.S. Army installations, 2008-2018) - sensitivity analysis [[here]](af_weather.html)
 
+## Land Cover
+
+- Tree canopy statistics [[here]](land_cover.html)
+
 ## Heat Stress Outcomes
 
 - DMED HSI Summary (annual) [[here]](dmed_summary.html) 

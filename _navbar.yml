@@ -40,6 +40,11 @@ left:
           href: annual_tables.html
         - text: "Air Force weather station data"
           href: af_weather.html  
+    - text: "Land Cover"
+      icon: fa-tree  
+      menu: 
+        - text: "Tree canopy"
+          href: land_cover.html
     - text: "Heat Illness"
       icon: fa-medkit  
       menu: 
@@ -67,7 +72,7 @@ left:
           href: daily_models.html
         - text: "Case-crossover models"
           href: case_crossover.html
-    - text: "Shiny - interactive"
+    - text: "Shiny"
       icon: fa-desktop  
       menu: 
         - text: "Annual HSI Shiny"

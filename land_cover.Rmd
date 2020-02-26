@@ -1,0 +1,300 @@
+---
+title: "land_cover"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+library(here)
+library(sf)
+library(sp)
+library(tidyverse)
+library(viridis)
+library(rvest)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rnaturalearthhires)
+library(rgeos)
+library(lwgeom)
+library(cowplot)
+library(purrr)
+library(purrrlyr)
+library(tmap)
+library(janitor)
+library(plotly)
+library(FedData)
+library(tabularaster)
+library(rasterVis)
+library(raster)
+```
+
+## Load Military Installations, Ranges, and Training Areas (MIRTA) Dataset
+
+Accessed from: https://catalog.data.gov/dataset/military-installations-ranges-and-training-areas.   
+Metadata updated date: January 18, 2017.
+
+Join Fort Benning Georgia and Alabama shapefiles. Note: Fort Lewis (JBLM) geometry includes remote sites.
+
+
+## Select installations
+
+Select bases for analyses. Citeria: in list of top CONUS bases for heat illnesses from MSMR report (April 2018). Additional Army installations based on HSI counts and rates (from DMED) and for diversity of climate regions.
+
+Add centroid column.
+```{r select_sf_dataframe, warning = FALSE}
+
+# saveRDS(select_bases, "data/select_bases.rds")
+
+select_bases <-
+  read_rds("data/select_bases.rds")
+
+army_shapefiles <-
+  select_bases %>% 
+  dplyr::filter(.$site_name %in% c("Fort Benning GA", "Fort Bragg","Fort Campbell",
+                              "Fort Jackson", "Fort Polk", "Fort Hood",
+                              "Fort Stewart", "Fort Leonard Wood", "Fort Riley",
+                              "NTC and Fort Irwin", "Fort Bliss"))
+```
+
+
+
+## Download and crop the National Land Cover Database
+ref: https://github.com/ropensci/FedData/blob/master/R/NLCD_FUNCTIONS.R
+
+```{r get_nlcd, eval = FALSE}
+
+
+canopy_list <- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    base_canopy <-
+      get_nlcd(template = army_shapefiles$geometry[i],
+                   year = 2016,
+                   dataset = "Tree_Canopy",
+                   label = army_shapefiles$site_name[i])  
+    canopy_list[[i]] <- base_canopy
+}
+
+
+
+# write_rds(canopy_list, "data/canopy_list.rds")
+
+```
+
+
+## Tree Canopy Maps
+
+```{r plot_tree_cover}
+
+canopy_list <-
+  read_rds("data/canopy_list.rds")
+
+# Change canopy raster projection to base shapefile projection
+
+projection <- "+proj=longlat +datum=WGS84 +no_defs"
+
+
+
+# Function to canopy raster projections to base shapefile projections
+canopy_crs_function <- function(stack) {
+    projectRaster(stack, crs = projection)
+}
+
+
+
+canopy_list_crs <- 
+  map(canopy_list, canopy_crs_function)
+canopy_list_crs
+
+
+plot_raster_function <- function(stack, base) {
+    plot(stack, main = NULL)
+    par(mar = c(2,2,2,2) + 0.1)
+    plot(base, add = TRUE, lwd = 3)
+}
+
+
+map2(.x = canopy_list_crs, .y = army_shapefiles$geometry, .f = plot_raster_function)
+
+
+```
+
+## Mask raster by installation boundary
+
+
+```{r mask_raster, eval = FALSE}
+
+mask_canopy_list <- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    mask_canopy <-
+        mask(canopy_list_crs[[i]], as(army_shapefiles$geometry[i], "Spatial"))
+    
+    mask_canopy_list[[i]] <- mask_canopy
+}
+
+names(mask_canopy_list) <- army_shapefiles$site_name
+mask_canopy_list
+
+purrr::map2(mask_canopy_list, names(mask_canopy_list), 
+     ~plot(.x, main = .y))
+
+
+# write_rds(mask_canopy_list, "data/mask_canopy_list.rds")
+
+```
+
+
+
+## Raster cell stats
+sum, mean, min, max, sd
+```{r raster_stats}
+
+mask_canopy_list <-
+  read_rds("data/mask_canopy_list.rds")
+
+
+# Mean percent canopy at each installation
+map_dfr(mask_canopy_list, ~ cellStats(., "mean")) %>% 
+  tidyr::pivot_longer(., 1:11, names_to = "location",  values_to = "mean_pct_canopy")
+
+
+# Canopy pixel frequency tables
+# map(mask_canopy_list, freq)
+
+
+# Canopy raster value statitics
+mask_canopy_stats_list <- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    mask_canopy_stats <-
+       freq(mask_canopy_list[[i]]) %>% 
+       as_tibble() %>%
+       summarise(sum_pixel = sum(count)) %>% 
+       mutate(na_count = freq(mask_canopy_list[[i]]) %>%
+                    as_tibble() %>% 
+                    dplyr::filter(value %in% NA) %>% 
+                    pull(count),
+              pct_na = na_count / sum_pixel,
+              mean_canopy = cellStats(mask_canopy_list[[i]], "mean"),
+              sd_canopy = cellStats(mask_canopy_list[[i]], "sd"))
+    
+mask_canopy_stats_list[[i]] <- mask_canopy_stats 
+}
+
+
+mask_canopy_stats_list %>% 
+  bind_rows() %>% 
+  mutate(installation = army_shapefiles$site_name)
+
+
+# Plot percent NA by mean_canopy value (includes space outside of mask)
+mask_canopy_stats_list %>% 
+  bind_rows() %>% 
+  ggplot(aes(x = mean_canopy, y = pct_na)) +
+    geom_point() +
+    geom_smooth(method = lm)
+
+
+# Histograms of canopy pixel values
+
+purrr::map2(mask_canopy_list, names(mask_canopy_list), 
+     ~histogram(.x, main = .y))
+
+# Map "NA" values
+# Inclusive of inside mask and bounding box
+map2(mask_canopy_list, names(mask_canopy_list),  ~ plot(is.na(.), main = .y))
+
+
+
+```
+
+
+## Convert NA to 0 (zero), then mask shapefile
+
+Reclassify function
+```{r reclassify_na}
+
+canopy_list_crs[[1]] %>% plot()
+
+canopy_list_crs[[1]] %>% 
+  is.na()
+
+# Function to replace NA values
+replace_na_function <- function(raster_layer) {
+  raster::reclassify(raster_layer, cbind(NA, 0))
+}
+
+
+canopy_list_no_na <-
+  map(.x = canopy_list_crs, .f = replace_na_function)
+
+canopy_list_no_na
+
+canopy_list_no_na[[1]] %>% plot()
+```
+
+Mask shapefile
+
+```{r mask_no_na}
+
+mask_canopy_no_na_list <- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    mask_canopy_no_na <-
+        mask(canopy_list_no_na[[i]], as(army_shapefiles$geometry[i], "Spatial"))
+    
+    mask_canopy_no_na_list[[i]] <- mask_canopy_no_na
+}
+
+names(mask_canopy_no_na_list) <- army_shapefiles$site_name
+mask_canopy_no_na_list
+
+purrr::map2(mask_canopy_no_na_list, names(mask_canopy_no_na_list), 
+     ~plot(.x, main = .y))
+
+
+# write_rds(mask_canopy_list, "data/mask_canopy_list.rds")
+```
+
+## Canopy cell statistics with NA's reclassified
+
+
+```{r cell_stats_no_na}
+# Canopy raster value statitics
+mask_canopy_stats_no_na_list <- list()
+
+for (i in seq_len(nrow(army_shapefiles))) {
+    mask_canopy_stats_no_na <-
+       freq(mask_canopy_no_na_list[[i]]) %>% 
+       as_tibble() %>%
+       summarise(sum_pixel = sum(count)) %>% 
+       mutate(na_count = freq(mask_canopy_no_na_list[[i]]) %>%
+                    as_tibble() %>% 
+                    dplyr::filter(value %in% NA) %>% 
+                    pull(count),
+              pct_na = na_count / sum_pixel,
+              mean_canopy = cellStats(mask_canopy_no_na_list[[i]], "mean"),
+              sd_canopy = cellStats(mask_canopy_no_na_list[[i]], "sd"))
+    
+mask_canopy_stats_no_na_list[[i]] <- mask_canopy_stats_no_na 
+}
+
+
+mask_canopy_stats_no_na_list %>% 
+  bind_rows() %>% 
+  mutate(installation = army_shapefiles$site_name)
+
+
+# Histograms of canopy pixel values with NAs reclassified to 0
+
+purrr::map2(mask_canopy_no_na_list, names(mask_canopy_list), 
+     ~histogram(.x, main = .y))
+
+```
+

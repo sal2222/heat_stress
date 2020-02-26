@@ -99,38 +99,6 @@ index_heat_key
 # write_rds(index_heat_key, "data/index_heat_key.rds")
 
 
-# Medical encounters - all ICD codes
-
-all_icd <-
-  read_rds("data/all_icd.rds")
-
-```
-
-
-```{r joined_rate_population}
-
-dmed_population <-
-  dmed_tidy %>% 
-  filter(!location %in% c("us", "overseas"),
-         type == "Ambulatory Data",
-         hsi == "all",
-         strata == "gender",
-         category == "Total") %>% 
-  dplyr::select(location, year, population) %>% 
-    mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
-           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
-           location = dplyr::recode(location, bragg = "fort_bragg"),
-           location = dplyr::recode(location, campbell = "fort_campbell"),
-           location = dplyr::recode(location, polk = "fort_polk"),
-           location = dplyr::recode(location, hood = "fort_hood"),
-           location = dplyr::recode(location, stewart = "fort_stewart"),
-           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
-           location = dplyr::recode(location, riley = "fort_riley"),
-           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
-           location = dplyr::recode(location, bliss = "fort_bliss"),
-           location = as.character(location))
-
-
 index_long <- 
   annual_tables_list %>% 
     filter(installation %in% c("fort_benning_ga", "fort_bragg", "fort_campbell", "fort_jackson",
@@ -141,176 +109,77 @@ index_long <-
     mutate(year = as.integer(year)) 
 
 
-hsi_rates <-
-  dmed_tidy %>% 
-    filter(location %in% c("benning", "bragg", "campbell", "jackson",
-                           "polk", "hood", "stewart", "leonardwood", 
-                           "riley", "irwin", "bliss"),
-           type == "Ambulatory Data",
-           hsi == "all",
-           strata == "gender",
-           category == "Total") %>% 
-    dplyr::select(location, year, rate) %>% 
-    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
-           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
-           location = dplyr::recode(location, bragg = "fort_bragg"),
-           location = dplyr::recode(location, campbell = "fort_campbell"),
-           location = dplyr::recode(location, polk = "fort_polk"),
-           location = dplyr::recode(location, hood = "fort_hood"),
-           location = dplyr::recode(location, stewart = "fort_stewart"),
-           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
-           location = dplyr::recode(location, riley = "fort_riley"),
-           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
-           location = dplyr::recode(location, bliss = "fort_bliss"),
-           location = as.character(location))
 
-# Ambulatory HSI
+# Medical encounters - all ICD codes
 
-hsi_amb <-
-  dmed_tidy %>% 
-    filter(location %in% c("benning", "bragg", "campbell", "jackson",
-                           "polk", "hood", "stewart", "leonardwood", 
-                           "riley", "irwin", "bliss"),
-           type == "Ambulatory Data",
-           hsi == "all",
-           strata == "gender",
-           category == "Total") %>% 
-    dplyr::select(location, year, count, population) %>% 
-    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
-           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
-           location = dplyr::recode(location, bragg = "fort_bragg"),
-           location = dplyr::recode(location, campbell = "fort_campbell"),
-           location = dplyr::recode(location, polk = "fort_polk"),
-           location = dplyr::recode(location, hood = "fort_hood"),
-           location = dplyr::recode(location, stewart = "fort_stewart"),
-           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
-           location = dplyr::recode(location, riley = "fort_riley"),
-           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
-           location = dplyr::recode(location, bliss = "fort_bliss"),
-           location = as.character(location),
-           rate = (count / population) * 1000)
-
-
-# Hospitalization HSI
-
-hsi_hosp <-
-  dmed_tidy %>% 
-    filter(location %in% c("benning", "bragg", "campbell", "jackson",
-                           "polk", "hood", "stewart", "leonardwood", 
-                           "riley", "irwin", "bliss"),
-           type == "Hospitalizations",
-           hsi == "all",
-           strata == "gender",
-           category == "Total") %>% 
-    dplyr::select(location, year, count, population) %>% 
-    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
-           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
-           location = dplyr::recode(location, bragg = "fort_bragg"),
-           location = dplyr::recode(location, campbell = "fort_campbell"),
-           location = dplyr::recode(location, polk = "fort_polk"),
-           location = dplyr::recode(location, hood = "fort_hood"),
-           location = dplyr::recode(location, stewart = "fort_stewart"),
-           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
-           location = dplyr::recode(location, riley = "fort_riley"),
-           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
-           location = dplyr::recode(location, bliss = "fort_bliss"),
-           location = as.character(location),
-           rate = (count / population) * 1000) 
-
-
-
-# Reportable Events Counts
-
-hsi_rme <-
-  dmed_tidy %>% 
-    filter(location %in% c("benning", "bragg", "campbell", "jackson",
-                           "polk", "hood", "stewart", "leonardwood", 
-                           "riley", "irwin", "bliss"),
-           type == "Reportable Events",
-           hsi == "all",
-           strata == "gender",
-           category == "Total") %>% 
-    dplyr::select(location, year, count, population) %>% 
-    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
-           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
-           location = dplyr::recode(location, bragg = "fort_bragg"),
-           location = dplyr::recode(location, campbell = "fort_campbell"),
-           location = dplyr::recode(location, polk = "fort_polk"),
-           location = dplyr::recode(location, hood = "fort_hood"),
-           location = dplyr::recode(location, stewart = "fort_stewart"),
-           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
-           location = dplyr::recode(location, riley = "fort_riley"),
-           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
-           location = dplyr::recode(location, bliss = "fort_bliss"),
-           location = as.character(location),
-           rate = (count / population) * 1000)
-
-
-
-# Join with Annual heat; assign Basic Combat Training (BCT) category
-
-# Ambultatory
-
-joined_hsi_amb <-
-  index_long %>% 
-    left_join(hsi_amb, by = c("installation" = "location", "year" = "year")) %>% 
-      drop_na(count) %>% 
-  mutate(bct = case_when(installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
-                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0))  %>%
-  ungroup() %>% 
-  dplyr::group_by(index) %>% 
-      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
-  ungroup() %>% 
-  na.omit()
-
-
-
-# Hospitalization
-  # Join to indices of heat; assign BCT status; center and scale heat index value (pooled, for each index)  
-
-
-joined_hsi_hosp <-
-  index_long %>% 
-    left_join(hsi_hosp, by = c("installation" = "location", "year" = "year")) %>% 
-      drop_na(count) %>% 
-  mutate(bct = case_when(installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
-                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0)) %>%
-  ungroup() %>% 
-  dplyr::group_by(index) %>% 
-      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
-  ungroup() %>% 
-  na.omit()
-
-# write_rds(joined_hsi_hosp, "data/joined_hsi_hosp.rds", compress = "none")
-
-
-
-# Reportable Events
-joined_hsi_rme <-
-  index_long %>% 
-    left_join(hsi_rme, by = c("installation" = "location", "year" = "year")) %>% 
-      drop_na(count) %>% 
-  mutate(bct = case_when(installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
-                         !installation %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0)) %>%
-  ungroup() %>% 
-  dplyr::group_by(index) %>% 
-      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
-  ungroup() %>% 
-  na.omit()
-
-# write_rds(joined_hsi_rme, "data/joined_hsi_rme.rds", compress = "none")
-
-
+all_icd <-
+  read_rds("data/all_icd.rds") %>% 
+  filter(category == "Total") %>% 
+  dplyr::select(-category, -strata, -hsi, -population) %>% 
+  dplyr::rename(count_overall = count,
+                rate_overall = rate)
 
 ```
+
+
+```{r joined_tables}
+
+dmed_hsi <-
+  dmed_tidy %>% 
+    filter(location %in% c("benning", "bragg", "campbell", "jackson",
+                           "polk", "hood", "stewart", "leonardwood", 
+                           "riley", "irwin", "bliss"),
+           hsi == "all",
+           strata == "gender",
+           category == "Total") %>% 
+    dplyr::select(-category, -strata, -hsi) %>% 
+    dplyr::mutate(location = dplyr::recode(location, jackson = "fort_jackson"),
+           location = dplyr::recode(location, benning = "fort_benning_ga"),                 
+           location = dplyr::recode(location, bragg = "fort_bragg"),
+           location = dplyr::recode(location, campbell = "fort_campbell"),
+           location = dplyr::recode(location, polk = "fort_polk"),
+           location = dplyr::recode(location, hood = "fort_hood"),
+           location = dplyr::recode(location, stewart = "fort_stewart"),
+           location = dplyr::recode(location, leonardwood = "fort_leonard_wood"),
+           location = dplyr::recode(location, riley = "fort_riley"),
+           location = dplyr::recode(location, irwin = "ntc_and_fort_irwin"),
+           location = dplyr::recode(location, bliss = "fort_bliss"),
+           location = as.character(location)) %>% 
+  left_join(all_icd, by = c("type", "year", "location")) %>% 
+  mutate(burden = count/count_overall,
+         burden_rate = rate/rate_overall,
+         bct = case_when(location %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 1,
+                         !location %in% c("fort_benning_ga", "fort_jackson", "fort_leonard_wood") ~ 0)) 
+
+
+  
+# Join to indices of heat; center and scale heat index value (pooled, for each index/type - pooled over all included locations and years)  
+  
+joined_hsi <-
+  index_long %>% 
+    left_join(dmed_hsi, by = c("installation" = "location", "year" = "year")) %>% 
+      drop_na(count) %>% 
+  ungroup() %>% 
+  dplyr::group_by(index, type) %>% 
+      mutate(value_scaled = scale(value, center = TRUE, scale = TRUE)) %>% 
+  ungroup() %>% 
+  na.omit()
+
+joined_hsi
+
+# write_rds(joined_hsi, "data/joined_hsi.rds", compress = "none")
+
+```
+
 
 
 ## Plots of HSI Ambulatory Counts
 
 ```{r plot_ambulatory_rates, cache = TRUE, warning = FALSE}
 
-joined_hsi_amb %>% 
- ggplot(aes(x = year, y = population, color = installation, shape = installation)) +
+joined_hsi %>%
+  filter(type %in% "Ambulatory Data") %>% 
+  ggplot(aes(x = year, y = population, color = installation, shape = installation)) +
     geom_line() +
     geom_point() +
     labs(
@@ -322,8 +191,9 @@ joined_hsi_amb %>%
     theme_bw() 
 
 
-joined_hsi_amb %>% 
- ggplot(aes(x = count)) +
+joined_hsi %>%
+  filter(type %in% "Ambulatory Data") %>% 
+  ggplot(aes(x = count)) +
     geom_histogram(color = "darkblue", fill = "lightblue") +
     facet_wrap(installation ~ .) +
     labs(
@@ -334,6 +204,21 @@ joined_hsi_amb %>%
     theme_bw() 
 
 
+# Burden
+# 
+joined_hsi %>% 
+  filter(type %in% "Ambulatory Data",
+         index %in% "tmp_f_mean") %>% 
+  ggplot(aes(x = year, y = burden, color = installation, shape = installation )) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "Army Heat Stress Illness Ambulatory Burden (HSI count/All ICD count)",
+      x = "Year",
+      y = "HSI Burden Ratio"
+    ) +
+    scale_shape_manual(values = 0:11) +
+    theme_bw() 
 ```
 
 ## Examine single index of heat (out of 80+ indices)  
@@ -342,8 +227,9 @@ Annual hours WBGT greater than 85 deg F
 ```{r}
 
 
-joined_hsi_amb %>% 
-  filter(index %in% "hours_wbgt_gt85") %>% 
+joined_hsi %>% 
+  filter(type %in% "Ambulatory Data",
+         index %in% "hours_wbgt_gt85") %>% 
   ggplot(aes(x = year, y = count)) +
     geom_point() +
     geom_smooth(method = lm, se = FALSE, size = 0.8) +
@@ -355,8 +241,38 @@ joined_hsi_amb %>%
     theme_bw() 
 
 
-joined_hsi_amb %>% 
-  filter(index %in% "hours_wbgt_gt85") %>% 
+joined_hsi %>% 
+  filter(type %in% "Ambulatory Data",
+         index %in% "hours_wbgt_gt85") %>% 
+  ggplot(aes(x = year, y = count_overall)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "Army Ambulatory Counts - All ICD codes",
+      x = "Year",
+      y = "Count - All diseases and injuries"
+    ) +
+    theme_bw() 
+
+
+joined_hsi %>% 
+  filter(type %in% "Hospitalizations",
+         index %in% "hours_wbgt_gt85") %>% 
+  ggplot(aes(x = year, y = count_overall)) +
+    geom_point() +
+    geom_smooth(method = lm, se = FALSE, size = 0.8) +
+    labs(
+      title = "Army Hospitalization Counts - All ICD codes",
+      x = "Year",
+      y = "Count - All diseases and injuries"
+    ) +
+    theme_bw() 
+
+
+
+joined_hsi %>% 
+  filter(type %in% "Ambulatory Data",
+         index %in% "hours_wbgt_gt85") %>% 
   ggplot(aes(x = year, y = count, color = installation, shape = installation)) +
     geom_point() +
     geom_smooth(method = lm, se = FALSE, size = 0.8) +
@@ -368,8 +284,9 @@ joined_hsi_amb %>%
     theme_bw() 
 
 
-joined_hsi_amb %>% 
-  filter(index %in% "hours_wbgt_gt85") %>% 
+joined_hsi %>% 
+  filter(type %in% "Ambulatory Data", 
+         index %in% "hours_wbgt_gt85") %>% 
   ggplot(aes(x = value, y = count, color = installation, shape = installation)) +
     geom_point() +
     geom_smooth(method = lm, se = FALSE, size = 0.8) +
@@ -381,8 +298,9 @@ joined_hsi_amb %>%
     scale_shape_manual(values = 0:11) +
     theme_bw() 
 
-joined_hsi_amb %>% 
-   filter(index %in% "hours_wbgt_gt85") %>% 
+joined_hsi %>% 
+  filter(type %in% "Ambulatory Data", 
+         index %in% "hours_wbgt_gt85") %>% 
  ggplot(aes(x = value, y = fct_reorder(installation, value))) +
     ggridges::geom_density_ridges(
        jittered_points = TRUE,
@@ -414,8 +332,9 @@ joined_hsi_amb %>%
 # Assign dataset; center and scale predictor value
 
 data_hours_wbgt_gt85_counts <-
-  joined_hsi_amb %>% 
-    filter(index %in% "hours_wbgt_gt85")
+  joined_hsi %>% 
+  filter(type %in% "Ambulatory Data",
+         index %in% "hours_wbgt_gt85")
 
 
 ```
@@ -488,8 +407,8 @@ For interpreting centered and scaled estimates.
 
 ```{r index_mean_sd}
 index_mean_sd <- 
-  joined_hsi_amb %>% 
-    group_by(index) %>% 
+  joined_hsi %>%
+    group_by(index, type) %>% 
     summarise(
       mean = mean(value),
       sd = sd(value)
@@ -513,7 +432,8 @@ random_slope_bct_function = function(df) {
 # Ambulatory nested models
 
 random_slope_bct_nest <-
-  joined_hsi_amb %>%
+  joined_hsi %>%
+    filter(type %in% "Ambulatory Data") %>% 
     dplyr::select(index, everything()) %>% 
       nest(data = installation:value_scaled) %>% 
       mutate(glmer_models = map(data, random_slope_bct_function),
@@ -698,7 +618,8 @@ broom::tidy(random_intercept_slope_bct)
 # Hospitalization nested models
 
 hosp_random_slope_bct_nest <-
-  joined_hsi_hosp %>%
+  joined_hsi %>%
+  filter(type %in% "Hospitalizations") %>% 
   na.omit() %>% 
     dplyr::select(index, everything()) %>% 
       nest(data = installation:value_scaled) %>% 
