@@ -1,7 +1,9 @@
 # heat_stress
 Heat stress illness and climate research
 
-This repository contains code used for:
+This repository contains early-stage project code.
+RMarkdown outputs can be viewed at: https://sal2222.github.io/heat_stress/index.html; however, this site is no longer updated or maintained.
+
 
 ## Data Preparation
 
